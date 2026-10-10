@@ -3,6 +3,7 @@ import categoriesJson from "../../config/categories.json";
 import sitesJson from "../../config/sites.json";
 import siteJson from "../../config/site.json";
 import trendingJson from "../../config/trending.json";
+import changelogJson from "../../config/changelog.json";
 
 export interface SiteCategory {
   id: string;
@@ -44,6 +45,21 @@ export interface TrendingConfig {
   tagline: string;
   boost: Record<string, number>;
   exclude: string[];
+}
+
+export interface ChangelogEntry {
+  version: string;
+  date: string;
+  title: string;
+  changes: string[];
+}
+
+export interface ChangelogConfig {
+  /** The version the site is on right now; printed in the footer. */
+  version: string;
+  updated?: string;
+  intro?: string;
+  entries: ChangelogEntry[];
 }
 
 export interface ExploreConfig {
@@ -171,6 +187,16 @@ export const siteUrl = (site.url ?? "https://example.com").replace(/\/+$/, "");
 export const siteKeywords = site.keywords ?? [];
 export const siteAuthor = site.author ?? siteName;
 export const siteLinks = site.links ?? {};
+
+export const changelog: ChangelogConfig = {
+  version: changelogJson.version ?? "0.0.0",
+  updated: changelogJson.updated,
+  intro: changelogJson.intro,
+  entries: changelogJson.entries ?? [],
+};
+
+/** The version shown in the footer and at the top of the changelog. */
+export const appVersion = changelog.version;
 
 export const sites = normalizeSites(sitesJson);
 export const categories = normalizeCategories(categoriesJson);

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { FeatureBadges } from "./FeatureBadges";
+import { appVersion } from "../lib/siteData";
 
 /** Link columns, kept apart from the markup so the footer stays readable. */
 const DIRECTORY_LINKS: { to: string; label: string }[] = [
@@ -111,8 +112,16 @@ export function Footer() {
           style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p>© {new Date().getFullYear()} Boring Internet.</p>
+            <p>
+              © {new Date().getFullYear()} Boring Internet · v{appVersion}
+            </p>
             <div className="flex flex-wrap items-center gap-4">
+              <Link
+                to="/changelog"
+                className="nav-link changelog-link text-[10px] font-bold tracking-[0.16em] uppercase"
+              >
+                Changelog <span className="changelog-link-version">v{appVersion}</span>
+              </Link>
               <Link to="/terms" className="nav-link text-[10px] font-bold tracking-[0.16em] uppercase">
                 Terms
               </Link>

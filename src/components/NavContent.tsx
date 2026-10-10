@@ -10,6 +10,7 @@ import {
 } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import { posts } from "../lib/posts";
+import { useAuth } from "../lib/auth";
 
 /** How many quick matches the side search shows while you type. */
 const SEARCH_PREVIEW = 6;
@@ -64,6 +65,7 @@ function SectionToggle({
 export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
@@ -374,9 +376,15 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         <Link to="/submit" className="sidenav-cta" onClick={() => onNavigate?.()}>
           Submit your site
         </Link>
-        <Link to="/auth" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
-          Sign in
-        </Link>
+        {user ? (
+          <Link to="/profile" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
+            Your account
+          </Link>
+        ) : (
+          <Link to="/auth" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
+            Sign in
+          </Link>
+        )}
       </div>
     </div>
   );

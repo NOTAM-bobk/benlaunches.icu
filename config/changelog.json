@@ -1,0 +1,48 @@
+{
+  "version": "0.5.0",
+  "updated": "2026-10-10",
+  "intro": "Every release of this directory, newest first. Small, hand-made changes to a small place.",
+  "entries": [
+    {
+      "version": "0.5.0",
+      "date": "2026-10-10",
+      "title": "Playful type and a tidier account",
+      "changes": [
+        "Nunito and Baloo 2 replace the old Futura stack, so the whole site reads rounder and friendlier.",
+        "The account menu marks log out in red and keeps each option apart with a faint rule.",
+        "Account pages put the three tabs in a row on phones, and move the menu to the right on desktop.",
+        "This changelog page itself, with the version number in the footer."
+      ]
+    },
+    {
+      "version": "0.4.0",
+      "date": "2026-10-10",
+      "title": "A new home at benlaunches.icu",
+      "changes": [
+        "The directory moved to www.benlaunches.icu and the header now reads Ben Launches.",
+        "Shared deep links work again — /advertise, /submit and friends no longer show a missing page.",
+        "Advertise prices now run from $1 to $10 depending on the placement or service.",
+        "Articles moved under Libraries in the menu, and search no longer shows how many sites are listed."
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-10-10",
+      "title": "Accounts and profiles",
+      "changes": [
+        "Public profiles and a person search, so you can see who saved what.",
+        "Accounts moved to Supabase, so saved sites and votes follow you between devices."
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-09",
+      "title": "Games, badges and the small print",
+      "changes": [
+        "This or That became a phone-first verdict bar.",
+        "The featured-on strip picked up a StartupTrusted badge.",
+        "Terms, privacy and problem reports landed, along with the weekly blog workflow."
+      ]
+    }
+  ]
+}

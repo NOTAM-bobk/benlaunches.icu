@@ -19,6 +19,7 @@ import ThisOrThat from "./pages/ThisOrThat.tsx";
 import SiteTinder from "./pages/SiteTinder.tsx";
 import { Profile, Saved, Settings } from "./pages/Account.tsx";
 import Advertise from "./pages/Advertise.tsx";
+import Changelog from "./pages/Changelog.tsx";
 import { Privacy, Terms } from "./pages/Legal.tsx";
 import EmbedBadge from "./pages/EmbedBadge.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "submit",
         element: <Submit />,
+      },
+      {
+        path: "changelog",
+        element: <Changelog />,
       },
       {
         path: "advertise",
