@@ -4434,8 +4434,8 @@ mark.hl {
 
 .avatar-picker {
   display: grid;
-  /* Ten presets, five to a row, so the grid never ends on a lonely last tile. */
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* As many tiles as the row can hold, so a longer shelf still fills every line. */
+  grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
   gap: 0.6rem;
 }
 
@@ -6143,4 +6143,87 @@ mark.hl {
 .traffic-box-link:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/* ---------- The confetti thrown when a vote lands ---------- */
+.vote-circle {
+  position: relative;
+}
+
+.vote-confetti {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.vote-confetti i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 9px;
+  border-radius: 1px;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: vote-confetti-pop 0.95s cubic-bezier(0.22, 0.9, 0.3, 1) var(--delay, 0ms) forwards;
+}
+
+@keyframes vote-confetti-pop {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.6);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px)))
+      rotate(var(--rot, 0deg)) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vote-confetti {
+    display: none;
+  }
+}
+
+/* ---------- The 1–2–3 on the home page's trending trio ---------- */
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 2px 0 var(--ink);
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rank-top {
+  min-width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.25rem;
+}
+
+.rank-1 {
+  background: #f6c445;
+}
+
+.rank-2 {
+  background: #ded9cf;
+}
+
+.rank-3 {
+  background: #dda172;
 }

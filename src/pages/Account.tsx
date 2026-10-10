@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router";
 import { SiteIcon } from "../components/SiteIcon";
 import { SiteSeo } from "../components/SeoHead";
 import {
+  avatarLabel,
   avatarPresets,
   avatarUrl,
   randomAvatarSeed,
@@ -172,7 +173,10 @@ function ProfileForm({ user }: { user: AuthUser }) {
         />
         <div>
           <h2>Make it yours</h2>
-          <p>Your avatar and name appear in the account menu and on your saves.</p>
+          <p>
+            Your avatar and name appear in the account menu and on your saves. Pick a colour,
+            a face, a ring or a robot — or shuffle for something else entirely.
+          </p>
         </div>
       </div>
 
@@ -191,19 +195,20 @@ function ProfileForm({ user }: { user: AuthUser }) {
       <div className="account-field">
         <span className="account-field-label">Avatar</span>
         <div className="avatar-picker" role="group" aria-label="Choose an avatar">
-          {avatarPresets.map((seed) => {
-            const active = form.avatarSeed === seed;
+          {avatarPresets.map((preset) => {
+            const active = form.avatarSeed === preset;
+            const label = avatarLabel(preset);
             return (
               <button
-                key={seed}
+                key={preset}
                 type="button"
                 className={`avatar-choice${active ? " active" : ""}`}
                 aria-pressed={active}
-                title={seed.replace(/-/g, " ")}
-                onClick={() => setForm((current) => ({ ...current, avatarSeed: seed }))}
+                title={label}
+                onClick={() => setForm((current) => ({ ...current, avatarSeed: preset }))}
               >
-                <img src={avatarUrl(seed)} alt="" loading="lazy" decoding="async" />
-                <span className="sr-only">{`Use the ${seed.replace(/-/g, " ")} avatar`}</span>
+                <img src={avatarUrl(preset)} alt="" loading="lazy" decoding="async" />
+                <span className="sr-only">{`Use the ${label} avatar`}</span>
               </button>
             );
           })}

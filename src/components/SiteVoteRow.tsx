@@ -1,3 +1,4 @@
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router";
 import { SiteIcon } from "./SiteIcon";
 import { VerifiedStamp } from "./VerifiedStamp";
@@ -7,6 +8,35 @@ import { humanizeKey, type Site } from "../lib/siteData";
 const TAG_LIMIT = 3;
 
 const MEDALS = ["🥇", "🥈", "🥉"];
+
+/**
+ * The confetti thrown when a vote lands: a fixed spray of sixteen pieces, so the
+ * burst renders identically every time and needs no randomness at render time.
+ */
+const CONFETTI_PIECES: ReadonlyArray<{
+  x: number;
+  y: number;
+  rot: number;
+  delay: number;
+  color: string;
+}> = [
+  { x: 0, y: -46, rot: 220, delay: 0, color: "#d9601f" },
+  { x: 34, y: -32, rot: -180, delay: 20, color: "#f6c445" },
+  { x: 46, y: 4, rot: 140, delay: 40, color: "#1d9bf0" },
+  { x: 30, y: 34, rot: -260, delay: 10, color: "#2f8f6f" },
+  { x: 0, y: 46, rot: 300, delay: 30, color: "#d9601f" },
+  { x: -30, y: 34, rot: -120, delay: 50, color: "#f6c445" },
+  { x: -46, y: 4, rot: 200, delay: 0, color: "#1d9bf0" },
+  { x: -34, y: -32, rot: -220, delay: 25, color: "#2f8f6f" },
+  { x: 18, y: -42, rot: 160, delay: 45, color: "#fff7ee" },
+  { x: 42, y: -16, rot: -300, delay: 15, color: "#d9601f" },
+  { x: 42, y: 18, rot: 240, delay: 35, color: "#f6c445" },
+  { x: 16, y: 44, rot: -160, delay: 5, color: "#1d9bf0" },
+  { x: -18, y: 42, rot: 280, delay: 55, color: "#2f8f6f" },
+  { x: -42, y: 16, rot: -240, delay: 20, color: "#fff7ee" },
+  { x: -42, y: -18, rot: 180, delay: 40, color: "#d9601f" },
+  { x: -16, y: -42, rot: -200, delay: 10, color: "#f6c445" },
+];
 
 /**
  * One row of a ranking list: the medal or position, the site's icon, its name,
@@ -38,6 +68,21 @@ export function SiteVoteRow({
 }) {
   // A listing with no tags of its own still gets one line: its category.
   const tags = site.tags.length > 0 ? site.tags.slice(0, TAG_LIMIT) : [site.category];
+  /* The burst key: it changes on every vote, which restarts the animation, and
+     drops back to zero once the paper has had time to land. */
+  const [burst, setBurst] = useState(0);
+
+  useEffect(() => {
+    if (!burst) return;
+    const timer = window.setTimeout(() => setBurst(0), 1000);
+    return () => window.clearTimeout(timer);
+  }, [burst]);
+
+  function handleVote() {
+    if (voted || pending) return;
+    setBurst((value) => value + 1);
+    onVote();
+  }
 
   return (
     <li className={`vote-row${leader ? " vote-row-leader" : ""}`}>
@@ -74,7 +119,7 @@ export function SiteVoteRow({
       <button
         type="button"
         className={`vote-circle${voted ? " voted" : ""}`}
-        onClick={onVote}
+        onClick={handleVote}
         disabled={voted || pending}
         aria-label={
           voted
@@ -87,6 +132,24 @@ export function SiteVoteRow({
           {voted ? "✓" : "▲"}
         </span>
         <span className="vote-circle-count">{pending ? "…" : count}</span>
+        {burst > 0 && (
+          <span className="vote-confetti" aria-hidden="true">
+            {CONFETTI_PIECES.map((piece, index) => (
+              <i
+                key={`${burst}-${index}`}
+                style={
+                  {
+                    "--tx": `${piece.x}px`,
+                    "--ty": `${piece.y}px`,
+                    "--rot": `${piece.rot}deg`,
+                    "--delay": `${piece.delay}ms`,
+                    background: piece.color,
+                  } as CSSProperties
+                }
+              />
+            ))}
+          </span>
+        )}
       </button>
     </li>
   );

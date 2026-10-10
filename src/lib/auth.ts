@@ -264,13 +264,55 @@ export async function recordVoteForAccount(slug: string, voted: boolean) {
   else await supabase.from("user_votes").delete().eq("user_id", data.user.id).eq("slug", slug);
 }
 
-export function avatarUrl(seed: string) {
-  return `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(seed || "boring-internet")}&backgroundColor=f7e0c6,fff7ee`;
+/**
+ * The illustration styles a profile picture can be drawn in. A stored avatar is
+ * either a plain seed — which gets the default style — or `style:seed`, so a
+ * profile can change how it looks without a schema change anywhere.
+ */
+export const AVATAR_STYLES = [
+  "thumbs",
+  "shapes",
+  "rings",
+  "identicon",
+  "bottts-neutral",
+  "fun-emoji",
+] as const;
+
+export type AvatarStyle = (typeof AVATAR_STYLES)[number];
+
+const DEFAULT_AVATAR_STYLE: AvatarStyle = "thumbs";
+const AVATAR_BACKGROUND = "f7e0c6,fff7ee";
+
+/** Splits a stored avatar into the style it wears and the seed behind it. */
+export function parseAvatar(value: string): { style: AvatarStyle; seed: string } {
+  const [head, ...rest] = (value ?? "").split(":");
+  if (rest.length > 0 && (AVATAR_STYLES as readonly string[]).includes(head)) {
+    return { style: head as AvatarStyle, seed: rest.join(":") || "boring-internet" };
+  }
+  return { style: DEFAULT_AVATAR_STYLE, seed: value || "boring-internet" };
 }
 
+export function avatarUrl(value: string) {
+  const { style, seed } = parseAvatar(value);
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${AVATAR_BACKGROUND}`;
+}
+
+/** A human name for a stored avatar: "night owl · rings". */
+export function avatarLabel(value: string) {
+  const { style, seed } = parseAvatar(value);
+  return `${seed.replace(/-/g, " ")} · ${style.replace(/-/g, " ")}`;
+}
+
+/** The shelf of ready-made pictures: ten shapes, ten styles. */
 export const avatarPresets: string[] = [
   "quiet-web", "plain-html", "text-first", "slow-reading", "no-tracking",
   "one-person", "small-sites", "calm-cursor", "paper-trail", "night-owl",
+  "shapes:open-shelf", "shapes:still-archive", "shapes:sunny-corner",
+  "rings:steady-signal", "rings:amber-window", "rings:night-cursor",
+  "identicon:plain-html", "identicon:soft-garden", "identicon:paper-notion",
+  "bottts-neutral:calm-kettle", "bottts-neutral:round-compass",
+  "fun-emoji:sunny-path", "fun-emoji:warm-lantern", "fun-emoji:text-first",
+  "thumbs:gentle-reader",
 ];
 
 const AVATAR_WORDS_FIRST = ["quiet", "plain", "slow", "calm", "warm", "paper", "night", "small", "open", "soft", "steady", "gentle", "sunny", "round", "amber", "still"];
@@ -281,7 +323,10 @@ export function randomAvatarSeed(current?: string): string {
     const first = AVATAR_WORDS_FIRST[Math.floor(Math.random() * AVATAR_WORDS_FIRST.length)];
     const second = AVATAR_WORDS_SECOND[Math.floor(Math.random() * AVATAR_WORDS_SECOND.length)];
     const seed = `${first}-${second}`;
-    if (seed !== current) return seed;
+    // Shuffle the look as well as the seed, so a new picture always looks new.
+    const style = AVATAR_STYLES[Math.floor(Math.random() * AVATAR_STYLES.length)];
+    const value = style === DEFAULT_AVATAR_STYLE ? seed : `${style}:${seed}`;
+    if (value !== current) return value;
   }
   return `quiet-${Date.now().toString(36).slice(-4)}`;
 }

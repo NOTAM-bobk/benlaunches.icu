@@ -107,7 +107,6 @@ export function NeedsSomeVotes() {
           <h2 id="needs-votes-heading">
             Needs some votes <span aria-hidden="true">🙏</span>
           </h2>
-          <p>Find a good little corner of the web and help it move up the list.</p>
         </div>
         <Link to="/trending" className="needs-votes-all">
           Full rankings →
