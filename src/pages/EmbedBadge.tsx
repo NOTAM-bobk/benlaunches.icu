@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { BoostTraffic } from "../components/BoostTraffic";
 import { siteName } from "../lib/siteData";
@@ -21,14 +21,14 @@ export default function EmbedBadge() {
    * on someone else's site would be rude. Opened directly (the "badge card
    * page"), it can also show the paid options.
    */
-  const [standalone, setStandalone] = useState(false);
-  useEffect(() => {
+  const [standalone] = useState(() => {
     try {
-      setStandalone(window.self === window.top);
+      return window.self === window.top;
     } catch {
-      setStandalone(false);
+      /* A cross-origin parent blocks the comparison — assume a frame. */
+      return false;
     }
-  }, []);
+  });
   const name = params.get("name")?.trim().slice(0, 100) || "A website";
   const submittedUrl = safeHttpUrl(params.get("url"));
   const displayHost = submittedUrl?.hostname.replace(/^www\./, "") ?? "";

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router";
 import { SiteIcon } from "./SiteIcon";
+import { BrandIcon } from "./BrandIcons";
+import { SHARE_ICON_COLORS } from "../lib/shareBrands";
 import { useAuth } from "../lib/auth";
 import { siteName, type Site } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
@@ -11,8 +13,8 @@ import { siteDomain } from "../lib/siteTile";
  * platform's own compose screen with the words already in it — nothing is posted
  * on the visitor's behalf, and none of them load a script or a tracker.
  *
- * `mark` is a short monogram drawn in the brand's mono font, so the tiles do not
- * depend on an emoji font being installed.
+ * Each tile shows the platform's own mark, tinted with its brand colour, and
+ * `mark` stays as a monogram fallback for anything without a glyph yet.
  */
 const TARGETS: ReadonlyArray<{ id: string; label: string; mark: string; href: (text: string, url: string, name: string) => string }> = [
   {
@@ -226,7 +228,9 @@ export function ShareSite({ site, pageUrl }: { site: Site; pageUrl: string }) {
               </div>
 
               <a className="share-sms" href={smsHref}>
-                <span className="share-target-mark" aria-hidden="true">SMS</span>
+                <span className="share-target-mark" aria-hidden="true">
+                  <BrandIcon id="sms" />
+                </span>
                 <span className="share-sms-copy">
                   <strong>Text message</strong>
                   <small>Opens your messages app with the link ready to send.</small>
@@ -243,7 +247,13 @@ export function ShareSite({ site, pageUrl }: { site: Site; pageUrl: string }) {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <span className="share-target-mark" aria-hidden="true">{target.mark}</span>
+                      <span
+                        className="share-target-mark"
+                        aria-hidden="true"
+                        style={{ color: SHARE_ICON_COLORS[target.id] ?? "var(--ink)" }}
+                      >
+                        <BrandIcon id={target.id} fallback={target.mark} />
+                      </span>
                       <span className="share-target-label">{target.label}</span>
                     </a>
                   </li>

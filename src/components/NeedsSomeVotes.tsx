@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { SiteVoteRow } from "./SiteVoteRow";
 import { rankedSites, type Site } from "../lib/siteData";
@@ -13,6 +13,8 @@ import {
 } from "../lib/votes";
 
 const SITE_POOL = rankedSites();
+/** How many listings the strip shows at once. */
+const ROW_COUNT = 3;
 const STARTING_COUNTS = Object.fromEntries(
   SITE_POOL.map((site) => [site.slug, site.trending ?? 0]),
 );
@@ -22,25 +24,27 @@ function startingCounts(): Record<string, number> {
   return { ...STARTING_COUNTS, ...readLocalCounts() };
 }
 
-/**
- * The three listings at the very bottom of the live ranking, weakest first, each
- * with the position it holds so a row can show it like the trending list does.
- */
-function weakestThree(counts: Record<string, number>) {
-  const order = [...SITE_POOL].sort((a, b) => (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0));
-  return order
-    .slice(-3)
-    .reverse()
-    .map((site) => ({ site, rank: order.indexOf(site) + 1 }));
+/** Weakest first — the pool a fresh slot in the strip is drawn from. */
+function weakestFirst(counts: Record<string, number>): Site[] {
+  return [...SITE_POOL].sort(
+    (a, b) => (counts[a.slug] ?? 0) - (counts[b.slug] ?? 0) || a.name.localeCompare(b.name),
+  );
+}
+
+/** The slugs of the listings that need a vote most, weakest first. */
+function weakestSlugs(counts: Record<string, number>, limit: number): string[] {
+  return weakestFirst(counts)
+    .slice(0, limit)
+    .map((site) => site.slug);
 }
 
 export function NeedsSomeVotes() {
   const [counts, setCounts] = useState<Record<string, number>>(startingCounts);
   /*
-    Picked once, when the strip mounts. Choosing the weakest three again on every
-    vote would swap the site you just voted for out of the strip mid-session.
+    The three listings on show. A vote lifts that listing out of the weakest, so
+    the next one that needs a hand takes its place — the strip keeps giving.
   */
-  const [sitesNeedingVotes] = useState(() => weakestThree(startingCounts()));
+  const [shown, setShown] = useState<string[]>(() => weakestSlugs(startingCounts(), ROW_COUNT));
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [pending, setPending] = useState<string[]>([]);
   const [shared, setShared] = useState(false);
@@ -57,6 +61,18 @@ export function NeedsSomeVotes() {
     };
   }, []);
 
+  /** The rows in rank order, each with the position it holds in the ranking. */
+  const rows = useMemo(() => {
+    const strongestFirst = [...SITE_POOL].sort(
+      (a, b) => (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0),
+    );
+    return shown.flatMap((slug) => {
+      const site = SITE_POOL.find((entry) => entry.slug === slug);
+      if (!site) return [];
+      return [{ site, rank: strongestFirst.indexOf(site) + 1 }];
+    });
+  }, [shown, counts]);
+
   async function vote(site: Site) {
     if (voted.includes(site.slug) || pending.includes(site.slug)) return;
 
@@ -67,6 +83,12 @@ export function NeedsSomeVotes() {
     markVoted(site.slug);
     writeLocalCount(site.slug, nextCount);
 
+    // Hand the freed slot to the next listing that needs votes.
+    const nextUp = weakestFirst(counts).find((candidate) => !shown.includes(candidate.slug));
+    if (nextUp) {
+      setShown((current) => current.map((slug) => (slug === site.slug ? nextUp.slug : slug)));
+    }
+
     const sharedCount = await castVote(site.slug, "up");
     if (sharedCount !== null) {
       setShared(true);
@@ -76,39 +98,44 @@ export function NeedsSomeVotes() {
     setPending((current) => current.filter((slug) => slug !== site.slug));
   }
 
-  if (sitesNeedingVotes.length === 0) return null;
+  if (rows.length === 0) return null;
 
   return (
     <section className="needs-votes-section" aria-labelledby="needs-votes-heading">
       <header className="needs-votes-heading">
         <div>
-          <span className="section-eyebrow">A small nudge goes a long way</span>
-          <h2 id="needs-votes-heading">Needs some votes <span aria-hidden="true">🙏</span></h2>
+          <h2 id="needs-votes-heading">
+            Needs some votes <span aria-hidden="true">🙏</span>
+          </h2>
           <p>Find a good little corner of the web and help it move up the list.</p>
         </div>
-        <Link to="/trending" className="needs-votes-all">Full rankings →</Link>
+        <Link to="/trending" className="needs-votes-all">
+          Full rankings →
+        </Link>
       </header>
 
-      <ol className="vote-rows">
-        {sitesNeedingVotes.map(({ site, rank }) => (
-          <SiteVoteRow
-            key={site.id}
-            site={site}
-            rank={rank}
-            count={counts[site.slug] ?? site.trending ?? 0}
-            voted={voted.includes(site.slug)}
-            pending={pending.includes(site.slug)}
-            onVote={() => void vote(site)}
-          />
-        ))}
-      </ol>
-      <p className="needs-votes-note" role="status">
-        {shared
-          ? "Votes update the shared ranking. One vote per site, per visitor."
-          : votesConnected
-            ? "Showing the latest available scores; votes will sync with the shared ranking when it responds."
-            : "Votes are saved in this browser only until a shared vote counter is connected."}
-      </p>
+      <div className="needs-votes-panel">
+        <ol className="vote-rows">
+          {rows.map(({ site, rank }) => (
+            <SiteVoteRow
+              key={site.id}
+              site={site}
+              rank={rank}
+              count={counts[site.slug] ?? site.trending ?? 0}
+              voted={voted.includes(site.slug)}
+              pending={pending.includes(site.slug)}
+              onVote={() => void vote(site)}
+            />
+          ))}
+        </ol>
+        <p className="needs-votes-note" role="status">
+          {shared
+            ? "Votes update the shared ranking. One vote per site, per visitor."
+            : votesConnected
+              ? "Showing the latest available scores; votes will sync with the shared ranking when it responds."
+              : "Votes are saved in this browser only until a shared vote counter is connected."}
+        </p>
+      </div>
     </section>
   );
 }

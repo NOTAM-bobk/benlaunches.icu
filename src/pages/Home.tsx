@@ -509,24 +509,13 @@ export default function Home() {
           browse, then the crowd. */}
       <h2 className="find-title">Cure boredom, find launches</h2>
 
-      {/* Right under the headline: one promise at a time, then the two ways to
-          browse. The pieces rise in with a small stagger. */}
+      {/* Right under the headline: one promise at a time, rising in with the
+          rotator. */}
       <section className="find-intro">
         <FindRotator />
         <p className="sr-only">
           A cool site that finds interesting sites and recent launches, helps your own site get
           discovered, earns a featured-on badge, and points you at useful tools.
-        </p>
-        <p className="find-links">
-          <Link to="/discover-websites" className="find-link">
-            Browse by use case
-          </Link>
-          <span className="find-links-sep" aria-hidden="true">
-            ·
-          </span>
-          <Link to="/new-websites" className="find-link">
-            See what just launched
-          </Link>
         </p>
       </section>
 
