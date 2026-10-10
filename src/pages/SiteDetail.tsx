@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
 import { ShareSite } from "../components/ShareSite";
 import { SiteIcon } from "../components/SiteIcon";
+import { VerifiedStamp } from "../components/VerifiedStamp";
 import { SiteSeo } from "../components/SeoHead";
 import { useAuth } from "../lib/auth";
 import { screenshotUrl } from "../lib/shots";
@@ -124,7 +125,10 @@ export default function SiteDetail() {
             <div className="site-detail-identity">
               <SiteIcon site={site} size={64} label={false} />
               <div className="site-detail-title-block">
-                <h1 id="site-detail-title">{site.name}</h1>
+                <h1 id="site-detail-title">
+                  {site.name}
+                  {site.verified && <VerifiedStamp size={20} />}
+                </h1>
                 <a
                   href={site.url}
                   target="_blank"

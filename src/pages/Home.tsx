@@ -6,6 +6,7 @@ import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
 import { NeedsSomeVotes } from "../components/NeedsSomeVotes";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
+import { VerifiedStamp } from "../components/VerifiedStamp";
 import {
   categoryById,
   categoryFilters,
@@ -365,10 +366,13 @@ function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
         <div className="min-w-0">
           <Link
             to={`/sites/${site.slug}`}
-            className="text-base font-bold block truncate hover:underline underline-offset-4"
+            className="flex items-center gap-1.5 text-base font-bold hover:underline underline-offset-4"
             style={{ color: "var(--ink)" }}
           >
-            <Highlight text={site.name} query={query} />
+            <span className="truncate">
+              <Highlight text={site.name} query={query} />
+            </span>
+            {site.verified && <VerifiedStamp size={14} />}
           </Link>
           <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
             {siteDomain(site.url)}
@@ -898,6 +902,20 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        {/* A small box for anyone who just finished reading the closing note. */}
+        <aside className="traffic-box">
+          <div className="traffic-box-copy">
+            <strong>Want to get traffic?</strong>
+            <p>
+              Try Advertise with Ben Launches — a clearly labeled spot, a hand-checked verified
+              mark, or a one-off bit of help around a launch.
+            </p>
+          </div>
+          <Link to="/advertise" className="traffic-box-link">
+            Advertise with Ben Launches <span aria-hidden="true">→</span>
+          </Link>
+        </aside>
       </div>
     </>
   );

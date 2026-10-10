@@ -1,28 +1,12 @@
 import { Link } from "react-router";
 import { SiteIcon } from "./SiteIcon";
+import { VerifiedStamp } from "./VerifiedStamp";
 import { humanizeKey, type Site } from "../lib/siteData";
 
 /** How many tag diamonds a row shows before it stops. */
 const TAG_LIMIT = 3;
 
 const MEDALS = ["🥇", "🥈", "🥉"];
-
-/** The small orange tick that marks a listing a person has checked. */
-function VerifiedMark() {
-  return (
-    <svg className="vote-check" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
-      <circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <path
-        d="M6.4 10.4l2.4 2.4 4.8-5.2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 /**
  * One row of a ranking list: the medal or position, the site's icon, its name,
@@ -72,7 +56,7 @@ export function SiteVoteRow({
           <Link to={`/sites/${site.slug}`} className="vote-row-name" title={site.name}>
             {site.name}
           </Link>
-          {site.verified && <VerifiedMark />}
+          {site.verified && <VerifiedStamp />}
         </div>
         <p className="vote-row-description">{site.description}</p>
         <ul className="vote-row-tags">
