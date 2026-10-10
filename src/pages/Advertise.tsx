@@ -1,74 +1,10 @@
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
-import { siteName, siteUrl } from "../lib/siteData";
+import { serviceConfig, servicesInGroup, siteName, siteUrl } from "../lib/siteData";
 
-const OPTIONS = [
-  {
-    name: "Promoted spot",
-    price: "$3",
-    unit: "/ week",
-    description: "A clearly labeled promoted position near the top of a relevant category.",
-    details: ["One category placement", "Clearly labeled as promoted", "Seven-day run"],
-  },
-  {
-    name: "Homepage spotlight",
-    price: "$6",
-    unit: "/ week",
-    description: "A larger featured placement for a launch you want more people to notice.",
-    details: ["Homepage feature slot", "Links directly to your site", "Seven-day run"],
-    featured: true,
-  },
-  {
-    name: "Instant verification",
-    price: "$2",
-    unit: " one time",
-    description: "A verified mark for your listing after an automated ownership check.",
-    details: ["Verified mark on your listing", "Domain ownership check", "One-time fee"],
-  },
-];
-
-/**
- * Extras we can do around a launch, listed under the main placements. These are
- * one-off prices rather than weekly placements, so each card shows its own.
- */
-const SERVICES = [
-  {
-    name: "Become a verified site",
-    price: "$4",
-    unit: " one time",
-    description:
-      "A person reviews your site by hand, then your listing keeps the verified mark and moves to the front of future feature and category queues.",
-    featured: true,
-  },
-  {
-    name: "SEO audit",
-    price: "$8",
-    unit: " one time",
-    description:
-      "A plain-English review of your technical SEO, page speed and on-page basics, returned as a prioritised list of fixes.",
-  },
-  {
-    name: "Pre-launch checklist",
-    price: "$4",
-    unit: " one time",
-    description:
-      "Everything to run through before launch day: metadata, redirects, analytics, performance and the easy-to-miss details.",
-  },
-  {
-    name: "Top 100 featured-on cards",
-    price: "$1",
-    unit: " one time",
-    description:
-      "A ready-made pack of 100 “featured on” badge cards to drop into your product page or footer.",
-  },
-  {
-    name: "Get listed on 20 other directories",
-    price: "$10",
-    unit: " one time",
-    description:
-      "We submit your site to 20 hand-picked directories and launch platforms, so you start with a spread of quality listings.",
-  },
-];
+/** Placements and services both live in config/services.json. */
+const PLACEMENTS = servicesInGroup("placements");
+const SERVICES = servicesInGroup("services");
 
 export default function Advertise() {
   return (
@@ -124,14 +60,18 @@ export default function Advertise() {
           </div>
 
           <div className="advertise-grid">
-            {OPTIONS.map((option) => (
+            {PLACEMENTS.map((option) => (
               <article
-                key={option.name}
+                key={option.id}
                 className={`advertise-card${option.featured ? " advertise-card-featured" : ""}`}
               >
                 {option.featured && <span className="advertise-card-tag">Most visibility</span>}
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-xl font-bold">{option.name}</h3>
+                  <h3 className="text-xl font-bold">
+                    <Link to={`/services/${option.id}`} className="card-title-link">
+                      {option.name}
+                    </Link>
+                  </h3>
                   <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
                     {option.description}
                   </p>
@@ -139,12 +79,19 @@ export default function Advertise() {
                 <p className="advertise-price">
                   <span>{option.price}</span> <small>{option.unit}</small>
                 </p>
-                <ul className="advertise-features">
-                  {option.details.map((detail) => (
-                    <li key={detail}><span aria-hidden="true">✓</span>{detail}</li>
-                  ))}
-                </ul>
-                <span className="advertise-coming-soon">Coming soon</span>
+                {option.details && option.details.length > 0 && (
+                  <ul className="advertise-features">
+                    {option.details.map((detail) => (
+                      <li key={detail}><span aria-hidden="true">✓</span>{detail}</li>
+                    ))}
+                  </ul>
+                )}
+                <div className="advertise-card-foot">
+                  <span className="advertise-coming-soon">Coming soon</span>
+                  <Link to={`/services/${option.id}`} className="advertise-more">
+                    More details <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
@@ -163,11 +110,15 @@ export default function Advertise() {
           <div className="service-grid">
             {SERVICES.map((service) => (
               <article
-                key={service.name}
+                key={service.id}
                 className={`service-card${service.featured ? " service-card-featured" : ""}`}
               >
                 <div className="service-card-top">
-                  <h3 className="text-lg font-bold">{service.name}</h3>
+                  <h3 className="text-lg font-bold">
+                    <Link to={`/services/${service.id}`} className="card-title-link">
+                      {service.name}
+                    </Link>
+                  </h3>
                   <p className="service-price">
                     <span>{service.price}</span> <small>{service.unit}</small>
                   </p>
@@ -175,6 +126,9 @@ export default function Advertise() {
                 <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
                   {service.description}
                 </p>
+                <Link to={`/services/${service.id}`} className="advertise-more">
+                  More details <span aria-hidden="true">→</span>
+                </Link>
               </article>
             ))}
           </div>
@@ -192,6 +146,10 @@ export default function Advertise() {
             Submit your site <span aria-hidden="true">→</span>
           </Link>
         </section>
+
+        <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
+          {serviceConfig.boost.note}
+        </p>
       </div>
     </>
   );

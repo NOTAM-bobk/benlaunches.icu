@@ -4,6 +4,7 @@ import sitesJson from "../../config/sites.json";
 import siteJson from "../../config/site.json";
 import trendingJson from "../../config/trending.json";
 import changelogJson from "../../config/changelog.json";
+import servicesJson from "../../config/services.json";
 
 export interface SiteCategory {
   id: string;
@@ -60,6 +61,35 @@ export interface ChangelogConfig {
   updated?: string;
   intro?: string;
   entries: ChangelogEntry[];
+}
+
+export interface ServiceItem {
+  id: string;
+  group: string;
+  name: string;
+  price: string;
+  unit: string;
+  description: string;
+  /** The short checklist shown on the advertise cards, if the option has one. */
+  details?: string[];
+  featured?: boolean;
+  /** A longer opening paragraph for the service's own page. */
+  summary: string;
+  includes: string[];
+  steps: string[];
+  goodFor: string;
+}
+
+export interface ServiceGroup {
+  id: string;
+  label: string;
+  note: string;
+}
+
+export interface ServiceConfig {
+  boost: { eyebrow: string; title: string; note: string };
+  groups: ServiceGroup[];
+  items: ServiceItem[];
 }
 
 export interface ExploreConfig {
@@ -197,6 +227,22 @@ export const changelog: ChangelogConfig = {
 
 /** The version shown in the footer and at the top of the changelog. */
 export const appVersion = changelog.version;
+
+export const serviceConfig: ServiceConfig = {
+  boost: servicesJson.boost,
+  groups: servicesJson.groups ?? [],
+  items: servicesJson.items ?? [],
+};
+
+/** One offering by its URL id, or undefined when the id is unknown. */
+export function serviceById(id: string): ServiceItem | undefined {
+  return serviceConfig.items.find((item) => item.id === id);
+}
+
+/** Every offering in a group, in config order. */
+export function servicesInGroup(groupId: string): ServiceItem[] {
+  return serviceConfig.items.filter((item) => item.group === groupId);
+}
 
 export const sites = normalizeSites(sitesJson);
 export const categories = normalizeCategories(categoriesJson);

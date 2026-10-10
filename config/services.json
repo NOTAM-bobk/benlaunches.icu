@@ -1,0 +1,178 @@
+{
+  "boost": {
+    "eyebrow": "Boost your traffic",
+    "title": "Want more people to see it?",
+    "note": "Optional extras that put a listing in front of more of the right people. Clearly labeled, priced in USD, and never required to be considered for the directory."
+  },
+  "groups": [
+    { "id": "placements", "label": "Placements", "note": "A clearly marked spot for a launch, run for a week." },
+    { "id": "services", "label": "One-off services", "note": "Bought on their own or alongside a placement, charged once." }
+  ],
+  "items": [
+    {
+      "id": "promoted-spot",
+      "group": "placements",
+      "name": "Promoted spot",
+      "price": "$3",
+      "unit": "/ week",
+      "description": "A clearly labeled promoted position near the top of a relevant category.",
+      "details": ["One category placement", "Clearly labeled as promoted", "Seven-day run"],
+      "summary": "A single promoted slot near the top of the category your site belongs to, marked as promoted so nobody is misled.",
+      "includes": [
+        "One promoted slot in one category, above the standard listings",
+        "A promoted label on the listing, plus a note in the category header",
+        "A seven-day run, starting the day it goes live"
+      ],
+      "steps": [
+        "Submit your site and get it approved like any other listing.",
+        "Pick the category you want to stand out in and the week you want.",
+        "We position the listing, label it, and send you a short note when the run ends."
+      ],
+      "goodFor": "A launch that needs a small, honest lift inside its own category — not a site that wants to shout across the whole directory."
+    },
+    {
+      "id": "homepage-spotlight",
+      "group": "placements",
+      "name": "Homepage spotlight",
+      "price": "$6",
+      "unit": "/ week",
+      "description": "A larger featured placement for a launch you want more people to notice.",
+      "details": ["Homepage feature slot", "Links directly to your site", "Seven-day run"],
+      "featured": true,
+      "summary": "The biggest placement we offer: a labelled feature slot on the homepage, pointing straight at your site for a week.",
+      "includes": [
+        "A labelled feature slot in the homepage's featured row",
+        "A direct link to your site plus your icon and one-line description",
+        "A seven-day run, with one rotation swap if the artwork needs a fix"
+      ],
+      "steps": [
+        "Submit your site so we have your name, link, and one-line description on file.",
+        "Reserve the week you want — one spotlight runs at a time.",
+        "Your slot goes live at the start of the week and stays labeled as a spotlight."
+      ],
+      "goodFor": "A launch week, a relaunch, or a site that has no audience yet and needs its first real visitors."
+    },
+    {
+      "id": "instant-verification",
+      "group": "services",
+      "name": "Instant verification",
+      "price": "$2",
+      "unit": " one time",
+      "description": "A verified mark for your listing after an automated ownership check.",
+      "details": ["Verified mark on your listing", "Domain ownership check", "One-time fee"],
+      "summary": "A verified mark on your listing, granted the moment an automated check confirms you control the domain.",
+      "includes": [
+        "A verified badge next to your listing, everywhere it appears",
+        "An automated check through a DNS record or a file on your domain",
+        "A one-time fee — the mark stays as long as the listing does"
+      ],
+      "steps": [
+        "Buy the check for a listing you already own.",
+        "We show the exact DNS record or file to add — one line, no plugin needed.",
+        "The check usually clears in a few minutes; the mark appears immediately after."
+      ],
+      "goodFor": "A site that wants the same mark as anyone checked by hand, with no waiting for a person."
+    },
+    {
+      "id": "verified-site",
+      "group": "services",
+      "name": "Become a verified site",
+      "price": "$4",
+      "unit": " one time",
+      "description": "A person reviews your site by hand, then your listing keeps the verified mark and moves to the front of future feature and category queues.",
+      "featured": true,
+      "summary": "A hand review of your site by a person, not a script, ending with a verified mark and priority in future feature and category slots.",
+      "includes": [
+        "A human read-through of your site, with brief notes on what we found",
+        "The verified mark, plus priority in future feature and category queues",
+        "A one-time fee that follows the listing, not the month"
+      ],
+      "steps": [
+        "Submit your site and mention that you want the hand review.",
+        "We look at speed, structure, and whether it respects a visitor's attention.",
+        "You get the notes and the mark, usually within a few working days."
+      ],
+      "goodFor": "A site that wants a real opinion alongside the badge, and a better chance at the next open placement."
+    },
+    {
+      "id": "seo-audit",
+      "group": "services",
+      "name": "SEO audit",
+      "price": "$8",
+      "unit": " one time",
+      "description": "A plain-English review of your technical SEO, page speed and on-page basics, returned as a prioritised list of fixes.",
+      "summary": "A plain-English look at how your site is built for search: crawlability, page speed, metadata, and the on-page basics — returned as a list you can work through in order.",
+      "includes": [
+        "A crawl of your main pages, with the errors that actually matter",
+        "Page speed and Core Web Vitals numbers for three representative pages",
+        "A prioritised list of fixes, each with a line on why it is worth the time"
+      ],
+      "steps": [
+        "Send the site and anything you already know is broken.",
+        "We crawl it, measure it, and read the templates by hand.",
+        "You get one document: what to fix first, next, and eventually — no jargon, no upsell."
+      ],
+      "goodFor": "A site that ranks nowhere and wants to know which few things to fix first, without hiring anyone."
+    },
+    {
+      "id": "pre-launch-checklist",
+      "group": "services",
+      "name": "Pre-launch checklist",
+      "price": "$4",
+      "unit": " one time",
+      "description": "Everything to run through before launch day: metadata, redirects, analytics, performance and the easy-to-miss details.",
+      "summary": "A run-through of the boring things that break a launch: metadata, redirects, analytics, performance, and the small details nobody remembers until the day after.",
+      "includes": [
+        "A checklist written for your stack, not a generic PDF",
+        "A pass over metadata, canonical URLs, robots and sitemap behaviour",
+        "Analytics, error reporting, and a handful of \"did anyone actually test this\" items"
+      ],
+      "steps": [
+        "Share the site and the platforms it runs on before launch day.",
+        "We go through the list with you and flag anything that will bite later.",
+        "You end up with a ticked-off checklist and a short list of known gaps."
+      ],
+      "goodFor": "A first launch, or a rebuild that has to go out on a date you cannot move."
+    },
+    {
+      "id": "featured-on-cards",
+      "group": "services",
+      "name": "Top 100 featured-on cards",
+      "price": "$1",
+      "unit": " one time",
+      "description": "A ready-made pack of 100 “featured on” badge cards to drop into your product page or footer.",
+      "summary": "A pack of 100 ready-made cards that say your site is featured here — ready to drop into a product page, a press kit, or a footer.",
+      "includes": [
+        "100 named cards: press mentions, categories, and collections your site sits in",
+        "Light and dark versions, plus a plain text list for emails",
+        "A one-page guide on where these cards work and where they look like clutter"
+      ],
+      "steps": [
+        "Pick the collections or categories you want cards for.",
+        "We generate the set from your listing and send a zip.",
+        "Drop them in wherever your site lists where it has been seen."
+      ],
+      "goodFor": "A site with a press page or a marketing footer that looks a little empty."
+    },
+    {
+      "id": "directory-submissions",
+      "group": "services",
+      "name": "Get listed on 20 other directories",
+      "price": "$10",
+      "unit": " one time",
+      "description": "We submit your site to 20 hand-picked directories and launch platforms, so you start with a spread of quality listings.",
+      "summary": "We submit your site to 20 hand-picked directories and launch platforms and keep a record of every one, so the first month of distribution is not your problem.",
+      "includes": [
+        "Submissions to 20 directories we have actually used, not a scraped list",
+        "A copy of your submission text, so you can reuse it on the remaining ones",
+        "A sheet tracking where each submission went and what is still pending"
+      ],
+      "steps": [
+        "Send the name, link, one-line description and any assets you have.",
+        "We submit to the first 20 and note which ones ask for a fee.",
+        "You get the tracking sheet plus the remaining list, so you can keep going yourself."
+      ],
+      "goodFor": "A launch week when you would rather spend the time on the product than on twenty submission forms."
+    }
+  ]
+}

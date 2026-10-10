@@ -35,6 +35,13 @@ const staticPages = [
 ];
 
 /** Every listed site has its own page. */
+/** Every placement and service has its own page. */
+const servicePages = (read("services.json").items ?? []).map((entry) => ({
+  path: `/services/${entry.id}`,
+  priority: "0.4",
+  changefreq: "monthly",
+}));
+
 const sitePages = sites.map((entry) => ({
   path: `/sites/${entry.slug}`,
   priority: "0.8",
@@ -54,7 +61,7 @@ const collectionPages = collections.map((collection) => ({
   changefreq: "monthly",
 }));
 
-const urls = [...staticPages, ...sitePages, ...collectionPages, ...postPages];
+const urls = [...staticPages, ...servicePages, ...sitePages, ...collectionPages, ...postPages];
 const today = new Date().toISOString().slice(0, 10);
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>

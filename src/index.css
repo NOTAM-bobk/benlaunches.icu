@@ -5644,3 +5644,394 @@ mark.hl {
   border-radius: 999px;
   color: var(--muted);
 }
+
+/* ---------- Boost your traffic (submit + badge pages, detail pages) ---------- */
+.boost-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-thick);
+  text-align: left;
+}
+
+.boost-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.boost-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.boost-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.boost-group-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.boost-group-head h3 {
+  font-size: 1rem;
+}
+
+.boost-group-head p {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.boost-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.boost-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0.85rem;
+  border-top: 1px solid var(--rule);
+  transition: background 0.15s ease;
+}
+
+.boost-items li:last-child .boost-item {
+  border-bottom: 1px solid var(--rule);
+}
+
+.boost-item:hover {
+  background: #fff8ef;
+}
+
+.boost-item-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.boost-item-copy strong {
+  font-size: 0.95rem;
+}
+
+.boost-item-copy small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.boost-item-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.boost-item-price > span {
+  font-size: 1.05rem;
+}
+
+.boost-item-price small {
+  color: var(--muted);
+  font: 600 0.7rem var(--mono);
+}
+
+.boost-item-arrow {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.boost-foot {
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--rule);
+}
+
+.boost-foot-link {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 560px) {
+  .boost-item {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+
+  .boost-item-copy {
+    flex: 1 1 100%;
+  }
+
+  .boost-item-price {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+}
+
+/* Keep the section inside the centered submit screen. */
+.submit-boost {
+  margin-top: 0.5rem;
+}
+
+/* ---------- One service page ---------- */
+.service-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.service-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.service-head h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: -0.03em;
+}
+
+.service-price-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.service-price-value {
+  font-family: var(--display);
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.service-price-line small {
+  color: var(--muted);
+  font: 600 0.8rem var(--mono);
+}
+
+.service-summary {
+  max-width: 46rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.service-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.service-notice > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+  font: 700 0.7rem var(--mono);
+}
+
+.service-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-block h2 {
+  font-size: 1.25rem;
+}
+
+.service-includes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.service-includes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.service-includes li > span {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.service-steps {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.service-steps li::marker {
+  color: var(--accent);
+  font-family: var(--display);
+  font-weight: 700;
+}
+
+.service-good-for {
+  max-width: 46rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.service-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.service-others {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+.service-others h2 {
+  font-size: 1.25rem;
+}
+
+/* ---------- Advertise cards lead to the service pages ---------- */
+.card-title-link:hover,
+.advertise-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.advertise-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.advertise-card-foot .advertise-coming-soon {
+  flex: 1 1 8rem;
+}
+
+.advertise-more {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.service-card .advertise-more {
+  margin-top: auto;
+}
+
+/* ---------- The badge page, opened outside an iframe ---------- */
+.embed-root-standalone {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 1.5rem;
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.embed-root-standalone .embed-badge {
+  align-self: flex-start;
+}
+
+.embed-boost {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 46rem;
+}
+
+.embed-back {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.embed-back a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Home on a phone: the list sits on the page, not in boxes ---------- */
+@media (max-width: 767px) {
+  .home-site-grid {
+    gap: 0;
+  }
+
+  .home-site-card {
+    padding: 1.1rem 0;
+    border: 0;
+    border-top: 1px solid var(--rule);
+    border-radius: 0;
+    background: transparent;
+    background-image: none;
+    box-shadow: none;
+    overflow: visible;
+    transform: none;
+  }
+
+  .home-site-card::before {
+    content: none;
+  }
+
+  .home-site-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .home-site-grid > .home-site-card:first-child {
+    padding-top: 0.2rem;
+    border-top: 0;
+  }
+
+  .home-site-grid > .home-site-card:last-child {
+    padding-bottom: 0.2rem;
+  }
+}

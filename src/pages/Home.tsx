@@ -313,7 +313,7 @@ function CollectionCard({
 
 function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
   return (
-    <article className="card p-5 flex flex-col gap-3 text-left">
+    <article className="card home-site-card p-5 flex flex-col gap-3 text-left">
       <div className="flex items-center gap-3">
         <SiteIcon site={site} size={34} />
         <div className="min-w-0">
@@ -597,7 +597,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="home-site-grid grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((site) => (
                 <SiteCard key={site.id} site={site} />
               ))}
@@ -646,7 +646,7 @@ export default function Home() {
             </div>
             {filtered.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="home-site-grid grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {(showAllSites ? filtered : filtered.slice(0, SITE_PAGE)).map((site) => (
                     <SiteCard key={site.id} site={site} query={query} />
                   ))}
@@ -814,7 +814,7 @@ export default function Home() {
 
           {filtered.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="home-site-grid grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {(showAllSites ? filtered : filtered.slice(0, SITE_PAGE)).map((site) => (
                   <SiteCard key={site.id} site={site} query={query} />
                 ))}

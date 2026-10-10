@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
+import { BoostTraffic } from "../components/BoostTraffic";
 import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
 import { categoryChoices, siteName, siteUrl } from "../lib/siteData";
 import { readVotedSlugs } from "../lib/votes";
@@ -252,6 +253,7 @@ export default function Submit() {
               listing is approved.
             </p>
           </section>
+          <BoostTraffic id="submit-boost" className="submit-boost" />
           <div className="flex flex-wrap justify-center gap-3 mt-2">
             <button type="button" className="btn" onClick={() => setSubmittedId(null)}>
               Submit another
