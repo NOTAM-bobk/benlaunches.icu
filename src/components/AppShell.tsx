@@ -4,7 +4,6 @@ import { AccountMenu } from "./AccountMenu";
 import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SideNav } from "./SideNav";
-import { siteName } from "../lib/siteData";
 
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
@@ -168,7 +167,7 @@ export function AppShell() {
 
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-3">
           <Link to="/" className="justify-self-start">
-            <span className="brand-mark">{siteName}</span>
+            <span className="brand-mark">Ben Launches</span>
           </Link>
 
           <nav

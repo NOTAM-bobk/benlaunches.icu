@@ -5,14 +5,14 @@ import { siteName, siteUrl } from "../lib/siteData";
 const OPTIONS = [
   {
     name: "Promoted spot",
-    price: "$25",
+    price: "$3",
     unit: "/ week",
     description: "A clearly labeled promoted position near the top of a relevant category.",
     details: ["One category placement", "Clearly labeled as promoted", "Seven-day run"],
   },
   {
     name: "Homepage spotlight",
-    price: "$75",
+    price: "$6",
     unit: "/ week",
     description: "A larger featured placement for a launch you want more people to notice.",
     details: ["Homepage feature slot", "Links directly to your site", "Seven-day run"],
@@ -20,7 +20,7 @@ const OPTIONS = [
   },
   {
     name: "Instant verification",
-    price: "$19",
+    price: "$2",
     unit: " one time",
     description: "A verified mark for your listing after an automated ownership check.",
     details: ["Verified mark on your listing", "Domain ownership check", "One-time fee"],
@@ -34,7 +34,7 @@ const OPTIONS = [
 const SERVICES = [
   {
     name: "Become a verified site",
-    price: "$45",
+    price: "$4",
     unit: " one time",
     description:
       "A person reviews your site by hand, then your listing keeps the verified mark and moves to the front of future feature and category queues.",
@@ -42,28 +42,28 @@ const SERVICES = [
   },
   {
     name: "SEO audit",
-    price: "$95",
+    price: "$8",
     unit: " one time",
     description:
       "A plain-English review of your technical SEO, page speed and on-page basics, returned as a prioritised list of fixes.",
   },
   {
     name: "Pre-launch checklist",
-    price: "$45",
+    price: "$4",
     unit: " one time",
     description:
       "Everything to run through before launch day: metadata, redirects, analytics, performance and the easy-to-miss details.",
   },
   {
     name: "Top 100 featured-on cards",
-    price: "$15",
+    price: "$1",
     unit: " one time",
     description:
       "A ready-made pack of 100 “featured on” badge cards to drop into your product page or footer.",
   },
   {
     name: "Get listed on 20 other directories",
-    price: "$149",
+    price: "$10",
     unit: " one time",
     description:
       "We submit your site to 20 hand-picked directories and launch platforms, so you start with a spread of quality listings.",

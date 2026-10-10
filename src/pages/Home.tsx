@@ -517,7 +517,7 @@ export default function Home() {
         <input
           id="site-search"
           type="search"
-          placeholder={`Search ${sites.length} sites, tags, categories…`}
+          placeholder="Search sites, tags, categories…"
           value={query}
           onChange={(e) => {
             updateParams({ q: e.target.value, category: undefined });
@@ -539,22 +539,6 @@ export default function Home() {
           </button>
         )}
       </div>
-      {query.trim() && (
-        <p className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
-          <span>
-            <strong style={{ color: "var(--ink)" }}>{filtered.length}</strong>{" "}
-            {filtered.length === 1 ? "site matches" : "sites match"} “
-            <mark className="hl">{query.trim()}</mark>”
-          </span>
-          <button
-            type="button"
-            className="nav-btn"
-            onClick={() => updateParams({ q: undefined })}
-          >
-            Clear search
-          </button>
-        </p>
-      )}
       <div className="chip-row" role="group" aria-label="Filter the list by category">
         {categoryFilters.map((cat) => (
           <button
@@ -659,9 +643,6 @@ export default function Home() {
                   Results for “{query.trim()}”
                 </h2>
               </div>
-              <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                {filtered.length} site{filtered.length === 1 ? "" : "s"}
-              </span>
             </div>
             {filtered.length > 0 ? (
               <>
@@ -673,7 +654,7 @@ export default function Home() {
                 {!showAllSites && filtered.length > SITE_PAGE && (
                   <div className="show-more-row">
                     <button type="button" className="btn ghost" onClick={() => setShowAllSites(true)}>
-                      Show the other {filtered.length - SITE_PAGE} sites
+                      Show more sites
                     </button>
                   </div>
                 )}
