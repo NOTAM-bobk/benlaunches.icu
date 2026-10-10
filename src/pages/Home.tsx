@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { AvatarRow } from "../components/AvatarRow";
 import { Highlight } from "../components/Highlight";
@@ -28,6 +28,52 @@ import {
 } from "../lib/siteData";
 import { formatDate, posts } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
+
+/** What a cool site should do, one line at a time in the home hero. */
+const FIND_PHRASES = [
+  "Find interesting sites",
+  "Shows recent launches",
+  "Helps your site get discovered",
+  "Find cool sites",
+  "Get a featured-on badge",
+  "Get real traffic",
+  "Find useful tools",
+];
+
+/**
+ * "A cool site that…" with one phrase at a time underneath. Each phrase leaves
+ * with a blur and a tilt and the next one settles in the same way. The moving
+ * text is decorative — a single sentence with the same meaning is offered to
+ * screen readers from the page itself.
+ */
+function FindRotator() {
+  const [index, setIndex] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    const hold = window.setTimeout(() => setLeaving(true), 2700);
+    const swap = window.setTimeout(() => {
+      setIndex((value) => (value + 1) % FIND_PHRASES.length);
+      setLeaving(false);
+    }, 3050);
+    return () => {
+      window.clearTimeout(hold);
+      window.clearTimeout(swap);
+    };
+  }, [index]);
+
+  return (
+    <p className="find-rotate" aria-hidden="true">
+      <span className="find-rotate-lead">
+        <span className="find-pulse" />
+        A cool site that…
+      </span>
+      <span key={index} className={`find-rotate-phrase${leaving ? " leaving" : ""}`}>
+        {FIND_PHRASES[index]}
+      </span>
+    </p>
+  );
+}
 
 /** Only the newest handful of posts get a card in the home page's article row. */
 const FEATURED_POSTS = posts.slice(0, 3);
@@ -463,15 +509,13 @@ export default function Home() {
           browse, then the crowd. */}
       <h2 className="find-title">Cure boredom, find launches</h2>
 
-      {/* Right under the headline: what this is in two short lines, then the two
-          ways to browse. The pieces rise in with a small stagger. */}
+      {/* Right under the headline: one promise at a time, then the two ways to
+          browse. The pieces rise in with a small stagger. */}
       <section className="find-intro">
-        <p className="find-eyebrow">
-          <span className="find-pulse" aria-hidden="true" />
-          Hand-checked quiet sites
-        </p>
-        <p className="find-lede">
-          One tap opens a real website — no feed, no autoplay, nothing tracking you.
+        <FindRotator />
+        <p className="sr-only">
+          A cool site that finds interesting sites and recent launches, helps your own site get
+          discovered, earns a featured-on badge, and points you at useful tools.
         </p>
         <p className="find-links">
           <Link to="/discover-websites" className="find-link">
