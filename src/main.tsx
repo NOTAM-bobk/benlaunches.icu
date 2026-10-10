@@ -21,6 +21,7 @@ import { Profile, Saved, Settings } from "./pages/Account.tsx";
 import Advertise from "./pages/Advertise.tsx";
 import { Privacy, Terms } from "./pages/Legal.tsx";
 import EmbedBadge from "./pages/EmbedBadge.tsx";
+import { UserProfile, Users } from "./pages/Users.tsx";
 
 const router = createBrowserRouter([
   {
@@ -106,6 +107,14 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <Settings />,
+      },
+      {
+        path: "users",
+        element: <Users />,
+      },
+      {
+        path: "users/:id",
+        element: <UserProfile />,
       },
     ],
   },

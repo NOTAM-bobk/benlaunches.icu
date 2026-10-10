@@ -36,6 +36,15 @@ export interface AuthUser {
   voted: string[];
 }
 
+export interface PublicProfile {
+  id: string;
+  name: string;
+  avatarSeed: string;
+  bio: string;
+  saved: string[];
+  voted: string[];
+}
+
 export type AuthResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 type ProfileRow = {
@@ -52,6 +61,50 @@ type ProfileRow = {
 
 function failure(error: { message?: string } | null, fallback: string): AuthResult<never> {
   return { ok: false, error: error?.message || fallback };
+}
+
+type PublicProfileRow = Pick<ProfileRow, "id" | "name" | "avatar_seed" | "bio">;
+
+function publicProfile(profile: PublicProfileRow, saved: Array<{ slug: string }> | null, voted: Array<{ slug: string }> | null): PublicProfile {
+  return {
+    id: profile.id,
+    name: profile.name || "Boring Internet user",
+    avatarSeed: profile.avatar_seed || profile.id.slice(0, 8),
+    bio: profile.bio || "",
+    saved: (saved ?? []).map((row) => row.slug),
+    voted: (voted ?? []).map((row) => row.slug),
+  };
+}
+
+export async function searchPublicProfiles(query = ""): Promise<AuthResult<{ profiles: PublicProfile[] }>> {
+  if (!supabase) return { ok: false, error: "The account service is not connected." };
+  const client = supabase;
+  const term = query.trim();
+  let request = client.from("profiles").select("id,name,avatar_seed,bio").order("name", { ascending: true }).limit(24);
+  if (term) request = request.ilike("name", `%${term.replace(/[%_]/g, "\\$&")}%`);
+  const { data, error } = await request;
+  if (error) return failure(error, "Could not find users.");
+  const profiles = (data ?? []) as PublicProfileRow[];
+  const expanded = await Promise.all(profiles.map(async (profile) => {
+    const [{ data: saved }, { data: voted }] = await Promise.all([
+      client.from("saved_sites").select("slug").eq("user_id", profile.id).order("created_at", { ascending: false }),
+      client.from("user_votes").select("slug").eq("user_id", profile.id).order("created_at", { ascending: false }),
+    ]);
+    return publicProfile(profile, saved, voted);
+  }));
+  return { ok: true, value: { profiles: expanded } };
+}
+
+export async function getPublicProfile(id: string): Promise<AuthResult<{ profile: PublicProfile }>> {
+  if (!supabase) return { ok: false, error: "The account service is not connected." };
+  const { data: profile, error } = await supabase.from("profiles").select("id,name,avatar_seed,bio").eq("id", id).maybeSingle<PublicProfileRow>();
+  if (error) return failure(error, "Could not load this profile.");
+  if (!profile) return { ok: false, error: "That profile could not be found." };
+  const [{ data: saved }, { data: voted }] = await Promise.all([
+    supabase.from("saved_sites").select("slug").eq("user_id", id).order("created_at", { ascending: false }),
+    supabase.from("user_votes").select("slug").eq("user_id", id).order("created_at", { ascending: false }),
+  ]);
+  return { ok: true, value: { profile: publicProfile(profile, saved, voted) } };
 }
 
 async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {

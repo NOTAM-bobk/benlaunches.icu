@@ -5181,3 +5181,229 @@ mark.hl {
     padding: 0 1rem;
   }
 }
+
+/* ---------- public user directory ---------- */
+.users-page {
+  min-height: 70vh;
+}
+
+.users-heading {
+  max-width: 680px;
+  margin-bottom: 2rem;
+}
+
+.users-heading h1 {
+  margin-top: 0.45rem;
+  font-size: clamp(3rem, 8vw, 6rem);
+}
+
+.users-heading p {
+  margin-top: 1rem;
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.users-search {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 680px;
+  margin-bottom: 2.5rem;
+}
+
+.users-search .field {
+  min-width: 0;
+  flex: 1;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.users-card,
+.users-site-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow-thick);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.users-card {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.users-card:hover,
+.users-site-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+.users-avatar {
+  flex: 0 0 auto;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.users-card-copy,
+.users-site-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.users-card-copy strong,
+.users-site-copy strong {
+  overflow: hidden;
+  font-size: 1.08rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users-card-copy span,
+.users-card-copy small,
+.users-site-copy span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users-card-arrow {
+  font-size: 1.5rem;
+}
+
+.users-status,
+.users-error {
+  color: var(--muted);
+}
+
+.users-error {
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.users-empty-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 680px;
+}
+
+.users-back {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.user-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 800px;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.user-profile-header h1 {
+  margin-top: 0.35rem;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+}
+
+.user-profile-header p {
+  max-width: 42rem;
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
+
+.user-profile-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1.25rem 0 2.5rem;
+  color: var(--muted);
+}
+
+.user-profile-stats strong {
+  color: var(--ink);
+  font-size: 1.5rem;
+}
+
+.user-profile-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+}
+
+.users-site-section {
+  min-width: 0;
+}
+
+.users-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.users-section-heading h2 {
+  font-size: 1.6rem;
+}
+
+.users-section-heading span {
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.users-site-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.users-site-card {
+  box-shadow: none;
+  padding: 0.7rem;
+}
+
+.users-empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+  .users-grid,
+  .user-profile-lists {
+    grid-template-columns: 1fr;
+  }
+
+  .users-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .users-search .btn {
+    width: 100%;
+  }
+
+  .user-profile-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

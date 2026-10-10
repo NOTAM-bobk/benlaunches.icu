@@ -91,6 +91,9 @@ export function AccountMenu() {
               <Link to="/settings" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
                 Settings
               </Link>
+              <Link to="/users" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
+                Find users
+              </Link>
               <button
                 type="button"
                 role="menuitem"
@@ -117,6 +120,9 @@ export function AccountMenu() {
               </Link>
               <Link to="/submit" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
                 Submit your site
+              </Link>
+              <Link to="/users" role="menuitem" className="account-item" onClick={() => setOpen(false)}>
+                Find users
               </Link>
             </>
           )}
