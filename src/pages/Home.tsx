@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { AvatarRow } from "../components/AvatarRow";
 import { Highlight } from "../components/Highlight";
 import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
@@ -454,6 +454,8 @@ export default function Home() {
   const selectedCategory = params.get("category") ?? "all";
   const [savedCollections, toggleSaved] = useSavedCollections();
   const [showAllSites, setShowAllSites] = useState(false);
+  const [urlDraft, setUrlDraft] = useState("");
+  const navigate = useNavigate();
   const lastRandom = useRef<string | null>(null);
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
@@ -497,6 +499,13 @@ export default function Home() {
     window.open(pick.url, "_blank", "noopener,noreferrer");
   }
 
+  /** Hand the typed URL to the submit form, which opens with it filled in. */
+  function handleLaunch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const url = urlDraft.trim();
+    navigate(url ? `/submit?url=${encodeURIComponent(url)}` : "/submit");
+  }
+
   function updateParams(next: { q?: string; category?: string }) {
     const draft = new URLSearchParams(params);
     for (const [key, value] of Object.entries(next)) {
@@ -511,7 +520,11 @@ export default function Home() {
     <section className="flex flex-col gap-4">
       {/* The page's own headline, then what the place is, then the ways to
           browse, then the crowd. */}
-      <h2 className="find-title">Cure boredom, find launches</h2>
+      <h2 className="find-title">
+        Launch your product
+        <br />
+        Get discovered now
+      </h2>
 
       {/* Right under the headline: one promise at a time, rising in with the
           rotator. */}
@@ -541,41 +554,37 @@ export default function Home() {
 
       <AvatarRow />
 
-      <label htmlFor="site-search" className="sr-only">
-        Search launched sites
-      </label>
-      <div className="search-box">
+      <form className="search-box launch-form" onSubmit={handleLaunch}>
+        <label htmlFor="site-url" className="sr-only">
+          Enter your product URL
+        </label>
         <span className="search-glyph" aria-hidden="true">
           <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true">
-            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
-            <path d="M12.8 12.8 L17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.6" />
+            <path
+              d="M2.8 10h14.4M10 2.8c2 2 2 12.4 0 14.4M10 2.8c-2 2-2 12.4 0 14.4"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            />
           </svg>
         </span>
         <input
-          id="site-search"
-          type="search"
-          placeholder="Search sites, tags, categories…"
-          value={query}
-          onChange={(e) => {
-            updateParams({ q: e.target.value, category: undefined });
-          }}
-          enterKeyHint="search"
-          autoComplete="off"
+          id="site-url"
+          type="url"
+          inputMode="url"
+          placeholder="https://your-product.com"
+          value={urlDraft}
+          onChange={(e) => setUrlDraft(e.target.value)}
+          enterKeyHint="go"
+          autoComplete="url"
           spellCheck={false}
           className="field search-field text-base"
           style={{ borderColor: "var(--ink)" }}
         />
-        {query.length > 0 && (
-          <button
-            type="button"
-            className="search-clear"
-            onClick={() => updateParams({ q: undefined })}
-            aria-label="Clear search"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+        <button type="submit" className="btn accent launch-btn">
+          Launch
+        </button>
+      </form>
       <div className="chip-row" role="group" aria-label="Filter the list by category">
         {categoryFilters.map((cat) => (
           <button

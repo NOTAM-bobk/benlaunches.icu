@@ -103,6 +103,7 @@ function BackToTop() {
 
 export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
+  const [promoOpen, setPromoOpen] = useState(true);
   const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -158,7 +159,7 @@ export function AppShell() {
             It only belongs on the home screen — every other page opens on the
             brand row, which also keeps the header (and the mobile menu that
             hangs off its height) shorter. */}
-        {path === "/" && (
+        {path === "/" && promoOpen && (
           <div className="promo-bar">
             <p className="promo-bar-copy">
               Enhance your site’s SEO{" "}
@@ -169,6 +170,14 @@ export function AppShell() {
             <Link to="/submit" className="promo-bar-cta">
               Launch your site <span aria-hidden="true">→</span>
             </Link>
+            <button
+              type="button"
+              className="promo-bar-close"
+              onClick={() => setPromoOpen(false)}
+              aria-label="Dismiss this message"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
         )}
 

@@ -970,12 +970,13 @@ hr {
 
 /* The strip at the very top of the header: the pitch and the way to act on it. */
 .promo-bar {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 0.35rem 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 2.25rem;
   border-bottom: 1px solid var(--ink);
   background: var(--ink);
   color: var(--surface);
@@ -1015,11 +1016,39 @@ hr {
   color: var(--ink);
 }
 
+/* A tiny way out of the strip. It floats in the top-right corner. */
+.promo-bar-close {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--surface);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.promo-bar-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.16);
+}
+
 /* Phones keep the bar short: one line, no explanatory tail. */
 @media (max-width: 639px) {
   .promo-bar {
     gap: 0.3rem 0.55rem;
-    padding: 0.45rem 0.75rem;
+    padding: 0.45rem 2rem;
   }
 
   .promo-bar-copy {
@@ -1168,6 +1197,7 @@ hr {
   flex-direction: column;
   overflow: hidden;
   background: var(--surface);
+  font-family: var(--display);
   border-radius: 0;
   box-shadow: none;
   opacity: 0;
@@ -1219,6 +1249,10 @@ hr {
 .drawer-scroll {
   flex: 1;
   overflow-y: auto;
+}
+
+.drawer .sidenav-search input {
+  font-family: var(--display);
 }
 
 @media (min-width: 1024px) {
@@ -2528,6 +2562,24 @@ mark.hl {
 .search-clear:hover {
   background: var(--ink);
   color: var(--surface);
+}
+
+/*
+ * The home box is a URL entry form rather than a search box: the field takes
+ * the URL and the Launch button hands it to the submit form.
+ */
+.launch-form .search-field {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  padding-right: 1rem;
+}
+
+.launch-btn {
+  flex: none;
+  margin-left: 0.5rem;
+  min-height: 3.1rem;
+  padding-inline: 1.3rem;
 }
 
 /*

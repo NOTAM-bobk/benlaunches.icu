@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { BoostTraffic } from "../components/BoostTraffic";
 import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
@@ -97,7 +97,12 @@ const SUBMIT_FAQ = [
 
 export default function Submit() {
   const { user } = useAuth();
-  const [draft, setDraft] = useState<SubmissionDraft>(EMPTY_DRAFT);
+  /* A URL typed into the home launch form arrives here as ?url=… and starts the form. */
+  const [params] = useSearchParams();
+  const [draft, setDraft] = useState<SubmissionDraft>(() => ({
+    ...EMPTY_DRAFT,
+    url: params.get("url")?.trim() ?? "",
+  }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [badFields, setBadFields] = useState<string[]>([]);
