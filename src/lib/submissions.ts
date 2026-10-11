@@ -1,4 +1,5 @@
 import { votesConnected, votesEndpoint } from "./votes";
+import { fetchProfileSubmissions, type ProfileSubmission } from "./submitted";
 
 /**
  * Site submissions go to the same Worker as votes (`cloudflare/votes-worker.js`).
@@ -110,9 +111,12 @@ export async function autofillSite(url: string): Promise<Result<SiteAutofill>> {
 
 export async function submitSite(
   draft: SubmissionDraft,
+  ownerId?: string,
 ): Promise<Result<{ id: string; status: SubmissionStatus }>> {
-  return post<{ id: string; status: SubmissionStatus }>("/submit", draft);
+  return post<{ id: string; status: SubmissionStatus }>("/submit", { ...draft, ownerId });
 }
+
+export { fetchProfileSubmissions, type ProfileSubmission };
 
 export async function submitSiteReport(
   report: SiteProblemReportDraft,

@@ -12,6 +12,7 @@ const DIRECTORY_LINKS: { to: string; label: string }[] = [
   { to: "/trending", label: "Trending 🔥" },
   { to: "/submit", label: "Submit your site" },
   { to: "/advertise", label: "Advertise with Boring Internet" },
+  { to: "/stats", label: "Directory stats" },
 ];
 
 const LEGAL_LINKS: { to: string; label: string }[] = [

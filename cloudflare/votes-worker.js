@@ -23,6 +23,7 @@ const USER_PREFIX = "user:";
 const EMAIL_PREFIX = "email:";
 const SESSION_PREFIX = "session:";
 const SESSION_COOKIE = "bi_session";
+const ANALYTICS_PREFIX = "analytics:";
 const SESSION_DAYS = 30;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const MAX_BODY_BYTES = 24 * 1024;
@@ -84,6 +85,16 @@ async function digest(value) {
 function userKey(id) { return USER_PREFIX + id; }
 function emailKey(email) { return EMAIL_PREFIX + email.toLowerCase().trim(); }
 function sessionKey(token) { return SESSION_PREFIX + token; }
+function analyticsDay(date = new Date()) { return date.toISOString().slice(0, 10); }
+function analyticsPath(path) {
+  const value = str(path, 160);
+  return value.startsWith("/") ? value.replace(/[^a-zA-Z0-9_?&=./:-]/g, "") || "/" : "/";
+}
+async function increment(env, key) {
+  const next = (Number(await env.VOTES.get(key)) || 0) + 1;
+  await env.VOTES.put(key, String(next), { expirationTtl: 60 * 60 * 24 * 45 });
+  return next;
+}
 
 function parseCookies(request) {
   return Object.fromEntries((request.headers.get("Cookie") || "").split(";").map((part) => part.trim().split("=")).filter(([key, value]) => key && value));
@@ -110,6 +121,8 @@ async function currentUser(request, env) {
   if (!session || session.expiresAt < Date.now()) return null;
   return env.VOTES.get(userKey(session.userId), "json");
 }
+
+const requireUser = currentUser;
 
 async function createSession(userId, env) {
   const token = bytesToBase64(crypto.getRandomValues(new Uint8Array(32)));
@@ -293,6 +306,36 @@ async function listSubmissions(env) {
   return submissions.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
 }
 
+async function profileSubmissions(env, ownerId, includePending) {
+  const all = await listSubmissions(env);
+  return all.filter((submission) => submission.ownerId === ownerId && (includePending || submission.status === "approved"))
+    .map(({ id, name, url, tagline, status, createdAt }) => ({ id, name, url, tagline, status, createdAt }));
+}
+
+async function analyticsStats(env) {
+  const days = [];
+  const now = new Date();
+  for (let offset = 29; offset >= 0; offset -= 1) {
+    const date = new Date(now);
+    date.setUTCDate(date.getUTCDate() - offset);
+    const day = analyticsDay(date);
+    days.push({ date: day, views: Number(await env.VOTES.get(`${ANALYTICS_PREFIX}day:${day}:views`)) || 0, uniqueViews: Number(await env.VOTES.get(`${ANALYTICS_PREFIX}day:${day}:unique`)) || 0 });
+  }
+  const pageCounts = {};
+  let cursor;
+  do {
+    const page = await env.VOTES.list({ prefix: `${ANALYTICS_PREFIX}page:`, cursor, limit: 1000 });
+    for (const key of page.keys) pageCounts[key.name.slice(`${ANALYTICS_PREFIX}page:`.length)] = Number(await env.VOTES.get(key.name)) || 0;
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return {
+    generatedAt: new Date().toISOString(),
+    totals: { views: days.reduce((sum, day) => sum + day.views, 0), uniqueViews: days.reduce((sum, day) => sum + day.uniqueViews, 0) },
+    days,
+    topPages: Object.entries(pageCounts).sort(([, a], [, b]) => b - a).slice(0, 10).map(([path, views]) => ({ path, views })),
+  };
+}
+
 /* ---------------- handlers ---------------- */
 
 export default {
@@ -317,6 +360,34 @@ export default {
 
     if (pathname === "/counts" && request.method === "GET") {
       return json(await allVoteCounts(env), headers);
+    }
+
+    if (pathname === "/analytics/view" && request.method === "POST") {
+      const body = await readBody(request);
+      const day = analyticsDay();
+      const path = analyticsPath(body?.path);
+      const visitor = str(body?.visitorId, 120);
+      await increment(env, `${ANALYTICS_PREFIX}day:${day}:views`);
+      await increment(env, `${ANALYTICS_PREFIX}page:${path}`);
+      if (visitor) {
+        const uniqueKey = `${ANALYTICS_PREFIX}unique:${day}:${await digest(visitor)}`;
+        if (!(await env.VOTES.get(uniqueKey))) {
+          await env.VOTES.put(uniqueKey, "1", { expirationTtl: 60 * 60 * 24 * 45 });
+          await increment(env, `${ANALYTICS_PREFIX}day:${day}:unique`);
+        }
+      }
+      return json({ ok: true }, headers, 202);
+    }
+
+    if (pathname === "/analytics/stats" && request.method === "GET") {
+      return json(await analyticsStats(env), headers);
+    }
+
+    const profileMatch = pathname.match(/^\/profiles\/([^/]+)\/submissions$/);
+    if (profileMatch && request.method === "GET") {
+      const profileId = str(decodeURIComponent(profileMatch[1]), 100);
+      const includePending = new URL(request.url).searchParams.get("private") === "1";
+      return json({ submissions: await profileSubmissions(env, profileId, includePending) }, headers);
     }
 
     if (pathname === "/inspect" && request.method === "GET") {
@@ -429,6 +500,7 @@ export default {
         id,
         status: "pending",
         createdAt: new Date().toISOString(),
+        ownerId: str(body.ownerId, 100),
         ...value,
       };
       await env.VOTES.put(SUBMISSION_PREFIX + id, JSON.stringify(submission));

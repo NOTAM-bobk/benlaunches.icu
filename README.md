@@ -113,7 +113,7 @@ palette moves.
 
 ## Trending votes, submissions, and admin
 
-The Worker at `cloudflare/votes-worker.js` does three things, all on Workers KV:
+The Worker at `cloudflare/votes-worker.js` handles votes, submissions, profiles, and lightweight analytics, all on Workers KV:
 
 | Route | Who | What |
 | --- | --- | --- |
@@ -122,6 +122,9 @@ The Worker at `cloudflare/votes-worker.js` does three things, all on Workers KV:
 | `POST /submit` | public | store a pending site submission (`/submit` page) |
 | `POST /admin/submissions` | password | list submissions for review (`/admin` page) |
 | `POST /admin/review` | password | set a submission to `approved` / `rejected` |
+| `GET /profiles/:id/submissions` | public | approved URLs for a public profile; `?private=1` also includes moderation status for the signed-in account UI |
+| `POST /analytics/view` | public | count a page view and a daily unique visitor without cookies or IP storage |
+| `GET /analytics/stats` | public | rolling 30-day totals, daily chart data, and top pages for `/stats` |
 | `GET /health` | public | liveness + whether the admin password is set |
 
 Deployed at `https://boring-internet-votes.sawyerbobk563.workers.dev`.
@@ -137,6 +140,12 @@ Setup notes:
 
 Until `VITE_VOTES_API_URL` is set the pages say so: votes fall back to
 localStorage and the submit form is disabled.
+
+When a visitor is signed in through the account service, the submit form sends
+the profile ID with the submission. Pending, approved, and rejected URLs appear
+on `/profile`; approved URLs are returned on `/users/:id`. Analytics uses a
+random browser identifier stored in localStorage only to deduplicate visitors
+within a day. It does not store IP addresses or cookies.
 
 Two KV behaviours are worth knowing: writes take up to ~60 seconds to appear
 in reads from other locations (the admin page therefore polls every 30s while

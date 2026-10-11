@@ -6,6 +6,7 @@ import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
 import { categoryChoices, siteName, siteUrl } from "../lib/siteData";
 import { readVotedSlugs } from "../lib/votes";
 import { autofillSite, submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
+import { useAuth } from "../lib/auth";
 
 type TextFieldKey =
   | "url"
@@ -95,6 +96,7 @@ const SUBMIT_FAQ = [
 ];
 
 export default function Submit() {
+  const { user } = useAuth();
   const [draft, setDraft] = useState<SubmissionDraft>(EMPTY_DRAFT);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +159,7 @@ export default function Submit() {
     setError(null);
     setBadFields([]);
 
-    const result = await submitSite(draft);
+    const result = await submitSite(draft, user?.id);
     setBusy(false);
 
     if (!result.ok) {

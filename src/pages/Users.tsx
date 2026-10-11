@@ -32,6 +32,10 @@ function SiteList({ title, slugs, empty }: { title: string; slugs: string[]; emp
   );
 }
 
+function SubmittedList({ profile }: { profile: PublicProfile }) {
+  return <section className="users-site-section users-submitted-section"><div className="users-section-heading"><h2>Submitted websites</h2><span>{profile.submitted.length}</span></div>{profile.submitted.length ? <ul className="submitted-site-list">{profile.submitted.map((submission) => <li key={submission.id}><a href={submission.url} target="_blank" rel="noreferrer"><strong>{submission.name}</strong><span>{submission.url}</span></a><span className="submission-status approved">approved</span></li>)}</ul> : <p className="users-empty">No approved submissions yet.</p>}</section>;
+}
+
 function UserCard({ profile }: { profile: PublicProfile }) {
   return (
     <Link to={`/users/${profile.id}`} className="users-card">
@@ -123,6 +127,7 @@ export function UserProfile() {
         <div className="user-profile-lists">
           <SiteList title="Liked websites" slugs={profile.voted} empty="Nothing liked yet." />
           <SiteList title="Saved websites" slugs={profile.saved} empty="Nothing saved yet." />
+          <SubmittedList profile={profile} />
         </div>
       </main>
     </>

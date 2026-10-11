@@ -4,6 +4,7 @@ import { AccountMenu } from "./AccountMenu";
 import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SideNav } from "./SideNav";
+import { trackPageView } from "../lib/analytics";
 
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
@@ -47,6 +48,7 @@ const FOOTER_ROUTES = new Set([
   "/advertise",
   "/terms",
   "/privacy",
+  "/stats",
 ]);
 
 function tabIndex(pathname: string): number {
@@ -143,6 +145,10 @@ export function AppShell() {
     if (location.hash || navigationType === "POP") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location.pathname, location.hash, navigationType]);
+
+  useEffect(() => {
+    trackPageView(`${location.pathname}${location.search}`);
+  }, [location.pathname, location.search]);
 
   return (
     <div className="min-h-screen flex flex-col">

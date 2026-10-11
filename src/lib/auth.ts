@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { setReducedMotionPreference } from "./motion";
 import { supabase, supabaseConnected } from "./supabase";
+import { fetchProfileSubmissions, type ProfileSubmission } from "./submitted";
 
 export interface AuthSettings {
   emailUpdates: boolean;
@@ -34,6 +35,7 @@ export interface AuthUser {
   settings: AuthSettings;
   saved: string[];
   voted: string[];
+  submitted: ProfileSubmission[];
 }
 
 export interface PublicProfile {
@@ -43,6 +45,7 @@ export interface PublicProfile {
   bio: string;
   saved: string[];
   voted: string[];
+  submitted: ProfileSubmission[];
 }
 
 export type AuthResult<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -73,6 +76,7 @@ function publicProfile(profile: PublicProfileRow, saved: Array<{ slug: string }>
     bio: profile.bio || "",
     saved: (saved ?? []).map((row) => row.slug),
     voted: (voted ?? []).map((row) => row.slug),
+    submitted: [],
   };
 }
 
@@ -90,7 +94,7 @@ export async function searchPublicProfiles(query = ""): Promise<AuthResult<{ pro
       client.from("saved_sites").select("slug").eq("user_id", profile.id).order("created_at", { ascending: false }),
       client.from("user_votes").select("slug").eq("user_id", profile.id).order("created_at", { ascending: false }),
     ]);
-    return publicProfile(profile, saved, voted);
+    return { ...publicProfile(profile, saved, voted), submitted: await fetchProfileSubmissions(profile.id) };
   }));
   return { ok: true, value: { profiles: expanded } };
 }
@@ -104,7 +108,7 @@ export async function getPublicProfile(id: string): Promise<AuthResult<{ profile
     supabase.from("saved_sites").select("slug").eq("user_id", id).order("created_at", { ascending: false }),
     supabase.from("user_votes").select("slug").eq("user_id", id).order("created_at", { ascending: false }),
   ]);
-  return { ok: true, value: { profile: publicProfile(profile, saved, voted) } };
+  return { ok: true, value: { profile: { ...publicProfile(profile, saved, voted), submitted: await fetchProfileSubmissions(id) } } };
 }
 
 async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
@@ -157,6 +161,7 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
         }),
         saved: (saved ?? []).map((row) => row.slug),
         voted: (voted ?? []).map((row) => row.slug),
+        submitted: await fetchProfileSubmissions(authUser.id, true),
       },
     },
   };
