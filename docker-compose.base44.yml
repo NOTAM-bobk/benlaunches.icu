@@ -1,0 +1,26 @@
+services:
+  web:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:5173"
+    environment:
+      - BASE44_PREVIEW_MODE=${BASE44_PREVIEW_MODE:-}
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-}
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX:-}
+      - BASE44_SANDBOX_HOST_DOMAIN=${BASE44_SANDBOX_HOST_DOMAIN:-}
+    command: ["sh", "-ec", "npm ci --no-audit --no-fund && exec npm run dev"]
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const http = require('http'); const req = http.get('http://localhost:5173/', r => { process.exit(r.statusCode < 500 ? 0 : 1); }); req.on('error', () => process.exit(1));"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    restart: on-failure

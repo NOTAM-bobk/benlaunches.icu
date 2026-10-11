@@ -23,5 +23,8 @@ export default defineConfig({
     host: true,
     strictPort: true,
     hmr: false,
+    ...(process.env.BASE44_PREVIEW_MODE === "1" && process.env.BASE44_SANDBOX_HOST_DOMAIN
+      ? { allowedHosts: [`.${process.env.BASE44_SANDBOX_HOST_DOMAIN}`] }
+      : {}),
   },
 });
