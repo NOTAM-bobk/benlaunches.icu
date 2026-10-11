@@ -213,6 +213,33 @@ export function isSameOrigin(req) {
   }
 }
 
+/** The existing Cloudflare Worker is the durable admin queue for purchases. */
+export function paymentsWorkerUrl() {
+  return (process.env.VOTES_API_URL || process.env.VITE_VOTES_API_URL || "").trim().replace(/\/+$/, "");
+}
+
+export function paymentsWorkerPassword() {
+  return (process.env.PAYMENTS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
+}
+
+export async function recordCompletedPayment(purchase) {
+  const endpoint = paymentsWorkerUrl();
+  const password = paymentsWorkerPassword();
+  if (!endpoint || !password) return { recorded: false, reason: "payment queue is not configured" };
+  try {
+    const response = await fetch(`${endpoint}/payments/record`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password, purchase }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return { recorded: false, reason: `payment queue returned ${response.status}` };
+    return { recorded: true };
+  } catch (error) {
+    return { recorded: false, reason: error instanceof Error ? error.message : "payment queue unreachable" };
+  }
+}
+
 export function jsonBody(req) {
   const body = req.body;
   if (body && typeof body === "object") return body;

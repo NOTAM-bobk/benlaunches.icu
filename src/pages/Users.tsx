@@ -121,7 +121,7 @@ export function UserProfile() {
         <Link to="/users" className="users-back">← Find users</Link>
         <header className="user-profile-header">
           <ProfileAvatar seed={profile.avatarSeed} size={96} />
-          <div><span className="account-eyebrow">Boring Internet profile</span><h1>{profile.name}</h1>{profile.bio && <p>{profile.bio}</p>}</div>
+          <div><span className="account-eyebrow">Boring Internet profile</span><h1>{profile.name}</h1>{profile.bio && <p>{profile.bio}</p>}{profile.websiteUrl && <a href={profile.websiteUrl} target="_blank" rel="noreferrer" className="accent-text underline underline-offset-4 break-all">{profile.websiteUrl}</a>}</div>
         </header>
         <div className="user-profile-stats"><span><strong>{profile.voted.length}</strong> liked</span><span><strong>{profile.saved.length}</strong> saved</span></div>
         <div className="user-profile-lists">

@@ -34,6 +34,7 @@ export interface AuthUser {
   name: string;
   avatarSeed: string;
   bio: string;
+  websiteUrl: string;
   settings: AuthSettings;
   saved: string[];
   voted: string[];
@@ -46,6 +47,7 @@ export interface PublicProfile {
   name: string;
   avatarSeed: string;
   bio: string;
+  websiteUrl: string;
   saved: string[];
   voted: string[];
   submitted: ProfileSubmission[];
@@ -64,6 +66,7 @@ type ProfileRow = {
   name: string;
   avatar_seed: string;
   bio: string;
+  website_url: string;
   email_updates: boolean;
   weekly_digest: boolean;
   new_site_alerts: boolean;
@@ -75,7 +78,7 @@ function failure(error: { message?: string } | null, fallback: string): AuthResu
   return { ok: false, error: error?.message || fallback };
 }
 
-type PublicProfileRow = Pick<ProfileRow, "id" | "name" | "avatar_seed" | "bio">;
+type PublicProfileRow = Pick<ProfileRow, "id" | "name" | "avatar_seed" | "bio" | "website_url">;
 
 function publicProfile(profile: PublicProfileRow, saved: Array<{ slug: string }> | null, voted: Array<{ slug: string }> | null): PublicProfile {
   return {
@@ -83,6 +86,7 @@ function publicProfile(profile: PublicProfileRow, saved: Array<{ slug: string }>
     name: profile.name || "Boring Internet user",
     avatarSeed: profile.avatar_seed || profile.id.slice(0, 8),
     bio: profile.bio || "",
+    websiteUrl: profile.website_url || "",
     saved: (saved ?? []).map((row) => row.slug),
     voted: (voted ?? []).map((row) => row.slug),
     submitted: [],
@@ -93,7 +97,7 @@ export async function searchPublicProfiles(query = ""): Promise<AuthResult<{ pro
   if (!supabase) return { ok: false, error: "The account service is not connected." };
   const client = supabase;
   const term = query.trim();
-  let request = client.from("profiles").select("id,name,avatar_seed,bio").order("name", { ascending: true }).limit(24);
+  let request = client.from("profiles").select("id,name,avatar_seed,bio,website_url").order("name", { ascending: true }).limit(24);
   if (term) request = request.ilike("name", `%${term.replace(/[%_]/g, "\\$&")}%`);
   const { data, error } = await request;
   if (error) return failure(error, "Could not find users.");
@@ -128,7 +132,7 @@ export async function getSiteSupporters(slug: string): Promise<SiteSupporter[]> 
 
 export async function getPublicProfile(id: string): Promise<AuthResult<{ profile: PublicProfile }>> {
   if (!supabase) return { ok: false, error: "The account service is not connected." };
-  const { data: profile, error } = await supabase.from("profiles").select("id,name,avatar_seed,bio").eq("id", id).maybeSingle<PublicProfileRow>();
+  const { data: profile, error } = await supabase.from("profiles").select("id,name,avatar_seed,bio,website_url").eq("id", id).maybeSingle<PublicProfileRow>();
   if (error) return failure(error, "Could not load this profile.");
   if (!profile) return { ok: false, error: "That profile could not be found." };
   const [{ data: saved }, { data: voted }] = await Promise.all([
@@ -147,7 +151,7 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id,name,avatar_seed,bio,email_updates,weekly_digest,new_site_alerts,reduced_motion,public_profile")
+    .select("id,name,avatar_seed,bio,website_url,email_updates,weekly_digest,new_site_alerts,reduced_motion,public_profile")
     .eq("id", authUser.id)
     .maybeSingle<ProfileRow>();
   if (profileError) return failure(profileError, "Could not load your profile.");
@@ -157,6 +161,7 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
     name: (authUser.user_metadata?.name as string | undefined) ?? authUser.email?.split("@")[0] ?? "",
     avatar_seed: authUser.id.slice(0, 8),
     bio: "",
+    website_url: "",
     email_updates: false,
     weekly_digest: false,
     new_site_alerts: false,
@@ -183,6 +188,7 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
         name: safeProfile.name,
         avatarSeed: safeProfile.avatar_seed,
         bio: safeProfile.bio,
+        websiteUrl: safeProfile.website_url,
         settings: normalizeSettings({
           emailUpdates: safeProfile.email_updates,
           weeklyDigest: safeProfile.weekly_digest,
@@ -264,9 +270,18 @@ export function useAuth() {
     return result.error ? failure(result.error, "Could not sign out.") : { ok: true as const, value: { ok: true } };
   }
 
-  async function updateProfile(values: { name: string; avatarSeed: string; bio: string }) {
+  async function updateProfile(values: { name: string; avatarSeed: string; bio: string; websiteUrl: string }) {
     if (!supabase || !user) return { ok: false as const, error: "Sign in to edit your profile." };
-    const result = await supabase.from("profiles").update({ name: values.name.trim(), avatar_seed: values.avatarSeed.trim() || user.avatarSeed, bio: values.bio.trim() }).eq("id", user.id);
+    const websiteUrl = values.websiteUrl.trim();
+    if (websiteUrl) {
+      try {
+        const parsed = new URL(websiteUrl);
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("protocol");
+      } catch {
+        return { ok: false as const, error: "Enter a valid website URL starting with http:// or https://." };
+      }
+    }
+    const result = await supabase.from("profiles").update({ name: values.name.trim(), avatar_seed: values.avatarSeed.trim() || user.avatarSeed, bio: values.bio.trim(), website_url: websiteUrl }).eq("id", user.id);
     if (result.error) return failure(result.error, "Could not save your profile.");
     const refreshed = await refresh();
     window.dispatchEvent(new Event(AUTH_REFRESH_EVENT));

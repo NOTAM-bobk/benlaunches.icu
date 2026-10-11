@@ -3,6 +3,7 @@ create table if not exists public.profiles (
   name text not null default '',
   avatar_seed text not null default '',
   bio text not null default '',
+  website_url text not null default '',
   email_updates boolean not null default false,
   reduced_motion boolean not null default false,
   created_at timestamptz not null default now(),

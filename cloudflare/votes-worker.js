@@ -19,6 +19,7 @@
 const VOTE_PREFIX = "vote:";
 const SUBMISSION_PREFIX = "submission:";
 const REPORT_PREFIX = "report:";
+const PURCHASE_PREFIX = "purchase:";
 const USER_PREFIX = "user:";
 const EMAIL_PREFIX = "email:";
 const SESSION_PREFIX = "session:";
@@ -29,6 +30,7 @@ const SESSION_DAYS = 30;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const MAX_BODY_BYTES = 24 * 1024;
 const REVIEW_STATUSES = new Set(["pending", "approved", "rejected"]);
+const PURCHASE_STATUSES = new Set(["pending", "fulfilled", "refunded"]);
 
 function cors(env, request) {
   const allowed = (env.ALLOWED_ORIGIN || "*").split(",").map((value) => value.trim());
@@ -308,6 +310,20 @@ async function listSubmissions(env) {
   return submissions.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
 }
 
+async function listPurchases(env) {
+  const purchases = [];
+  let cursor;
+  do {
+    const page = await env.VOTES.list({ prefix: PURCHASE_PREFIX, cursor, limit: 1000 });
+    for (const key of page.keys) {
+      const purchase = await env.VOTES.get(key.name, "json");
+      if (purchase) purchases.push(purchase);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return purchases.sort((a, b) => String(b.paidAt ?? b.recordedAt ?? "").localeCompare(String(a.paidAt ?? a.recordedAt ?? "")));
+}
+
 async function profileSubmissions(env, ownerId, includePending) {
   const all = await listSubmissions(env);
   return all.filter((submission) => submission.ownerId === ownerId && (includePending || submission.status === "approved"))
@@ -355,6 +371,7 @@ export default {
           ok: true,
           adminConfigured: adminConfigured(env),
           submissions: (await env.VOTES.list({ prefix: SUBMISSION_PREFIX, limit: 1000 })).keys.length,
+          purchases: (await env.VOTES.list({ prefix: PURCHASE_PREFIX, limit: 1000 })).keys.length,
         },
         headers,
       );
@@ -542,6 +559,22 @@ export default {
       return json({ id, status: report.status }, headers, 201);
     }
 
+    if (pathname === "/payments/record" && request.method === "POST") {
+      const body = await readBody(request);
+      if (!body || !(await isAdmin(body, env))) return json({ error: "wrong password" }, headers, 401);
+      const purchase = body.purchase;
+      const orderId = str(purchase?.orderId, 80);
+      if (!orderId || purchase?.status !== "COMPLETED") return json({ error: "invalid purchase" }, headers, 400);
+      const record = {
+        status: "pending",
+        ...purchase,
+        orderId,
+        recordedAt: str(purchase.recordedAt, 40) || new Date().toISOString(),
+      };
+      await env.VOTES.put(PURCHASE_PREFIX + orderId, JSON.stringify(record));
+      return json({ ok: true, orderId }, headers);
+    }
+
     if ((pathname === "/admin/reports" || pathname === "/admin/report-review") && request.method === "POST") {
       const body = await readBody(request);
       if (!body) return json({ error: "invalid body" }, headers, 400);
@@ -568,6 +601,19 @@ export default {
       if (!raw) return json({ error: "not found" }, headers, 404);
       await env.VOTES.put(REPORT_PREFIX + id, JSON.stringify({ ...JSON.parse(raw), status, reviewedAt: new Date().toISOString() }));
       return json({ id, status }, headers);
+    }
+
+    if ((pathname === "/admin/purchases" || pathname === "/admin/purchase-review") && request.method === "POST") {
+      const body = await readBody(request);
+      if (!body || !(await isAdmin(body, env))) return json({ error: "wrong password" }, headers, 401);
+      if (pathname === "/admin/purchases") return json({ purchases: await listPurchases(env) }, headers);
+      const orderId = str(body.orderId, 80);
+      const status = str(body.status, 20);
+      if (!orderId || !PURCHASE_STATUSES.has(status)) return json({ error: "invalid purchase review" }, headers, 400);
+      const existing = await env.VOTES.get(PURCHASE_PREFIX + orderId, "json");
+      if (!existing) return json({ error: "not found" }, headers, 404);
+      await env.VOTES.put(PURCHASE_PREFIX + orderId, JSON.stringify({ ...existing, status, reviewedAt: new Date().toISOString() }));
+      return json({ orderId, status }, headers);
     }
 
     if ((pathname === "/admin/submissions" || pathname === "/admin/review") && request.method === "POST") {

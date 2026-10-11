@@ -150,6 +150,7 @@ function ProfileForm({ user }: { user: AuthUser }) {
     name: user.name,
     avatarSeed: user.avatarSeed,
     bio: user.bio ?? "",
+    websiteUrl: user.websiteUrl ?? "",
   });
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -242,6 +243,20 @@ function ProfileForm({ user }: { user: AuthUser }) {
         <span>{form.bio.length}/240 characters</span>
       </label>
 
+      <label className="account-field">
+        <span className="account-field-label">Your website</span>
+        <input
+          className="field"
+          type="url"
+          value={form.websiteUrl}
+          maxLength={300}
+          placeholder="https://yourwebsite.com"
+          autoComplete="url"
+          onChange={(event) => setForm((current) => ({ ...current, websiteUrl: event.target.value }))}
+        />
+        <span>This link appears on your public profile.</span>
+      </label>
+
       <div className="account-form-actions">
         <button className="btn accent" type="submit" disabled={busy}>
           {busy ? "Saving…" : "Save profile"}
@@ -294,6 +309,10 @@ function AccountOverview({ user }: { user: AuthUser }) {
         <div>
           <dt>Short bio</dt>
           <dd>{user.bio?.trim() || "No bio yet — add one above."}</dd>
+        </div>
+        <div>
+          <dt>Website</dt>
+          <dd>{user.websiteUrl ? <a href={user.websiteUrl} target="_blank" rel="noreferrer" className="accent-text underline break-all">{user.websiteUrl}</a> : "No website yet — add one above."}</dd>
         </div>
         <div>
           <dt>Account reference</dt>

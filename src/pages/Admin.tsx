@@ -3,12 +3,16 @@ import { SiteSeo } from "../components/SeoHead";
 import {
   fetchSubmissions,
   fetchSiteReports,
+  fetchPurchases,
   reviewSubmission,
   reviewSiteReport,
+  reviewPurchase,
   submissionsConnected,
   type SiteProblemReport,
   type Submission,
   type SubmissionStatus,
+  type Purchase,
+  type PurchaseStatus,
 } from "../lib/submissions";
 
 const FILTERS: Array<{ id: SubmissionStatus | "all"; label: string }> = [
@@ -179,6 +183,35 @@ function ReportCard({
   );
 }
 
+function PurchaseCard({ purchase, busy, onReview }: { purchase: Purchase; busy: boolean; onReview: (orderId: string, status: PurchaseStatus) => void }) {
+  return (
+    <article className="card p-5 flex flex-col gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-bold">{purchase.payer.name || "PayPal buyer"}</h2>
+            <span className="text-[10px] font-bold tracking-[0.14em] uppercase border px-2 py-0.5" style={{ borderColor: "var(--ink)", backgroundColor: purchase.status === "fulfilled" ? "var(--ink)" : "var(--accent)", color: purchase.status === "fulfilled" ? "var(--surface)" : "var(--on-accent)" }}>{purchase.status}</span>
+          </div>
+          <a className="accent-text underline break-all" href={`mailto:${purchase.payer.email}`}>{purchase.payer.email || "No email returned by PayPal"}</a>
+        </div>
+        <strong className="text-xl">{purchase.total} {purchase.currency}</strong>
+      </div>
+      <ul className="flex flex-col gap-1 text-[14px]">
+        {purchase.items.map((item, index) => <li key={`${item.name}-${index}`}><strong>{item.quantity}×</strong> {item.name} <span style={{ color: "var(--muted)" }}>({item.unitAmount} each)</span></li>)}
+      </ul>
+      <div className="flex flex-wrap gap-3 text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+        <span>Paid {new Date(purchase.paidAt || purchase.recordedAt).toLocaleString("en-US")}</span>
+        <span>Order {purchase.orderId}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 border-t pt-4" style={{ borderColor: "var(--rule)" }}>
+        <button type="button" className="btn" disabled={busy || purchase.status === "fulfilled"} onClick={() => onReview(purchase.orderId, "fulfilled")}>Mark fulfilled</button>
+        <button type="button" className="btn ghost" disabled={busy || purchase.status === "refunded"} onClick={() => onReview(purchase.orderId, "refunded")}>Mark refunded</button>
+        {purchase.amountMatchesItems ? <span className="text-[11px]" style={{ color: "var(--muted)" }}>PayPal amount matches services</span> : <span className="text-[11px]" style={{ color: "var(--accent)" }}>Check amount against services</span>}
+      </div>
+    </article>
+  );
+}
+
 export default function Admin() {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
@@ -186,13 +219,14 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [reports, setReports] = useState<SiteProblemReport[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [filter, setFilter] = useState<SubmissionStatus | "all">("pending");
 
   async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError(null);
-    const [result, reportResult] = await Promise.all([fetchSubmissions(password), fetchSiteReports(password)]);
+    const [result, reportResult, purchaseResult] = await Promise.all([fetchSubmissions(password), fetchSiteReports(password), fetchPurchases(password)]);
     setBusy(false);
     if (!result.ok) {
       setError(result.error === "wrong password" ? "Wrong password." : result.error);
@@ -200,6 +234,7 @@ export default function Admin() {
     }
     setSubmissions(result.value.submissions);
     if (reportResult.ok) setReports(reportResult.value.reports);
+    if (purchaseResult.ok) setPurchases(purchaseResult.value.purchases);
     setUnlocked(true);
   }
 
@@ -208,10 +243,11 @@ export default function Admin() {
     if (!unlocked) return;
     let active = true;
     const timer = setInterval(() => {
-      void Promise.all([fetchSubmissions(password), fetchSiteReports(password)]).then(([submissionResult, reportResult]) => {
+      void Promise.all([fetchSubmissions(password), fetchSiteReports(password), fetchPurchases(password)]).then(([submissionResult, reportResult, purchaseResult]) => {
         if (!active) return;
         if (submissionResult.ok) setSubmissions(submissionResult.value.submissions);
         if (reportResult.ok) setReports(reportResult.value.reports);
+        if (purchaseResult.ok) setPurchases(purchaseResult.value.purchases);
       });
     }, 30000);
     return () => {
@@ -221,9 +257,10 @@ export default function Admin() {
   }, [unlocked, password]);
 
   async function refresh(currentPassword: string) {
-    const [result, reportResult] = await Promise.all([fetchSubmissions(currentPassword), fetchSiteReports(currentPassword)]);
+    const [result, reportResult, purchaseResult] = await Promise.all([fetchSubmissions(currentPassword), fetchSiteReports(currentPassword), fetchPurchases(currentPassword)]);
     if (result.ok) setSubmissions(result.value.submissions);
     if (reportResult.ok) setReports(reportResult.value.reports);
+    if (purchaseResult.ok) setPurchases(purchaseResult.value.purchases);
   }
 
   async function review(id: string, status: SubmissionStatus) {
@@ -248,6 +285,17 @@ export default function Admin() {
       return;
     }
     setReports((current) => current.map((item) => (item.id === id ? { ...item, status } : item)));
+  }
+
+  async function reviewPayment(orderId: string, status: PurchaseStatus) {
+    setBusy(true);
+    const result = await reviewPurchase(password, orderId, status);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setPurchases((current) => current.map((purchase) => purchase.orderId === orderId ? { ...purchase, status } : purchase));
   }
 
   const visible =
@@ -339,6 +387,7 @@ export default function Admin() {
                     setPassword("");
                     setSubmissions([]);
                     setReports([]);
+                    setPurchases([]);
                   }}
                 >
                   Lock
@@ -368,6 +417,17 @@ export default function Admin() {
                 ))}
               </div>
             )}
+
+            <section className="flex flex-col gap-5 border-t pt-8" style={{ borderColor: "var(--rule)" }}>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">Payments</span>
+                  <h2 className="text-2xl font-bold">Purchases {purchases.length > 0 ? `(${purchases.filter((purchase) => purchase.status === "pending").length} to fulfill)` : ""}</h2>
+                </div>
+                <p className="text-[12px]" style={{ color: "var(--muted)" }}>PayPal buyers and the service they purchased.</p>
+              </div>
+              {purchases.length === 0 ? <p className="border p-6 text-center text-sm" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>No completed purchases recorded yet.</p> : <div className="flex flex-col gap-5">{purchases.map((purchase) => <PurchaseCard key={purchase.orderId} purchase={purchase} busy={busy} onReview={(orderId, status) => void reviewPayment(orderId, status)} />)}</div>}
+            </section>
 
             <section className="flex flex-col gap-5 border-t pt-8" style={{ borderColor: "var(--rule)" }}>
               <div className="flex flex-wrap items-end justify-between gap-3">

@@ -13,6 +13,7 @@ import {
   methodNotAllowed,
   ordersController,
   priceToCents,
+  recordCompletedPayment,
 } from "./_lib.js";
 
 /** Order ids look like "5O190127TN364715T"; anything else never reaches PayPal. */
@@ -82,7 +83,7 @@ export default async function handler(req, res) {
       );
     }
 
-    jsonResponse(res, 200, {
+    const purchase = {
       status: "COMPLETED",
       orderId: result.id ?? orderId,
       captureId: capture.id ?? "",
@@ -101,7 +102,13 @@ export default async function handler(req, res) {
         unitAmount: item?.unitAmount?.value ?? "",
       })),
       amountMatchesItems: amounts.verified,
-    });
+      recordedAt: new Date().toISOString(),
+    };
+    const queue = await recordCompletedPayment(purchase);
+    if (!queue.recorded) {
+      console.error(`[paypal] purchase ${purchase.orderId} was paid but not added to admin queue: ${queue.reason}`);
+    }
+    jsonResponse(res, 200, { ...purchase, purchaseRecorded: queue.recorded });
   } catch (error) {
     const reference = randomUUID().slice(0, 8);
     console.error(`[paypal] capture-order failed (${reference})`, describePayPalError(error));

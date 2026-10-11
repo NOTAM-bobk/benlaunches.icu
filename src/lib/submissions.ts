@@ -54,6 +54,21 @@ export interface SiteProblemReport extends SiteProblemReportDraft {
   reviewedAt?: string;
 }
 
+export type PurchaseStatus = "pending" | "fulfilled" | "refunded";
+export interface Purchase {
+  status: PurchaseStatus;
+  orderId: string;
+  captureId: string;
+  paidAt: string;
+  recordedAt: string;
+  reviewedAt?: string;
+  currency: string;
+  total: string;
+  payer: { name: string; email: string };
+  items: { name: string; quantity: number; unitAmount: string }[];
+  amountMatchesItems: boolean;
+}
+
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string; fields?: string[] };
 
 export interface SiteAutofill {
@@ -150,4 +165,16 @@ export async function reviewSiteReport(
   status: SubmissionStatus,
 ): Promise<Result<{ id: string; status: SubmissionStatus }>> {
   return post<{ id: string; status: SubmissionStatus }>("/admin/report-review", { password, id, status });
+}
+
+export async function fetchPurchases(password: string): Promise<Result<{ purchases: Purchase[] }>> {
+  return post<{ purchases: Purchase[] }>("/admin/purchases", { password });
+}
+
+export async function reviewPurchase(
+  password: string,
+  orderId: string,
+  status: PurchaseStatus,
+): Promise<Result<{ orderId: string; status: PurchaseStatus }>> {
+  return post<{ orderId: string; status: PurchaseStatus }>("/admin/purchase-review", { password, orderId, status });
 }
