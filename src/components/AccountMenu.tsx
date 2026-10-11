@@ -58,7 +58,7 @@ export function AccountMenu() {
 
   return (
     <div className="account" ref={rootRef}>
-      {user && <Link to="/profile#streak" className="header-streak" aria-label={`${user.streak.current} day sign-in streak`}><span aria-hidden="true">🔥</span><strong>{user.streak.current}</strong><small>day{user.streak.current === 1 ? "" : "s"}</small></Link>}
+      {user && <Link to="/profile#streak" className="header-streak" aria-label={`${user.streak.current} day sign-in streak`}><svg className="header-streak-flame" viewBox="0 0 32 36" aria-hidden="true"><path d="M16.6 2.5c.8 6.4-4.2 8.2-3.5 13.2-2.2-1.1-3.2-3.1-3-5.8C5.5 14.3 3.5 19 4.2 23.5 5.1 29.2 10 33 16 33s10.9-3.8 11.8-9.5c.8-5-2.2-10.7-7.8-15.7.5 4.1-1.1 6.8-3.4 8.6.7-4.8 1.4-8.8 0-13.9Z" /></svg><strong>{user.streak.current}d</strong></Link>}
       <button
         type="button"
         className="account-box"
