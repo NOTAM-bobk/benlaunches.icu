@@ -257,6 +257,7 @@ function AccountOverview({ user }: { user: AuthUser }) {
   const stats = [
     { label: "Saved websites", value: user.saved.length, to: "/saved" },
     { label: "Votes cast", value: user.voted.length, to: "/trending" },
+    { label: "Submitted sites", value: user.submitted.length, to: "/profile#submissions" },
     { label: "Email updates", value: user.settings.emailUpdates ? "On" : "Off", to: "/settings" },
   ];
 
@@ -338,6 +339,21 @@ function AccountShortcuts() {
   );
 }
 
+function SubmittedSites({ user }: { user: AuthUser }) {
+  return <section className="account-panel account-submissions" id="submissions">
+    <div className="account-panel-heading"><span className="account-settings-icon" aria-hidden="true">↗</span><div><h2>Your submitted sites</h2><p>Every URL you send is kept here. Approved sites also appear on your public profile.</p></div></div>
+    {user.submitted.length ? <ul className="submitted-site-list">{user.submitted.map((submission) => <li key={submission.id}><a href={submission.url} target="_blank" rel="noreferrer"><strong>{submission.name}</strong><span>{submission.url}</span></a><span className={`submission-status ${submission.status}`}>{submission.status}</span></li>)}</ul> : <p className="account-empty-state">You have not submitted a site yet. <Link to="/submit" className="accent-text underline">Submit one now</Link>.</p>}
+  </section>;
+}
+
+function StreakPanel({ user }: { user: AuthUser }) {
+  return <section className="account-panel streak-panel" id="streak">
+    <div className="streak-flame" aria-hidden="true">🔥</div>
+    <div className="streak-copy"><span className="account-eyebrow">Daily sign-in</span><h2>{user.streak.current} day streak</h2><p>Sign in every day to keep it going. Your best streak is {user.streak.longest} day{user.streak.longest === 1 ? "" : "s"}.</p></div>
+    <div className="streak-count"><strong>{user.streak.current}</strong><span>days</span></div>
+  </section>;
+}
+
 export function Profile() {
   const { user, loading } = useAuth();
   if (loading) return <AccountLoading title="Your account" path="/profile" />;
@@ -352,6 +368,8 @@ export function Profile() {
         <div className="account-stack">
           <ProfileForm user={user} />
           <AccountOverview user={user} />
+          <StreakPanel user={user} />
+          <SubmittedSites user={user} />
           <AccountShortcuts />
         </div>
       ) : (

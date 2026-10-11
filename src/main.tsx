@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
 import "./index.css";
+import "./stats-submissions.css";
+import "./streak.css";
 import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
 import Blog from "./pages/Blog.tsx";
@@ -26,6 +28,7 @@ import EmbedBadge from "./pages/EmbedBadge.tsx";
 import Checkout from "./pages/Checkout.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
+import Stats from "./pages/Stats.tsx";
 
 const router = createBrowserRouter([
   {
@@ -135,6 +138,10 @@ const router = createBrowserRouter([
       {
         path: "users/:id",
         element: <UserProfile />,
+      },
+      {
+        path: "stats",
+        element: <Stats />,
       },
     ],
   },
