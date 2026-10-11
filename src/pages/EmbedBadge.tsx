@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { BoostTraffic } from "../components/BoostTraffic";
+import { SiteSeo } from "../components/SeoHead";
 import { siteName } from "../lib/siteData";
 
 function safeHttpUrl(value: string | null): URL | null {
@@ -36,7 +37,9 @@ export default function EmbedBadge() {
   const label = isListed ? "As seen on" : "Submitted to";
 
   return (
-    <main className={standalone ? "embed-root embed-root-standalone" : "embed-root"}>
+    <>
+      <SiteSeo title="Embedded badge" description="Boring Internet featured-site badge." path="/embed" noindex />
+      <main className={standalone ? "embed-root embed-root-standalone" : "embed-root"}>
       <a
         href="https://www.benlaunches.icu/"
         target="_top"
@@ -60,6 +63,7 @@ export default function EmbedBadge() {
           </p>
         </div>
       )}
-    </main>
+      </main>
+    </>
   );
 }

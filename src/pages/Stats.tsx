@@ -13,7 +13,7 @@ export default function Stats() {
   const maxViews = useMemo(() => Math.max(1, ...(stats?.days ?? []).map((day) => day.views)), [stats]);
 
   return <>
-    <SiteSeo title="Directory stats" description="A transparent look at visits to Boring Internet." path="/stats" />
+    <SiteSeo title="Directory stats" description="A transparent look at visits to Boring Internet." path="/stats" noindex />
     <main className="stats-page mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
       <header className="stats-heading">
         <span className="account-eyebrow">Open numbers</span>

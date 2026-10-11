@@ -25,7 +25,8 @@ export interface SeoHeadProps {
 
 function canonicalFor(path: string | undefined, fallback: string): string {
   if (path === undefined) return fallback;
-  return `${siteUrl}${path === "/" ? "/" : path.replace(/\/+$/, "")}`;
+  const cleanPath = path === "/" ? "/" : path.replace(/\/+$/, "");
+  return `${siteUrl}${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
 }
 
 export function SeoHead({
@@ -43,7 +44,11 @@ export function SeoHead({
   const pageDescription = description ?? siteDescription;
   const url = canonicalFor(path, canonical ?? `${siteUrl}/`);
   const image = `${siteUrl}/og.png`;
-  const keywordList = keywords && keywords.length > 0 ? keywords : siteKeywords;
+  // Keep this useful for older SEO panels and avoid repeating noisy keywords.
+  const keywordList = [...new Set(keywords && keywords.length > 0 ? keywords : siteKeywords)]
+    .map((keyword) => keyword.trim())
+    .filter(Boolean)
+    .slice(0, 8);
 
   return (
     <>
@@ -64,6 +69,7 @@ export function SeoHead({
       <meta property="og:description" content={pageDescription} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image} />
+      <meta property="og:image:secure_url" content={image} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/png" />
@@ -76,6 +82,7 @@ export function SeoHead({
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={image} />
       <meta name="twitter:image:alt" content={`${siteName} — ${siteTagline}`} />
+      <meta name="twitter:domain" content="www.benlaunches.icu" />
 
       <link rel="icon" href="/favicon.ico" sizes="32x32" />
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

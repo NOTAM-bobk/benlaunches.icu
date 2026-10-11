@@ -86,6 +86,14 @@ Disallow: /admin
 Disallow: /admin/
 Disallow: /auth
 Disallow: /auth/
+Disallow: /checkout
+Disallow: /embed
+Disallow: /profile
+Disallow: /saved
+Disallow: /settings
+Disallow: /stats
+Disallow: /users
+Disallow: /site-tinder
 
 Sitemap: ${base}/sitemap.xml
 `;

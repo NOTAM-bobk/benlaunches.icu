@@ -3,33 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="application-name" content="Ben Launches" />
+    <meta name="author" content="Boring Internet" />
+    <meta name="theme-color" content="#1a120b" />
+    <meta name="apple-mobile-web-app-title" content="Boring Internet" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta
+      name="keywords"
+      content="bored button, website to website, discover websites, find websites, new and upcoming websites, website launches, launch new websites, launched sites directory"
+    />
+    <link rel="canonical" href="https://www.benlaunches.icu/" />
 
-    <!-- Browser tab, bookmarks, and installable-app icons -->
+    <!-- Browser tab, bookmarks, installable-app icons, and social previews. -->
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#1a120b" />
-    <meta name="apple-mobile-web-app-title" content="Boring Internet" />
-
-    <title>Boring Internet</title>
-
-    <!-- Defaults for crawlers that do not run JS; pages override these at runtime. -->
+    <title>Discover Websites, New Launches &amp; Bored Button — Boring Internet</title>
     <meta
       name="description"
-      content="A hand-checked directory of launched sites that load fast, respect your attention, and skip the growth tactics. Browse by category, see what is trending, and submit your own."
+      content="Discover interesting websites, new and upcoming launches, and a calm website-to-website bored button. Browse a hand-curated directory and submit your own site."
     />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Boring Internet" />
+    <meta property="og:title" content="Discover Websites, New Launches &amp; Bored Button — Boring Internet" />
+    <meta property="og:description" content="A hand-curated directory for discovering websites, new launches, and useful places to go when you are bored." />
+    <meta property="og:url" content="https://www.benlaunches.icu/" />
+    <meta property="og:image" content="https://www.benlaunches.icu/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Boring Internet — discover websites and new launches" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Discover Websites, New Launches &amp; Bored Button — Boring Internet" />
+    <meta name="twitter:description" content="A hand-curated directory for discovering websites, new launches, and useful places to go when you are bored." />
+    <meta name="twitter:image" content="https://www.benlaunches.icu/og.png" />
+    <meta name="twitter:image:alt" content="Boring Internet — discover websites and new launches" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Boring Internet",
+        "alternateName": "Ben Launches",
+        "url": "https://www.benlaunches.icu/",
+        "description": "A hand-curated directory for discovering websites, new launches, and useful places to go when you are bored.",
+        "inLanguage": "en",
+        "publisher": { "@type": "Organization", "name": "Boring Internet", "url": "https://www.benlaunches.icu/" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.benlaunches.icu/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <noscript>
-      <h1>Boring Internet</h1>
-      <p>
-        A quiet list of launched sites. JavaScript is off, so the directory cannot render — you can
-        still read the <a href="/sitemap.xml">sitemap</a> or the
-        <a href="/blog">blog</a>.
-      </p>
+      <main>
+        <h1>Discover websites, new launches, and a bored button</h1>
+        <p>Boring Internet is a hand-curated directory for finding interesting websites and moving website to website without an algorithmic feed.</p>
+        <h2>Explore the directory</h2>
+        <nav aria-label="Directory pages">
+          <ul>
+            <li><a href="/discover-websites">Discover websites</a> — jump from one useful site to the next.</li>
+            <li><a href="/new-websites">New and upcoming websites</a> — browse fresh website launches.</li>
+            <li><a href="/trending">Trending websites</a> — see what visitors are voting for.</li>
+            <li><a href="/collections">Curated website collections</a> — find sites by theme.</li>
+            <li><a href="/blog">Launch and curation blog</a> — read the editorial notes.</li>
+            <li><a href="/submit">Submit your website</a> — send in a launched site for review.</li>
+          </ul>
+        </nav>
+        <p>JavaScript is required for the interactive directory. The <a href="/sitemap.xml">XML sitemap</a> lists all public pages.</p>
+      </main>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
