@@ -42,11 +42,11 @@ checkout works locally when keys are present.
 - `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS` is passed through via compose
   `environment:` (platform-set; Vite >= 6.1 appends it to `allowedHosts`).
 
-## Leftover template file
+## Deleted template file
 
-`src/App.tsx` is the default Vite template component (imports `./assets/hero.png`
-which doesn't exist). It is **not imported** by `src/main.tsx` — the real entry
-point uses `src/components/AppShell.tsx`. The 500 on `/src/App.tsx` is harmless.
+`src/App.tsx` was the default Vite template component (imported `./assets/hero.png`
+which didn't exist). It was never imported by `src/main.tsx` — the real entry point
+uses `src/components/AppShell.tsx` — so it was deleted to clear Vite log errors.
 
 ## Package managers
 
