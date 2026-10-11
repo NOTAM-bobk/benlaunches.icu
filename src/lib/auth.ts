@@ -15,6 +15,7 @@ export interface AuthSettings {
 export const SETTINGS_KEYS: ReadonlyArray<keyof AuthSettings> = [
   "emailUpdates", "weeklyDigest", "newSiteAlerts", "reducedMotion", "publicProfile",
 ];
+const AUTH_REFRESH_EVENT = "bi:auth-refresh";
 
 export function normalizeSettings(raw: unknown): AuthSettings {
   const value = (raw ?? {}) as Partial<AuthSettings>;
@@ -223,7 +224,12 @@ export function useAuth() {
     void refresh();
     if (!supabase) return;
     const { data } = supabase.auth.onAuthStateChange(() => { void refresh(); });
-    return () => data.subscription.unsubscribe();
+    const onAuthRefresh = () => { void refresh(); };
+    window.addEventListener(AUTH_REFRESH_EVENT, onAuthRefresh);
+    return () => {
+      data.subscription.unsubscribe();
+      window.removeEventListener(AUTH_REFRESH_EVENT, onAuthRefresh);
+    };
   }, [refresh]);
 
   async function signIn(email: string, password: string) {
@@ -262,7 +268,9 @@ export function useAuth() {
     if (!supabase || !user) return { ok: false as const, error: "Sign in to edit your profile." };
     const result = await supabase.from("profiles").update({ name: values.name.trim(), avatar_seed: values.avatarSeed.trim() || user.avatarSeed, bio: values.bio.trim() }).eq("id", user.id);
     if (result.error) return failure(result.error, "Could not save your profile.");
-    return refresh();
+    const refreshed = await refresh();
+    window.dispatchEvent(new Event(AUTH_REFRESH_EVENT));
+    return refreshed;
   }
 
   async function updateSettings(settings: AuthSettings) {

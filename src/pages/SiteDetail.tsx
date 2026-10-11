@@ -74,6 +74,12 @@ export default function SiteDetail() {
     .filter((entry) => entry.slug !== site.slug)
     .slice(0, 6);
   const builderSites = neighbours;
+  const siteSlug = site.slug;
+  async function voteAndRefreshSupporters() {
+    await vote.vote();
+    const updated = await getSiteSupporters(siteSlug);
+    setSupporters(updated);
+  }
   const domain = siteDomain(site.url);
   const extras = Object.entries(site.extras ?? {}).sort(([left], [right]) => {
     const leftOrder = DETAIL_ORDER.indexOf(left);
@@ -272,7 +278,7 @@ export default function SiteDetail() {
           <button
             type="button"
             className={`site-detail-bar-vote${vote.voted ? " is-voted" : ""}`}
-            onClick={() => void vote.vote()}
+            onClick={() => void voteAndRefreshSupporters()}
             disabled={vote.voted || vote.pending}
             aria-label={
               vote.voted
