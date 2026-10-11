@@ -11,7 +11,7 @@ export default function Advertise() {
     <>
       <SiteSeo
         title="Advertise with Boring Internet"
-        description="Explore planned options for promoting a website or getting a verified mark on Boring Internet."
+        description="Ways to promote a website or get a verified mark on Boring Internet. Prices in USD, paid through PayPal."
         path="/advertise"
         keywords={["advertise with Boring Internet", "promote a website", "verified website listing"]}
         jsonLd={[
@@ -20,7 +20,7 @@ export default function Advertise() {
             "@type": "WebPage",
             name: "Advertise with Boring Internet",
             url: `${siteUrl}/advertise`,
-            description: "Planned options for promoting or verifying a website listing.",
+            description: "Ways to promote or verify a website listing, priced in USD.",
             inLanguage: "en",
           },
         ]}
@@ -43,9 +43,9 @@ export default function Advertise() {
         <div className="advertise-notice" role="status">
           <span className="advertise-notice-mark" aria-hidden="true">i</span>
           <p>
-            <strong>Planned pricing — not live yet.</strong> These are draft rates for the options
-            we are considering. Promotion, verification, and checkout are not available yet, and
-            this page will not collect payment.
+            <strong>Prices are live and paid through PayPal.</strong> Every option opens on a
+            secure checkout page, and nothing is charged until you approve it in PayPal. Sponsored
+            placements are always labeled as sponsored.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function Advertise() {
               Choose your kind of visibility
             </h2>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
-              Proposed pricing in USD. All sponsored placements will be disclosed.
+              Priced in USD. All sponsored placements are disclosed.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function Advertise() {
                   </ul>
                 )}
                 <div className="advertise-card-foot">
-                  <span className="advertise-coming-soon">Coming soon</span>
+                  <span className="advertise-coming-soon">Available now</span>
                   <Link to={`/services/${option.id}`} className="advertise-more">
                     More details <span aria-hidden="true">→</span>
                   </Link>

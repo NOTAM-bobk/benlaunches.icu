@@ -23,6 +23,8 @@ import Changelog from "./pages/Changelog.tsx";
 import ServiceDetail from "./pages/ServiceDetail.tsx";
 import { Privacy, Terms } from "./pages/Legal.tsx";
 import EmbedBadge from "./pages/EmbedBadge.tsx";
+import Checkout from "./pages/Checkout.tsx";
+import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
 
 const router = createBrowserRouter([
@@ -61,6 +63,14 @@ const router = createBrowserRouter([
       {
         path: "services/:id",
         element: <ServiceDetail />,
+      },
+      {
+        path: "checkout",
+        element: <Checkout />,
+      },
+      {
+        path: "checkout/success",
+        element: <CheckoutSuccess />,
       },
       {
         path: "changelog",

@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local secrets — never commit keys. `.env.example` is the template.
+.env
+.env.*
+!.env.example

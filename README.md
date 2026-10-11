@@ -1,13 +1,14 @@
 # Boring Internet
 
-A quiet directory of launched sites. Everything on the page comes out of one
-editable file, and the only server-side piece is a small Cloudflare Worker that
-counts trending votes.
+A quiet directory of launched sites. Everything on the page comes out of editable
+files in `config/`. There are two server-side pieces: a small Cloudflare Worker
+that counts trending votes, and three Vercel functions in `api/` that take card
+payments through PayPal (see [Payments](#payments-paypal-checkout)).
 
 ## Editing the site: the `config/` folder
 
-Everything on the site comes from six JSON files. Edit them and redeploy —
-there is no CMS and nothing is fetched at build time.
+Everything on the site comes from the JSON files in `config/`. Edit them and
+redeploy — there is no CMS and nothing is fetched at build time.
 
 | File | What it controls |
 | --- | --- |
@@ -18,6 +19,8 @@ there is no CMS and nothing is fetched at build time.
 | `config/explore.json` | Home page: featured picks, "Very Interesting," editor picks, row size, section limits, and collections |
 | `config/blog.json` | Posts with their full body (`blocks`: `p`, `h2`, `quote`, `ul`) |
 | `config/launches.json` | The "Launches this week" ticker heading; the sites themselves come from recent `launched` dates |
+| `config/services.json` | Every paid placement and one-off service: name, price, unit, copy, and the long-form page at `/services/<id>` |
+| `config/checkout.json` | Checkout copy: page headings, the payment promises, the contact block (`hello@base31.org` / `612 444 3853`), the "not switched on" wording, and the receipt text |
 
 **Show a launch** → set a site's `launched` date in `config/sites.json`. The
 home-page ticker automatically selects the newest sites launched in the last
@@ -53,10 +56,13 @@ and takes one vote for whichever is better; the winner gets the same vote the
 trending list counts and the next pair appears immediately. No config: the
 pairs are drawn from `config/sites.json`.
 
-**Advertise** → `/advertise` describes draft promoted-placement and verification
-prices. Checkout is not connected; the listed amounts are proposals and cannot
-be purchased yet. After submitting a site, the confirmation screen generates an
-iframe badge snippet that points to the standalone `/embed` route.
+**Advertise** → `/advertise` lists the promoted placements and one-off services,
+priced from `config/services.json`. Each one has its own page at
+`/services/<id>` with a **Buy now** button, which puts it in the basket and opens
+`/checkout`. Change a price in one place (`config/services.json`) and the cards,
+the service pages, the basket, and the amount charged all follow. After
+submitting a site, the confirmation screen generates an iframe badge snippet that
+points to the standalone `/embed` route.
 
 **Write a post** → append an object to `config/blog.json` with `slug`, `title`,
 `description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`
@@ -66,11 +72,54 @@ There is nothing to upload per site: each row tries the site's own
 `/favicon.ico`, then a keyless icon lookup for the domain, then falls back to a
 monogram tile built from the name.
 
+## Payments (PayPal checkout)
+
+`/checkout` is a clean single-column page: the basket, what it costs, the contact
+details, and one PayPal button. `/checkout/success` is the receipt.
+
+**The browser never decides a price.** It sends ids and quantities; the server
+looks each one up in `config/services.json`, works out the total, and creates the
+PayPal order itself.
+
+| Route | What it does |
+| --- | --- |
+| `GET /api/paypal/config` | Public client id and environment for the checkout page — never the secret |
+| `POST /api/paypal/create-order` | Prices the basket from config, then creates a PayPal order |
+| `POST /api/paypal/capture-order` | Captures the approved order, requires `COMPLETED`, and reports what was paid |
+
+Both POST routes are same-origin only and answer `503 checkout_offline` (rather
+than failing) while the keys below are missing, and the checkout page shows a
+"not switched on yet" panel with the contact details instead of a pay button.
+
+### Setup
+
+1. Create a PayPal app at <https://developer.paypal.com/dashboard/applications>
+   (there is a Sandbox tab and a Live tab, each with its own pair of keys).
+2. Set these in **Vercel → Project → Settings → Environment Variables**, then
+   **redeploy** — environment variables only apply to new deployments:
+
+   | Name | Value |
+   | --- | --- |
+   | `PAYPAL_CLIENT_ID` | from your PayPal app |
+   | `PAYPAL_CLIENT_SECRET` | from your PayPal app (server-only) |
+   | `PAYPAL_ENV` | `sandbox` (default) or `production` |
+   | `PAYPAL_CURRENCY` | optional, defaults to `USD` |
+
+3. For local development, `cp .env.example .env.local` and paste the sandbox
+   keys in. `bun run dev` mounts the same three handlers at the same paths, so
+   the checkout page works locally instead of falling back to the offline panel.
+   `.env` and `.env.local` are gitignored; never prefix these with `VITE_`, or
+   Vite would inline them into the browser bundle.
+
+Two things worth knowing: a price written as `/ week` is **charged once** for a
+seven-day run (nothing recurs), and `vercel.json` keeps `/api` out of the
+single-page catch-all rewrite, so the functions are reachable.
+
 ## Scripts
 
 | Command | What it does |
 | --- | --- |
-| `bun run dev` | Vite dev server |
+| `bun run dev` | Vite dev server, with the `api/` payment handlers mounted |
 | `bun run build` | Typecheck and build to `dist/` |
 | `bun run icons` | Regenerate the icon set (see below) |
 | `bun run sitemap` | Regenerate `public/sitemap.xml` and `public/robots.txt` from `config/` |

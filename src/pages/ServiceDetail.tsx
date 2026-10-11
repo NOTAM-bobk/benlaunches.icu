@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router";
+import { AddToCartButton, BuyNowButton } from "../components/BuyButtons";
 import { SiteSeo } from "../components/SeoHead";
 import { serviceById, serviceConfig, siteName, siteUrl } from "../lib/siteData";
 
@@ -75,8 +76,8 @@ export default function ServiceDetail() {
 
         <p className="service-notice" role="status">
           <span aria-hidden="true">i</span>
-          Planned option — not on sale yet. Nothing here takes payment; this page describes what
-          it would include.
+          Paid through PayPal on a secure checkout page — nothing is charged until you approve it
+          there. A person follows up by email within a working day.
         </p>
 
         <section className="service-block" aria-labelledby="service-includes">
@@ -106,11 +107,10 @@ export default function ServiceDetail() {
         </section>
 
         <div className="service-actions">
-          <Link to="/submit" className="btn accent">
-            Submit your site <span aria-hidden="true">→</span>
-          </Link>
-          <Link to="/advertise" className="btn ghost">
-            All options and prices
+          <BuyNowButton id={service.id} />
+          <AddToCartButton id={service.id} />
+          <Link to="/submit" className="btn ghost">
+            Submit your site first
           </Link>
         </div>
 

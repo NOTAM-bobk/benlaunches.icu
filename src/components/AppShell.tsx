@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigationType } from "react-router";
 import { AccountMenu } from "./AccountMenu";
+import { CartLink } from "./CartLink";
 import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SideNav } from "./SideNav";
@@ -188,6 +189,7 @@ export function AppShell() {
           </nav>
 
           <div className="justify-self-end flex items-center gap-2">
+            <CartLink />
             <AccountMenu />
             <HamburgerButton open={navOpen} onClick={() => setNavOpen((open) => !open)} />
           </div>

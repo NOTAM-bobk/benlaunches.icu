@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { FeatureBadges } from "./FeatureBadges";
-import { appVersion } from "../lib/siteData";
+import { appVersion, siteLinks } from "../lib/siteData";
 
 /** Link columns, kept apart from the markup so the footer stays readable. */
 const DIRECTORY_LINKS: { to: string; label: string }[] = [
@@ -21,7 +21,7 @@ const LEGAL_LINKS: { to: string; label: string }[] = [
 ];
 
 const CONNECT_LINKS: { href: string; label: string }[] = [
-  { href: "mailto:hello@boringinternet.example", label: "Contact" },
+  { href: siteLinks.contact ?? "mailto:hello@base31.org", label: "Contact" },
   { href: "https://github.com/NOTAM-bobk/boringinternet.org", label: "GitHub" },
 ];
 

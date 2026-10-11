@@ -175,13 +175,14 @@ const TERMS: LegalSection[] = [
     body: (
       <>
         <p>
-          The placements and services on the <Link to="/advertise">advertise page</Link> are draft
-          pricing and are not on sale yet. Nothing there can be bought, and that page never asks
-          for payment.
+          The placements and services on the <Link to="/advertise">advertise page</Link> can be
+          bought on the <Link to="/checkout">checkout page</Link>. Payment is taken by PayPal, so
+          your card and bank details never reach this site. Prices are in US dollars and are
+          charged once, even for the options that run for a week.
         </p>
         <p>
-          When paid placements do go live, they will always be labelled as paid, and paying will
-          never be required to be listed or reviewed.
+          Paid placements are always labelled as paid, and paying is never required to be listed
+          or reviewed. If an order goes wrong, email us and we will sort it out.
         </p>
       </>
     ),

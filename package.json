@@ -25,6 +25,8 @@
   },
   "type": "module",
   "dependencies": {
+    "@paypal/paypal-server-sdk": "^2.5.0",
+    "@paypal/react-paypal-js": "^10.6.0",
     "@supabase/supabase-js": "^2.117.3",
     "react": "^19",
     "react-dom": "^19",
