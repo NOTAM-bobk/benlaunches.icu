@@ -30,6 +30,7 @@ import Checkout from "./pages/Checkout.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
 import Stats from "./pages/Stats.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const router = createBrowserRouter([
   {
@@ -143,6 +144,10 @@ const router = createBrowserRouter([
       {
         path: "stats",
         element: <Stats />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

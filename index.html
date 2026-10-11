@@ -13,24 +13,114 @@
     <meta name="theme-color" content="#1a120b" />
     <meta name="apple-mobile-web-app-title" content="Boring Internet" />
 
-    <title>Boring Internet</title>
+    <title>Discover Cool Sites &amp; New Launches — Boring Internet</title>
 
     <!-- Defaults for crawlers that do not run JS; pages override these at runtime. -->
     <meta
       name="description"
       content="A hand-checked directory of launched sites that load fast, respect your attention, and skip the growth tactics. Browse by category, see what is trending, and submit your own."
     />
+    <style>
+      /* Styles the static fallback below so the pre-JavaScript flash stays on brand. */
+      .seo-fallback {
+        background: #1a120b;
+        color: #f3ede3;
+        font-family: Georgia, "Times New Roman", serif;
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 3.5rem 1.5rem;
+        line-height: 1.65;
+      }
+      .seo-fallback a {
+        color: #e8b664;
+      }
+      .seo-fallback h1 {
+        font-size: 1.9rem;
+        line-height: 1.25;
+        margin: 0 0 1.25rem;
+      }
+      .seo-fallback p {
+        margin: 0 0 1rem;
+      }
+      .seo-fallback ul {
+        margin: 0 0 1rem;
+        padding-left: 1.2rem;
+      }
+      .seo-fallback li {
+        margin: 0.3rem 0;
+      }
+      .seo-fallback .seo-fallback-links {
+        border-top: 1px solid #4a3a2c;
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+        font-size: 0.95rem;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <noscript>
-      <h1>Boring Internet</h1>
-      <p>
-        A quiet list of launched sites. JavaScript is off, so the directory cannot render — you can
-        still read the <a href="/sitemap.xml">sitemap</a> or the
-        <a href="/blog">blog</a>.
-      </p>
-    </noscript>
+    <div id="root">
+      <!--
+        Static fallback shown to crawlers and visitors before JavaScript runs.
+        React replaces this content with the app on mount.
+      -->
+      <main class="seo-fallback">
+        <h1>Boring Internet — a hand-checked directory of launched websites</h1>
+        <p>
+          Boring Internet is a small, hand-curated directory of websites that have already
+          launched. Every listing is checked by a person before it goes live: the site loads
+          fast, works without forcing you through a waitlist or a sign-up wall, and skips the
+          pop-ups, newsletter traps and growth tactics that make the modern web feel like a
+          maze. What you get is a quiet list of real places you can open, use and judge for
+          yourself right now.
+        </p>
+        <p>
+          The directory is built for people who are bored of scrolling the same handful of
+          feeds and want to find interesting websites again. Whether you are hunting for a
+          genuinely useful tool, killing five minutes with something new, looking for a
+          website-to-website rabbit hole, or collecting inspiration for a project of your
+          own, the list gives you something worth opening without asking for your email
+          address first.
+        </p>
+        <p>There are three ways to browse:</p>
+        <ul>
+          <li>
+            Start from the homepage, where new and upcoming launches sit next to featured
+            picks and editors’ choices, with a live view of what is trending.
+          </li>
+          <li>
+            Filter by category — tools, games, blogs, art, music, learning and more — to
+            narrow the directory down to what you actually want.
+          </li>
+          <li>
+            Press the bored button and jump from website to website, one random hand-checked
+            site at a time, until something catches your attention.
+          </li>
+        </ul>
+        <p>
+          If you have launched something yourself, you can submit your site to the directory.
+          Submissions are reviewed by hand, and accepted sites get a permanent page with a
+          description, a category and a vote count from readers. There is no fee to be listed,
+          and once your site is in you can add a featured-on badge to your own pages.
+        </p>
+        <p>
+          The whole thing is kept deliberately small. Pages load in milliseconds, nothing
+          requires an account to browse, and the blog is written by the person who edits the
+          list. A public changelog records every meaningful change to the site.
+        </p>
+        <div class="seo-fallback-links">
+          <p>
+            <a href="/">Browse the directory</a> · <a href="/blog">Read the blog</a> ·
+            <a href="/submit">Submit your site</a> ·
+            <a href="mailto:hello@base31.org">Contact</a> ·
+            <a href="https://github.com/NOTAM-bobk/boringinternet.org" rel="noopener">GitHub</a>
+          </p>
+          <p>
+            <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of service</a> ·
+            <a href="/sitemap.xml">Sitemap</a>
+          </p>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

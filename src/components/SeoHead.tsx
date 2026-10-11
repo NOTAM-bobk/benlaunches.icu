@@ -2,6 +2,7 @@ import {
   siteAuthor,
   siteDescription,
   siteKeywords,
+  siteLinks,
   siteName,
   siteTagline,
   siteUrl,
@@ -132,7 +133,12 @@ function websiteJsonLd(): JsonLd {
     url: `${siteUrl}/`,
     description: siteDescription,
     inLanguage: "en",
-    publisher: { "@type": "Organization", name: siteName, url: `${siteUrl}/` },
+    publisher: {
+      "@type": "Organization",
+      name: siteName,
+      url: `${siteUrl}/`,
+      ...(siteLinks.github ? { sameAs: [siteLinks.github] } : {}),
+    },
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -222,7 +228,7 @@ export function HomepageSeo({
 
   return (
     <SeoHead
-      title={siteName}
+      title="Discover Cool Sites & New Launches"
       description={description}
       path="/"
       keywords={keywords}
