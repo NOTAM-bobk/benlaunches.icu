@@ -1866,75 +1866,129 @@ mark.hl {
   }
 }
 
-/* ---------- "featured on" badge carousel (footer) ---------- */
+/* ---------- reference-inspired footer + infinite featured-on strip ---------- */
 
-.footer-badges {
+.footer-inner {
+  max-width: 76rem;
+  margin-inline: auto;
+}
+
+.footer-intro {
+  max-width: 34rem;
+}
+
+.footer-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem 1.5rem;
+}
+
+.footer-link-group .nav-link {
+  display: inline-block;
+  padding-block: 0.18rem;
+  font-size: 1rem;
+}
+
+.footer-link-group ul {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.45rem;
+}
+
+.footer-badges {
+  width: calc(100% + 2.5rem);
+  margin-inline: -1.25rem;
+  padding: 2rem 0 2.15rem;
+  overflow: hidden;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
 }
 
 .footer-badges-label {
-  font-size: 0.66rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-/* All slides share one grid cell, so the strip is as tall as its tallest badge. */
 .badge-viewport {
-  display: grid;
   width: 100%;
-  max-width: 15.25rem;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.badge-marquee {
+  display: flex;
+  width: max-content;
+  animation: footer-badge-scroll 30s linear infinite;
+}
+
+.badge-marquee-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-right: 1rem;
 }
 
 .badge-slide {
-  grid-area: 1 / 1;
-  justify-self: start;
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
-  transition: opacity 0.45s ease, transform 0.45s ease;
+  display: block;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.badge-slide-active {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
+.badge-slide:hover,
+.badge-slide:focus-visible {
+  border-color: var(--ink);
+  transform: translateY(-2px);
 }
 
 .badge-slide img {
   display: block;
-  max-width: 100%;
-  height: auto;
+  width: auto;
+  max-width: min(15rem, 62vw);
+  height: 3.15rem;
+  object-fit: contain;
 }
 
-.carousel-dots {
-  display: flex;
+.badge-viewport:hover .badge-marquee,
+.badge-viewport:focus-within .badge-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes footer-badge-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 0.5rem)); }
+}
+
+.footer-meta {
   align-items: center;
-  gap: 0.4rem;
+  text-align: center;
 }
 
-.carousel-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  padding: 0;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: #fff;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+.footer-meta-row {
+  justify-content: center;
 }
 
-.carousel-dot:hover {
-  background: var(--accent-soft);
+.footer-meta-row > div {
+  justify-content: center;
 }
 
-.carousel-dot-active {
-  background: var(--accent);
-  transform: scale(1.2);
+@media (min-width: 640px) {
+  .footer-badges {
+    width: calc(100% + 4rem);
+    margin-inline: -2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-link-grid {
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 3rem;
+  }
 }
 
 /* ---------- small screens ---------- */
@@ -1946,8 +2000,11 @@ mark.hl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .badge-slide,
-  .carousel-dot {
+  .badge-marquee {
+    animation-play-state: paused;
+  }
+
+  .badge-slide {
     transition: none;
   }
 }
