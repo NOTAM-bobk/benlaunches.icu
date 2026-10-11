@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
@@ -5,7 +6,7 @@ import { ShareSite } from "../components/ShareSite";
 import { SiteIcon } from "../components/SiteIcon";
 import { VerifiedStamp } from "../components/VerifiedStamp";
 import { SiteSeo } from "../components/SeoHead";
-import { useAuth } from "../lib/auth";
+import { avatarUrl, getSiteSupporters, useAuth, type SiteSupporter } from "../lib/auth";
 import { screenshotUrl } from "../lib/shots";
 import { useSiteVote } from "../lib/votes";
 import {
@@ -42,6 +43,16 @@ export default function SiteDetail() {
   const { user, toggleSaved } = useAuth();
   const site = siteBySlug(slug);
   const vote = useSiteVote(slug, site?.trending ?? 0);
+  const [supporters, setSupporters] = useState<SiteSupporter[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    if (!site) return () => { active = false; };
+    void getSiteSupporters(site.slug).then((value) => {
+      if (active) setSupporters(value);
+    });
+    return () => { active = false; };
+  }, [site?.slug]);
 
   if (!site) {
     return (
@@ -62,6 +73,7 @@ export default function SiteDetail() {
   const neighbours = sitesByCategory(site.category)
     .filter((entry) => entry.slug !== site.slug)
     .slice(0, 6);
+  const builderSites = neighbours;
   const domain = siteDomain(site.url);
   const extras = Object.entries(site.extras ?? {}).sort(([left], [right]) => {
     const leftOrder = DETAIL_ORDER.indexOf(left);
@@ -182,6 +194,11 @@ export default function SiteDetail() {
             <div><span>Rank</span><strong>{rank > 0 ? `#${rank} of ${sites.length}` : "—"}</strong></div>
           </section>
 
+          <section className="site-detail-section site-supporters-section" aria-labelledby="supporters-heading">
+            <div className="site-detail-section-heading"><div><span className="site-detail-kicker">The people behind the signal</span><h2 id="supporters-heading">Supporters</h2></div><span className="site-supporters-count">{supporters.length}</span></div>
+            {supporters.length > 0 ? <ul className="site-supporters-list">{supporters.map((supporter) => <li key={supporter.id}><Link to={`/users/${supporter.id}`} className="site-supporter"><img src={avatarUrl(supporter.avatarSeed)} alt="" width="34" height="34" loading="lazy" /><span>{supporter.name}</span></Link></li>)}</ul> : <p className="site-supporters-empty">Be the first person to support {site.name}.</p>}
+          </section>
+
           {details.length > 0 && (
             <section className="site-detail-section">
               <h2>Details</h2>
@@ -212,11 +229,11 @@ export default function SiteDetail() {
             </section>
           )}
 
-          {neighbours.length > 0 && (
+          {builderSites.length > 0 && (
             <section className="site-detail-section">
-              <h2>More in {categoryLabel(site.category)}</h2>
+              <div className="site-detail-section-heading"><div><span className="site-detail-kicker">Keep exploring</span><h2>More from this builder</h2></div><span className="site-supporters-count">{builderSites.length}</span></div>
               <ul className="site-detail-related-grid">
-                {neighbours.map((entry) => (
+                {builderSites.map((entry) => (
                   <li key={entry.id}>
                     <Link to={`/sites/${entry.slug}`} className="site-detail-related-card">
                       <SiteIcon site={entry} size={36} label={false} />

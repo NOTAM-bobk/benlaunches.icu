@@ -50,6 +50,12 @@ export interface PublicProfile {
   submitted: ProfileSubmission[];
 }
 
+export interface SiteSupporter {
+  id: string;
+  name: string;
+  avatarSeed: string;
+}
+
 export type AuthResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 type ProfileRow = {
@@ -99,6 +105,24 @@ export async function searchPublicProfiles(query = ""): Promise<AuthResult<{ pro
     return { ...publicProfile(profile, saved, voted), submitted: await fetchProfileSubmissions(profile.id) };
   }));
   return { ok: true, value: { profiles: expanded } };
+}
+
+export async function getSiteSupporters(slug: string): Promise<SiteSupporter[]> {
+  if (!supabase || !slug) return [];
+  const { data: votes } = await supabase
+    .from("user_votes")
+    .select("user_id, created_at")
+    .eq("slug", slug)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const ids = [...new Set((votes ?? []).map((vote) => vote.user_id).filter((id): id is string => Boolean(id)))];
+  if (!ids.length) return [];
+  const { data: profiles } = await supabase.from("profiles").select("id,name,avatar_seed").in("id", ids);
+  const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  return ids.map((id) => {
+    const profile = byId.get(id);
+    return { id, name: profile?.name || "Boring Internet supporter", avatarSeed: profile?.avatar_seed || id.slice(0, 8) };
+  });
 }
 
 export async function getPublicProfile(id: string): Promise<AuthResult<{ profile: PublicProfile }>> {

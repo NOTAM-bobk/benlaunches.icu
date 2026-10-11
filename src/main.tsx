@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router";
 import "./index.css";
 import "./stats-submissions.css";
 import "./streak.css";
+import "./site-supporters.css";
 import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
 import Blog from "./pages/Blog.tsx";
