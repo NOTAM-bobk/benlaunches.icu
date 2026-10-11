@@ -58,6 +58,7 @@ export function AccountMenu() {
 
   return (
     <div className="account" ref={rootRef}>
+      {user && <Link to="/profile#streak" className="header-streak" aria-label={`${user.streak.current} day sign-in streak`}><span aria-hidden="true">🔥</span><strong>{user.streak.current}</strong><small>day{user.streak.current === 1 ? "" : "s"}</small></Link>}
       <button
         type="button"
         className="account-box"

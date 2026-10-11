@@ -346,6 +346,14 @@ function SubmittedSites({ user }: { user: AuthUser }) {
   </section>;
 }
 
+function StreakPanel({ user }: { user: AuthUser }) {
+  return <section className="account-panel streak-panel" id="streak">
+    <div className="streak-flame" aria-hidden="true">🔥</div>
+    <div className="streak-copy"><span className="account-eyebrow">Daily sign-in</span><h2>{user.streak.current} day streak</h2><p>Sign in every day to keep it going. Your best streak is {user.streak.longest} day{user.streak.longest === 1 ? "" : "s"}.</p></div>
+    <div className="streak-count"><strong>{user.streak.current}</strong><span>days</span></div>
+  </section>;
+}
+
 export function Profile() {
   const { user, loading } = useAuth();
   if (loading) return <AccountLoading title="Your account" path="/profile" />;
@@ -360,6 +368,7 @@ export function Profile() {
         <div className="account-stack">
           <ProfileForm user={user} />
           <AccountOverview user={user} />
+          <StreakPanel user={user} />
           <SubmittedSites user={user} />
           <AccountShortcuts />
         </div>

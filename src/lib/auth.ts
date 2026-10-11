@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { setReducedMotionPreference } from "./motion";
 import { supabase, supabaseConnected } from "./supabase";
 import { fetchProfileSubmissions, type ProfileSubmission } from "./submitted";
+import { recordDailySignIn, type SignInStreak } from "./streaks";
 
 export interface AuthSettings {
   emailUpdates: boolean;
@@ -36,6 +37,7 @@ export interface AuthUser {
   saved: string[];
   voted: string[];
   submitted: ProfileSubmission[];
+  streak: SignInStreak;
 }
 
 export interface PublicProfile {
@@ -142,6 +144,10 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
     supabase.from("user_votes").select("slug").eq("user_id", authUser.id),
   ]);
   if (savedError || votedError) return failure(savedError ?? votedError, "Could not load your saved sites.");
+  const [submitted, streak] = await Promise.all([
+    fetchProfileSubmissions(authUser.id, true),
+    recordDailySignIn(authUser.id),
+  ]);
 
   return {
     ok: true,
@@ -161,7 +167,8 @@ async function getCurrentUser(): Promise<AuthResult<{ user: AuthUser }>> {
         }),
         saved: (saved ?? []).map((row) => row.slug),
         voted: (voted ?? []).map((row) => row.slug),
-        submitted: await fetchProfileSubmissions(authUser.id, true),
+        submitted,
+        streak,
       },
     },
   };

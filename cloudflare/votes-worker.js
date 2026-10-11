@@ -24,6 +24,7 @@ const EMAIL_PREFIX = "email:";
 const SESSION_PREFIX = "session:";
 const SESSION_COOKIE = "bi_session";
 const ANALYTICS_PREFIX = "analytics:";
+const STREAK_PREFIX = "streak:";
 const SESSION_DAYS = 30;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const MAX_BODY_BYTES = 24 * 1024;
@@ -85,6 +86,7 @@ async function digest(value) {
 function userKey(id) { return USER_PREFIX + id; }
 function emailKey(email) { return EMAIL_PREFIX + email.toLowerCase().trim(); }
 function sessionKey(token) { return SESSION_PREFIX + token; }
+function streakKey(userId) { return STREAK_PREFIX + userId; }
 function analyticsDay(date = new Date()) { return date.toISOString().slice(0, 10); }
 function analyticsPath(path) {
   const value = str(path, 160);
@@ -427,6 +429,22 @@ export default {
     if (pathname === "/auth/me" && request.method === "GET") {
       const user = await currentUser(request, env);
       return user ? json({ user: publicUser(user) }, headers) : json({ error: "Not signed in." }, headers, 401);
+    }
+
+    if (pathname === "/auth/streak" && request.method === "POST") {
+      const body = await readBody(request);
+      const userId = str(body?.userId, 100);
+      if (!userId) return json({ error: "A user ID is required." }, headers, 400);
+      const today = analyticsDay();
+      const key = streakKey(userId);
+      const previous = await env.VOTES.get(key, "json") || { current: 0, longest: 0, lastDate: "" };
+      if (previous.lastDate === today) return json({ streak: previous }, headers);
+      const yesterday = new Date(`${today}T00:00:00.000Z`);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+      const current = previous.lastDate === analyticsDay(yesterday) ? Number(previous.current) + 1 : 1;
+      const streak = { current, longest: Math.max(Number(previous.longest) || 0, current), lastDate: today };
+      await env.VOTES.put(key, JSON.stringify(streak));
+      return json({ streak }, headers);
     }
 
     if (pathname === "/auth/signout" && request.method === "POST") {
