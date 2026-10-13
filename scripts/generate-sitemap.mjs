@@ -15,6 +15,7 @@ const read = (file) => JSON.parse(readFileSync(join(ROOT, "config", file), "utf8
 const site = read("site.json");
 const posts = read("blog.json").posts ?? [];
 const collections = read("explore.json").collections ?? [];
+const sites = read("sites.json").sites ?? [];
 const base = String(site.url ?? "https://example.com").replace(/\/+$/, "");
 
 /** Pages that always exist. */
@@ -39,7 +40,15 @@ const collectionPages = collections.map((collection) => ({
   changefreq: "monthly",
 }));
 
-const urls = [...staticPages, ...collectionPages, ...postPages];
+/* Every listing gets its own generated page, so every slug belongs here. */
+const sitePages = sites.map((entry) => ({
+  path: `/sites/${entry.slug}`,
+  priority: "0.6",
+  changefreq: "monthly",
+  lastmod: entry.launched,
+}));
+
+const urls = [...staticPages, ...collectionPages, ...postPages, ...sitePages];
 const today = new Date().toISOString().slice(0, 10);
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>

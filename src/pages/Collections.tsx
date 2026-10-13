@@ -1,20 +1,22 @@
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { collectionSites, collections, siteName } from "../lib/siteData";
+import { siteName } from "../lib/siteData";
+import { useDirectory } from "../lib/siteDirectory";
 
 /** Index of every curated collection, each linking to its own page. */
 export default function Collections() {
-  const grouped = collections.map((collection) => ({
+  const directory = useDirectory();
+  const grouped = directory.collections.map((collection) => ({
     collection,
-    members: collectionSites(collection),
+    members: directory.collectionMembers(collection),
   }));
 
   return (
     <>
       <SiteSeo
         title="Collections"
-        description={`Hand-picked groups of sites from ${siteName} — ${collections.length} collections, each on its own page with every link.`}
+        description={`Hand-picked groups of sites from ${siteName} — ${directory.collections.length} collections, each on its own page with every link.`}
         path="/collections"
         keywords={["site collections", "curated lists", "reading lists"]}
       />

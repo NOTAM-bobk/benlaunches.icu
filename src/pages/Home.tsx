@@ -3,26 +3,8 @@ import { Link, useSearchParams } from "react-router";
 import { Highlight } from "../components/Highlight";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import {
-  categories,
-  categoryById,
-  categoryFilters,
-  categoryLabel,
-  collectionSites,
-  collections,
-  exploreConfig,
-  featuredSiteRows,
-  featuredSites,
-  newAdditions,
-  searchSites,
-  siteDescription,
-  siteName,
-  sites,
-  sitesByCategory,
-  trendingSites,
-  type Site,
-  type SiteCollection,
-} from "../lib/siteData";
+import { exploreConfig, siteDescription, siteName, type Site, type SiteCollection } from "../lib/siteData";
+import { useDirectory } from "../lib/siteDirectory";
 import { formatDate, posts } from "../lib/posts";
 import { siteDomain, siteTileStyle } from "../lib/siteTile";
 import { screenshotUrl } from "../lib/shots";
@@ -266,7 +248,8 @@ function CollectionCard({
   saved: boolean;
   onToggle: () => void;
 }) {
-  const members = collectionSites(collection);
+  const directory = useDirectory();
+  const members = directory.collectionMembers(collection);
 
   return (
     <article className="collection-card">
@@ -362,15 +345,24 @@ function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
             {formatDate(site.launched)}
           </span>
         )}
-        <a
-          href={site.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex text-[11px] font-bold tracking-wider uppercase border px-3 py-1 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
-          style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
-        >
-          Visit site <span aria-hidden="true">→</span>
-        </a>
+        <span className="flex items-center gap-2">
+          <Link
+            to={`/sites/${site.slug}`}
+            className="text-[11px] font-bold tracking-wider uppercase underline underline-offset-4"
+            style={{ color: "var(--muted)" }}
+          >
+            Details
+          </Link>
+          <a
+            href={site.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex text-[11px] font-bold tracking-wider uppercase border px-3 py-1 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+            style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
+          >
+            Visit site <span aria-hidden="true">→</span>
+          </a>
+        </span>
       </div>
     </article>
   );
@@ -409,10 +401,13 @@ function useSavedCollections(): [string[], (id: string) => void] {
 
 /** The top of the page: what this is, how big the list is, and where to start. */
 function Hero() {
+  const directory = useDirectory();
+  const used = directory.categoriesInUse();
+  const newest = directory.newest(1)[0];
   const stats = [
-    { value: sites.length, label: "sites listed" },
-    { value: categories.length, label: "categories" },
-    { value: collections.length, label: "collections" },
+    { value: directory.sites.length, label: "sites listed" },
+    { value: used.length, label: "categories" },
+    { value: directory.collections.length, label: "collections" },
   ];
 
   return (
@@ -426,6 +421,25 @@ function Hero() {
           A <span className="hero-em">quiet</span> corner of the web, kept small on purpose.
         </h1>
         <p className="hero-lede">{siteDescription}</p>
+        {newest && (
+          <p className="hero-live">
+            <span className="hero-blip" aria-hidden="true" />
+            Newest on the list:{" "}
+            <Link
+              to={`/sites/${newest.slug}`}
+              className="font-bold accent-text underline underline-offset-4"
+            >
+              {newest.name}
+            </Link>
+            {newest.launched && <span className="hero-live-date"> · {formatDate(newest.launched)}</span>}
+            {directory.submittedCount > 0 && (
+              <span className="hero-live-date">
+                {" "}
+                · {directory.submittedCount} accepted from the submit form
+              </span>
+            )}
+          </p>
+        )}
         <div className="hero-actions">
           <a href="#all-sites" className="btn accent">
             Browse the list
@@ -462,32 +476,40 @@ function Hero() {
 export default function Home() {
   // ?q= and ?category= keep the side navigation and this page in sync.
   const [params, setParams] = useSearchParams();
+  const directory = useDirectory();
   const query = params.get("q") ?? "";
   const selectedCategory = params.get("category") ?? "all";
   const [savedCollections, toggleSaved] = useSavedCollections();
   const [showAllSites, setShowAllSites] = useState(false);
 
-  const featured = useMemo(() => featuredSites(), []);
-  const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
-  const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
+  const featured = useMemo(() => directory.featuredSites(), [directory]);
+  const additions = useMemo(
+    () => directory.newest(exploreConfig.newAdditionsLimit),
+    [directory],
+  );
+  const picks = useMemo(
+    () => directory.featuredRows(exploreConfig.featuredSitesLimit),
+    [directory],
+  );
 
   const filtered = useMemo(() => {
-    if (query.trim()) return searchSites(query);
-    return sitesByCategory(selectedCategory);
-  }, [query, selectedCategory]);
+    if (query.trim()) return directory.searchSites(query);
+    return directory.sitesByCategory(selectedCategory);
+  }, [directory, query, selectedCategory]);
 
   // A fresh search or category starts collapsed again.
   useEffect(() => {
     setShowAllSites(false);
   }, [query, selectedCategory]);
 
-  const trending = trendingSites(exploreConfig.trendingPreviewCount);
-  const trendingAll = trendingSites(sites.length).length;
+  const trending = directory.trending(exploreConfig.trendingPreviewCount);
+  const trendingAll = directory.sites.length;
 
   // A chosen category replaces the whole page with that category's sites.
   const searching = query.trim().length > 0;
-  const category = categoryById(selectedCategory);
+  const category = directory.categoryById(selectedCategory);
   const browsingCategory = !searching && Boolean(category);
+  const chips = directory.categoriesInUse();
 
   const switcher = (
     <section className="flex flex-col gap-4">
@@ -501,7 +523,7 @@ export default function Home() {
         <input
           id="site-search"
           type="search"
-          placeholder={`Search ${sites.length} sites, tags, categories…`}
+          placeholder={`Search ${directory.sites.length} sites, tags, categories…`}
           value={query}
           onChange={(e) => {
             updateParams({ q: e.target.value, category: undefined });
@@ -540,7 +562,21 @@ export default function Home() {
         </p>
       )}
       <div className="chip-row" role="group" aria-label="Filter the list by category">
-        {categoryFilters.map((cat) => (
+        <button
+          type="button"
+          onClick={() => updateParams({ category: "all", q: undefined })}
+          className="chip"
+          aria-pressed={selectedCategory === "all"}
+          style={{
+            backgroundColor: selectedCategory === "all" ? "var(--accent)" : "#ffffff",
+            color: selectedCategory === "all" ? "var(--on-accent)" : "var(--ink)",
+          }}
+        >
+          All
+          <span className="chip-count">{directory.sites.length}</span>
+        </button>
+        {/* Only categories that actually hold a site get a chip. */}
+        {chips.map(({ category: cat, count }) => (
           <button
             key={cat.id}
             type="button"
@@ -553,6 +589,7 @@ export default function Home() {
             }}
           >
             {cat.label}
+            <span className="chip-count">{count}</span>
           </button>
         ))}
       </div>
@@ -605,7 +642,7 @@ export default function Home() {
                 className="accent-text font-bold underline underline-offset-4"
                 onClick={() => updateParams({ category: "all" })}
               >
-                ← Back to all {sites.length} sites
+                ← Back to all {directory.sites.length} sites
               </button>
             </p>
           </section>
@@ -634,18 +671,41 @@ export default function Home() {
 
         {switcher}
 
-        {/* Featured band */}
-        <section className="grid gap-5 sm:grid-cols-2">
-          {featured.map((site, index) => (
-            <FeatureCard key={site.id} site={site} priority={index === 0} />
-          ))}
-        </section>
+        {directory.sites.length === 0 && (
+          <div className="empty-list">
+            <h2 className="text-xl font-bold tracking-[-0.01em]">The list is empty right now</h2>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+              Nothing has been listed yet. Send the first site in and it will show up here — every
+              card, category, and page on this screen is built from what is on the list.
+            </p>
+            <Link to="/submit" className="btn accent">
+              Submit your site
+            </Link>
+          </div>
+        )}
 
-        <PagedRows items={additions} title="New Additions" note="latest launches" />
-        <PagedRows items={picks} title="Featured Sites" note="top ranked" />
+        {/* Featured band */}
+        {featured.length > 0 && (
+          <section className="grid gap-5 sm:grid-cols-2">
+            {featured.map((site, index) => (
+              <FeatureCard key={site.id} site={site} priority={index === 0} />
+            ))}
+          </section>
+        )}
+
+        {additions.length > 0 && (
+          <PagedRows
+            items={additions}
+            title="New Additions"
+            note={directory.latestLaunch ? `newest ${formatDate(directory.latestLaunch)}` : "latest launches"}
+          />
+        )}
+        {picks.length > 0 && (
+          <PagedRows items={picks} title="Featured Sites" note="top ranked" />
+        )}
 
         {/* Collections */}
-        {collections.length > 0 && (
+        {directory.collections.length > 0 && (
           <section id="collections" className="space-y-4 scroll-mt-24">
           <div
             className="sec-head flex items-end justify-between gap-4 border-b pb-3"
@@ -656,11 +716,11 @@ export default function Home() {
                 to="/collections"
                 className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text"
               >
-                All {collections.length} collections →
+                All {directory.collections.length} collections →
               </Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              {collections.map((collection) => (
+              {directory.collections.map((collection) => (
                 <CollectionCard
                   key={collection.id}
                   collection={collection}
@@ -748,7 +808,11 @@ export default function Home() {
             style={{ borderColor: "var(--rule)" }}
           >
             <h2 className="text-xl font-bold tracking-[-0.01em]">
-              {query ? "Search results" : selectedCategory === "all" ? "All sites" : categoryLabel(selectedCategory)}
+              {query
+                ? "Search results"
+                : selectedCategory === "all"
+                  ? "All sites"
+                  : `${category?.label ?? selectedCategory} sites`}
             </h2>
             <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
               {filtered.length} site{filtered.length === 1 ? "" : "s"}

@@ -3,7 +3,9 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
 import "./index.css";
 import { AppShell } from "./components/AppShell.tsx";
+import { DirectoryProvider } from "./lib/siteDirectory.tsx";
 import Home from "./pages/Home.tsx";
+import SiteDetail from "./pages/SiteDetail.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
 import Collections from "./pages/Collections.tsx";
@@ -39,6 +41,10 @@ const router = createBrowserRouter([
         element: <CollectionDetail />,
       },
       {
+        path: "sites/:slug",
+        element: <SiteDetail />,
+      },
+      {
         path: "trending",
         element: <Trending />,
       },
@@ -60,6 +66,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <DirectoryProvider>
+      <RouterProvider router={router} />
+    </DirectoryProvider>
   </StrictMode>,
 );

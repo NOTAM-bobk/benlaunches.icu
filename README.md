@@ -21,7 +21,16 @@ there is no CMS and nothing is fetched at build time.
 **Add a site** → append an object to `config/sites.json` (keep `slug` unique and
 stable — votes are stored under it), then add the slug to a collection in
 `config/explore.json` or to `boost` in `config/trending.json` if it should rank
-higher out of the gate.
+higher out of the gate. A site can also carry the optional detail-page fields
+`tagline`, `useCases`, `alternatives`, `pricing`, `faq`, and `openSource`.
+
+**Every listing gets a page automatically** → `/sites/<slug>` is generated from
+the record itself: facts, tags, the collections it appears in, and the sites
+nearest to it are all derived, and the optional fields above add their own
+sections when present. Nothing per site is written by hand. Sites approved in
+the review queue get the same page without a redeploy, because the browser
+merges the approved half of the queue (`GET /sites` on the Worker) into the
+config list before rendering.
 
 **Open a collection** → every entry in the `collections` array of
 `config/explore.json` gets its own page at `/collections/<id>`, with the
@@ -72,7 +81,8 @@ palette moves.
 - Blog posts add `BlogPosting` + `BreadcrumbList` JSON-LD and
   `article:published_time`; the home page adds `WebSite` + `SearchAction`.
 - `public/robots.txt` disallows `/admin` and points at `public/sitemap.xml`,
-  which lists the static pages and every post.
+  which lists the static pages, every post, and every generated `/sites/<slug>`
+  page.
 - Canonical URLs always use the production domain from `config/site.json`, so
   preview URLs never get indexed.
 
@@ -85,6 +95,7 @@ The Worker at `cloudflare/votes-worker.js` does three things, all on Workers KV:
 | `GET /counts` | public | vote counts per site slug |
 | `POST /vote`, `POST /unvote` | public | add or remove one vote |
 | `POST /submit` | public | store a pending site submission (`/submit` page) |
+| `GET /sites` | public | approved submissions, published as directory entries |
 | `POST /admin/submissions` | password | list submissions for review (`/admin` page) |
 | `POST /admin/review` | password | set a submission to `approved` / `rejected` |
 | `GET /health` | public | liveness + whether the admin password is set |
@@ -101,7 +112,10 @@ Setup notes:
 4. Set the site's `VITE_VOTES_API_URL` to the Worker URL
 
 Until `VITE_VOTES_API_URL` is set the pages say so: votes fall back to
-localStorage and the submit form is disabled.
+localStorage, the submit form is disabled, and the directory is the config
+files only. Once it is set, approved submissions appear in the directory, in
+the category chips, and on their own generated pages. Redeploy the Worker to
+pick up the `GET /sites` route.
 
 Two KV behaviours are worth knowing: writes take up to ~60 seconds to appear
 in reads from other locations (the admin page therefore polls every 30s while

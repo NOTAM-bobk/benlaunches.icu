@@ -5,8 +5,8 @@ import {
   siteName,
   siteTagline,
   siteUrl,
-  sites,
 } from "../lib/siteData";
+import { useDirectory } from "../lib/siteDirectory";
 
 type JsonLd = Record<string, unknown>;
 
@@ -145,7 +145,7 @@ function websiteJsonLd(): JsonLd {
 }
 
 export function HomepageSeo() {
-  const total = sites.length;
+  const total = useDirectory().sites.length;
   const description = `${siteTagline} Browse all ${total} sites by category, see what is trending, and submit your own.`;
 
   return (

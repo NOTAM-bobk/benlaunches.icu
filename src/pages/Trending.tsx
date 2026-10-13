@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { trendingConfig, trendingSites, type Site } from "../lib/siteData";
+import { trendingConfig, type Site } from "../lib/siteData";
+import { useDirectory } from "../lib/siteDirectory";
 import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
@@ -26,7 +28,8 @@ const MODE_NOTES: Record<Exclude<VoteMode, "shared">, string> = {
 };
 
 export default function Trending() {
-  const ranked = useMemo(() => trendingSites(TOP_N), []);
+  const directory = useDirectory();
+  const ranked = useMemo(() => directory.trending(TOP_N), [directory]);
 
   const [counts, setCounts] = useState<Record<string, number>>(() => {
     const base: Record<string, number> = {};
@@ -118,15 +121,24 @@ export default function Trending() {
                 <SiteIcon site={site} size={44} label={false} />
 
                 <div className="min-w-0 flex flex-col gap-0.5">
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold truncate hover:underline underline-offset-4"
-                    style={{ color: "var(--ink)" }}
-                  >
-                    {site.name}
-                  </a>
+                  <span className="flex items-center gap-2">
+                    <Link
+                      to={`/sites/${site.slug}`}
+                      className="font-bold truncate hover:underline underline-offset-4"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      {site.name}
+                    </Link>
+                    <a
+                      href={site.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rank-visit"
+                      title={`Open ${siteDomain(site.url)}`}
+                    >
+                      ↗
+                    </a>
+                  </span>
                   <p className="text-[13px] truncate" style={{ color: "var(--muted)" }}>
                     {site.description}
                   </p>

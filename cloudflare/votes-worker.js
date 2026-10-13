@@ -6,6 +6,7 @@
  *   POST /vote                -> { slug, count }
  *   POST /unvote              -> { slug, count }
  *   POST /submit              -> { id, status }            (public, creates a pending submission)
+ *   GET  /sites               -> { sites: [...] }          (public, approved submissions only)
  *   POST /admin/submissions   -> { submissions: [...] }     (requires ADMIN_PASSWORD)
  *   POST /admin/review        -> { id, status }             (requires ADMIN_PASSWORD)
  *   GET  /health              -> { ok: true, adminConfigured: bool, submissions: n }
@@ -163,6 +164,29 @@ async function listSubmissions(env) {
   return submissions.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
 }
 
+/**
+ * The public shape of an approved submission: exactly the fields the directory
+ * and the generated detail page render. Nothing admin-only leaks through here.
+ */
+function publicSite(submission) {
+  return {
+    id: submission.id,
+    name: submission.name,
+    url: submission.url,
+    tagline: submission.tagline ?? "",
+    description: submission.description ?? "",
+    useCases: submission.useCases ?? "",
+    alternatives: submission.alternatives ?? "",
+    pricing: submission.pricing ?? "",
+    faq: submission.faq ?? "",
+    categories: Array.isArray(submission.categories) ? submission.categories : [],
+    openSource: submission.openSource === true,
+    status: "approved",
+    createdAt: submission.createdAt ?? "",
+    reviewedAt: submission.reviewedAt ?? submission.createdAt ?? "",
+  };
+}
+
 /* ---------------- handlers ---------------- */
 
 export default {
@@ -187,6 +211,15 @@ export default {
 
     if (pathname === "/counts" && request.method === "GET") {
       return json(await allVoteCounts(env), headers);
+    }
+
+    // Public: the approved half of the review queue, so the site can list and
+    // describe them without a redeploy.
+    if (pathname === "/sites" && (request.method === "GET" || request.method === "POST")) {
+      const approved = (await listSubmissions(env))
+        .filter((submission) => submission.status === "approved")
+        .map(publicSite);
+      return json({ sites: approved }, headers);
     }
 
     if ((pathname === "/vote" || pathname === "/unvote") && request.method === "POST") {

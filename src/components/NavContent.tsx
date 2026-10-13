@@ -2,12 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Highlight } from "./Highlight";
 import { SiteIcon } from "./SiteIcon";
-import {
-  categoryCount,
-  categoryFilters,
-  searchSites,
-  sites,
-} from "../lib/siteData";
+import { useDirectory } from "../lib/siteDirectory";
+import { navContextFor, type NavAction } from "../lib/navActions";
 import { siteDomain } from "../lib/siteTile";
 import { posts } from "../lib/posts";
 
@@ -63,6 +59,7 @@ function SectionToggle({
 export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const directory = useDirectory();
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
@@ -93,8 +90,14 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   // Live matches for the nav search box: names, tags, descriptions, category.
   const matches = useMemo(
-    () => (query.trim() ? searchSites(query) : []),
-    [query],
+    () => (query.trim() ? directory.searchSites(query) : []),
+    [directory, query],
+  );
+
+  // The action rows follow the visitor around the site.
+  const context = useMemo(
+    () => navContextFor(location.pathname, location.search, directory),
+    [directory, location.pathname, location.search],
   );
 
   // Close the results list when the pointer goes elsewhere.
@@ -134,6 +137,17 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     if (location.pathname !== "/") return "";
     return new URLSearchParams(location.search).get("category") ?? "";
   }, [location.pathname, location.search]);
+
+  /** True when an action points at the exact page (and filters) we are on. */
+  function isCurrent(action: NavAction): boolean {
+    if (!action.to) return false;
+    const [target] = action.to.split("#");
+    if (!target) return false;
+    const [path, query = ""] = target.split("?");
+    const here = `${location.pathname.replace(/\/+$/, "") || "/"}${location.search}`;
+    const there = `${(path || "/").replace(/\/+$/, "") || "/"}${query ? `?${query}` : ""}`;
+    return here === there;
+  }
 
   function toggleGroup(id: string) {
     setOpenGroups((current) => {
@@ -198,7 +212,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               setSearchOpen(true);
             }}
             onFocus={() => setSearchOpen(true)}
-            placeholder={`Search ${sites.length} sites`}
+            placeholder={`Search ${directory.sites.length} sites`}
           />
           <span className="keycap" aria-hidden="true">
             ⌘K
@@ -266,6 +280,44 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="sidenav-divider" />
 
+      <div className="sidenav-group sidenav-context">
+        <span className="sidenav-context-title">{context.title}</span>
+        {context.note && <span className="sidenav-context-note">{context.note}</span>}
+        <div className="sidenav-sub">
+          {context.actions.map((action) => {
+            const current = isCurrent(action);
+            const body = (
+              <>
+                <span className="sidenav-context-label">{action.label}</span>
+                {action.badge && <span className="sidenav-badge">{action.badge}</span>}
+              </>
+            );
+            return action.href ? (
+              <a
+                key={action.id}
+                className="sidenav-subitem"
+                href={action.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => onNavigate?.()}
+              >
+                {body}
+              </a>
+            ) : (
+              <button
+                key={action.id}
+                type="button"
+                className={`sidenav-subitem${current ? " active-sub" : ""}`}
+                aria-current={current ? "true" : undefined}
+                onClick={() => go(action.to ?? "/")}
+              >
+                {body}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="sidenav-group">
         <SectionToggle
           label="Libraries"
@@ -275,10 +327,10 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         {openGroups.libraries && (
           <div className="sidenav-sub">
             <button type="button" className="sidenav-subitem" onClick={() => go("/#explore")}>
-              All sites <span className="sidenav-badge">{sites.length}</span>
+              All sites <span className="sidenav-badge">{directory.sites.length}</span>
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/trending")}>
-              Top {sites.length} ranking
+              Top {directory.sites.length} ranking
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/submit")}>
               Submit your site
@@ -294,31 +346,63 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           onToggle={() => toggleGroup("categories")}
         />
         {openGroups.categories !== false && (
-          <div className="sidenav-sub">
-            {categoryFilters
-              .filter((category) => category.id !== "all")
-              .map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={`sidenav-subitem${
-                    activeCategory === category.id ? " active-sub" : ""
-                  }`}
-                  aria-current={activeCategory === category.id ? "true" : undefined}
-                  onClick={() => go(`/?category=${category.id}#explore`)}
-                >
-                  {category.label}
-                  <span className="sidenav-badge">{categoryCount(category.id)}</span>
-                </button>
-              ))}
+          <div className="sidenav-sub">            {directory.categoriesInUse().map(({ category, count }) => (
+              <button
+                key={category.id}
+                type="button"
+                className={`sidenav-subitem${
+                  activeCategory === category.id ? " active-sub" : ""
+                }`}
+                aria-current={activeCategory === category.id ? "true" : undefined}
+                onClick={() => go(`/?category=${category.id}#explore`) }
+              >
+                {category.label}
+                <span className="sidenav-badge">{count}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
 
       <div className="sidenav-foot">
-        <Link to="/submit" className="sidenav-cta" onClick={() => onNavigate?.()}>
-          Submit your site
-        </Link>
+        {context.primary.href ? (
+          <a
+            className="sidenav-cta"
+            href={context.primary.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onNavigate?.()}
+          >
+            {context.primary.label}
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="sidenav-cta"
+            onClick={() => go(context.primary.to ?? "/")}
+          >
+            {context.primary.label}
+          </button>
+        )}
+        {context.secondary.href ? (
+          <a
+            className="sidenav-foot-link"
+            href={context.secondary.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onNavigate?.()}
+          >
+            {context.secondary.label}
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="sidenav-foot-link"
+            onClick={() => go(context.secondary.to ?? "/#explore")}
+          >
+            {context.secondary.label}
+          </button>
+        )}
         <Link to="/auth" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
           Sign in
         </Link>

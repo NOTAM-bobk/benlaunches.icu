@@ -218,7 +218,20 @@
       "category": "tools",
       "tags": ["diagrams", "drawing", "local"],
       "trending": 32,
-      "launched": "2026-06-19"
+      "launched": "2026-06-19",
+      "tagline": "Sketches that look hand-drawn, drawn in a tab with nothing to install.",
+      "useCases": [
+        "Sketching a screen flow before anyone opens a design tool",
+        "Marking up a screenshot in a bug report",
+        "Whiteboarding in a call without a sign-in"
+      ],
+      "alternatives": ["tldraw", "Draw.io"],
+      "pricing": "Free, no account. Paid team folders if you want them.",
+      "faq": [
+        { "question": "Does it work offline?", "answer": "Yes — the whole editor runs in the tab and only leaves the browser when you export." },
+        { "question": "Can I keep the files?", "answer": "Every drawing exports as .excalidraw, PNG, or SVG, so nothing is locked in." }
+      ],
+      "openSource": true
     },
     {
       "id": "tldraw",

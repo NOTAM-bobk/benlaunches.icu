@@ -89,7 +89,7 @@ export function AccountMenu() {
         aria-label="Account and sign in"
         onClick={() => setOpen((value) => !value)}
       >
-        <Avatar seed={seed} size={26} />
+        <Avatar seed={seed} size={22} />
       </button>
 
       {open && (

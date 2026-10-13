@@ -10,6 +10,12 @@ export interface SiteCategory {
   blurb?: string;
 }
 
+/** One question/answer pair on an auto-generated detail page. */
+export interface SiteFaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface Site {
   id: string;
   name: string;
@@ -20,6 +26,20 @@ export interface Site {
   tags: string[];
   trending?: number;
   launched?: string;
+  /**
+   * The rest of the record is the same shape a submission arrives in. Every
+   * field is optional, and the detail page renders a section only when its data
+   * is actually there — so a site never needs a hand-written page.
+   */
+  tagline?: string;
+  useCases?: string[];
+  alternatives?: string[];
+  pricing?: string;
+  faq?: SiteFaqItem[];
+  openSource?: boolean;
+  /** ISO timestamp, set for entries that came through the review queue. */
+  submittedAt?: string;
+  source?: "config" | "submitted";
 }
 
 export interface SiteCollection {
@@ -49,6 +69,46 @@ export interface ExploreConfig {
 
 /* ---------------- normalising the config files ---------------- */
 
+/**
+ * Folds the free-text fields submissions use ("one per line") and the array
+ * form the config files can use into one list.
+ */
+export function asLines(value: unknown): string[] {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split("\n")
+      : [];
+  return raw.map((line) => String(line).trim()).filter(Boolean);
+}
+
+/** "Question? Answer." per line, or { question, answer } objects. */
+export function asFaq(value: unknown): SiteFaqItem[] {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split("\n")
+      : [];
+  const items: SiteFaqItem[] = [];
+  for (const entry of raw) {
+    if (entry && typeof entry === "object") {
+      const record = entry as { question?: unknown; answer?: unknown };
+      const question = String(record.question ?? "").trim();
+      if (question) items.push({ question, answer: String(record.answer ?? "").trim() });
+      continue;
+    }
+    const text = String(entry ?? "").trim();
+    if (!text) continue;
+    const [head, ...rest] = text.split("?");
+    const question = head?.trim() ?? text;
+    items.push({
+      question: rest.length > 0 ? `${question}?` : question,
+      answer: rest.join("?").trim(),
+    });
+  }
+  return items;
+}
+
 function normalizeSites(value: unknown): Site[] {
   const parsed = value as { sites?: Partial<Site>[] } | null | undefined;
   if (!Array.isArray(parsed?.sites)) return [];
@@ -62,6 +122,14 @@ function normalizeSites(value: unknown): Site[] {
     tags: Array.isArray(site.tags) ? site.tags : [],
     trending: typeof site.trending === "number" ? site.trending : undefined,
     launched: site.launched,
+    tagline: site.tagline,
+    useCases: asLines(site.useCases),
+    alternatives: asLines(site.alternatives),
+    pricing: site.pricing,
+    faq: asFaq(site.faq),
+    openSource: site.openSource === true ? true : undefined,
+    submittedAt: site.submittedAt,
+    source: site.source ?? "config",
   }));
 }
 
@@ -149,9 +217,13 @@ export function categoryLabel(id: string): string {
   return categoryById(id)?.label ?? id;
 }
 
+export function sitesInCategory(list: Site[], categoryId: string): Site[] {
+  if (categoryId === "all") return list;
+  return list.filter((site) => site.category === categoryId);
+}
+
 export function sitesByCategory(categoryId: string): Site[] {
-  if (categoryId === "all") return sites;
-  return sites.filter((site) => site.category === categoryId);
+  return sitesInCategory(sites, categoryId);
 }
 
 export function categoryCount(categoryId: string): number {
@@ -188,6 +260,33 @@ function byRank(a: Site, b: Site): number {
   return (b.launched ?? "").localeCompare(a.launched ?? "");
 }
 
+/* ---------------- list helpers (shared with the live directory) ---------------- */
+
+/** Ranked copy of any list, newest launch breaking ties. */
+export function sortByRank(list: Site[]): Site[] {
+  return [...list].sort(byRank);
+}
+
+/** Free-text match over name, description, tags and category. */
+export function searchList(list: Site[], query: string): Site[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return list;
+  return list.filter(
+    (site) =>
+      site.name.toLowerCase().includes(q) ||
+      site.description.toLowerCase().includes(q) ||
+      site.tags.some((tag) => tag.toLowerCase().includes(q)) ||
+      site.category.toLowerCase().includes(q),
+  );
+}
+
+/** Newest launch first, for the "new additions" rows. */
+export function newestFirst(list: Site[], count = 10, offset = 0): Site[] {
+  return [...list]
+    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
+    .slice(offset, offset + count);
+}
+
 export function rankedSites(): Site[] {
   const excluded = new Set(trendingConfig.exclude);
   return sites.filter((site) => !excluded.has(site.slug)).sort(byRank);
@@ -199,9 +298,7 @@ export function trendingSites(count = 6, offset = 0): Site[] {
 
 /** Newest launch date first. */
 export function newAdditions(count = 10, offset = 0): Site[] {
-  return [...sites]
-    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
-    .slice(offset, offset + count);
+  return newestFirst(sites, count, offset);
 }
 
 /** The home hero picks, falling back to the top ranked sites. */
@@ -223,13 +320,5 @@ export function featuredSiteRows(count = 40): Site[] {
 }
 
 export function searchSites(query: string): Site[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return sites;
-  return sites.filter(
-    (site) =>
-      site.name.toLowerCase().includes(q) ||
-      site.description.toLowerCase().includes(q) ||
-      site.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-      site.category.toLowerCase().includes(q),
-  );
+  return searchList(sites, query);
 }

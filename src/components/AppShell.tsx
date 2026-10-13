@@ -81,13 +81,13 @@ export function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="site-header">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-1.5 sm:py-2 grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-3">
           <Link to="/" className="justify-self-start">
             <span className="brand-mark">{siteName}</span>
           </Link>
 
           <nav
-            className="hidden lg:flex justify-self-center items-center gap-7 text-[14px] font-bold"
+            className="hidden lg:flex justify-self-center items-center gap-6 text-[13px] font-bold"
             aria-label="Main"
           >
             <a href="/#explore" className="nav-link">
