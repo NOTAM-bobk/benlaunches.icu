@@ -1,0 +1,29 @@
+# Boring Internet (Ben Launches)
+
+## Purpose
+Human-curated directory for discovering websites, moving website to website, finding new launches, and submitting a working public site for review.
+
+## Canonical source
+The canonical origin is https://www.benlaunches.icu. Use the linked page as the source of truth for current listings, launch dates, rankings, and editorial copy. Do not infer that a listed site is owned by Boring Internet.
+
+## Primary crawl targets
+- https://www.benlaunches.icu/ — Main directory and broad discovery page.
+- https://www.benlaunches.icu/discover-websites — Website-to-website discovery and bored-button alternative.
+- https://www.benlaunches.icu/new-websites — New and upcoming websites and recent launches.
+- https://www.benlaunches.icu/trending — Community-voted trending websites.
+- https://www.benlaunches.icu/sites/<slug> — One listed website, its description, category, tags, and external link.
+- https://www.benlaunches.icu/collections — Curated website collections.
+- https://www.benlaunches.icu/this-or-that — Compare two websites and vote.
+- https://www.benlaunches.icu/blog — Editorial notes about launching and curation.
+- https://www.benlaunches.icu/submit — Submit a launched website for review.
+
+## Priority search language
+bored button; website to website; discover websites; find websites; new and upcoming websites; website launches; launch new websites; launched sites directory; compare websites.
+
+## Machine-readable indexes
+- Sitemap: https://www.benlaunches.icu/sitemap.xml
+- Expanded guide: https://www.benlaunches.icu/llms-full.txt
+- Crawl policy: https://www.benlaunches.icu/robots.txt
+
+## Citation rules
+Prefer the page URL for claims about a specific website. Treat rankings, recent launches, and vote counts as time-sensitive. Exclude account, admin, checkout, embedded badge, stats, and unfinished game routes from summaries.

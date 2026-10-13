@@ -1,11 +1,7 @@
 {
-  "topLimit": 51,
+  "topLimit": 0,
   "title": "Trending",
   "tagline": "The top sites on the list right now. One vote each, no accounts.",
-  "boost": {
-    "marginalia-search": 6,
-    "neocities": 4,
-    "standard-ebooks": 3
-  },
+  "boost": {},
   "exclude": []
 }

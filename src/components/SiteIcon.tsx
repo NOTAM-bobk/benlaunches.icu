@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { Site } from "../lib/siteData";
 import { siteInitials, siteTileStyle } from "../lib/siteTile";
 import { serverIconUrl } from "../lib/shots";
 
@@ -25,12 +24,19 @@ function attemptsFor(url: string, size: number): string[] {
   }
 }
 
+/** The parts of a site the icon needs — directory sites and launches both fit. */
+export interface SiteIconSource {
+  name: string;
+  slug: string;
+  url: string;
+}
+
 export function SiteIcon({
   site,
   size = 40,
   label = true,
 }: {
-  site: Site;
+  site: SiteIconSource;
   size?: number;
   label?: boolean;
 }) {

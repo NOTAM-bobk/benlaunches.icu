@@ -2,21 +2,28 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Highlight } from "./Highlight";
 import { SiteIcon } from "./SiteIcon";
-import { useDirectory } from "../lib/siteDirectory";
-import { navContextFor, type NavAction } from "../lib/navActions";
+import {
+  categoryCount,
+  categoryFilters,
+  searchSites,
+  sites,
+} from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import { posts } from "../lib/posts";
+import { useAuth } from "../lib/auth";
+import { navContextFor, type NavAction } from "../lib/navActions";
 
 /** How many quick matches the side search shows while you type. */
 const SEARCH_PREVIEW = 6;
 
-/** The four top-level places in the site. */
-const SECTIONS = [
-  { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
-  { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
-  { id: "collections", to: "/collections", icon: "❐", label: "Collections" },
-  { id: "trending", to: "/trending", icon: "✦", label: "Trending" },
-] as const;
+/** The top-level places in the site. Icons are optional — most rows show a plain label. */
+const SECTIONS: ReadonlyArray<{ id: string; to: string; label: string; icon?: string }> = [
+  { id: "explore", to: "/#explore", label: "Explore" },
+  { id: "discover", to: "/discover-websites", label: "Discover" },
+  { id: "new", to: "/new-websites", label: "New" },
+  { id: "collections", to: "/collections", label: "Collections" },
+  { id: "trending", to: "/trending", icon: "🔥", label: "Trending" },
+];
 
 function scrollToSection(id: string) {
   const element = document.getElementById(id);
@@ -59,10 +66,12 @@ function SectionToggle({
 export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const directory = useDirectory();
+  const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
+  /** Keeps the Bored button from opening the same site twice in a row. */
+  const lastRandom = useRef<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -90,14 +99,8 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   // Live matches for the nav search box: names, tags, descriptions, category.
   const matches = useMemo(
-    () => (query.trim() ? directory.searchSites(query) : []),
-    [directory, query],
-  );
-
-  // The action rows follow the visitor around the site.
-  const context = useMemo(
-    () => navContextFor(location.pathname, location.search, directory),
-    [directory, location.pathname, location.search],
+    () => (query.trim() ? searchSites(query) : []),
+    [query],
   );
 
   // Close the results list when the pointer goes elsewhere.
@@ -125,7 +128,8 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   /** Where the visitor actually is right now. */
   const activeSection = useMemo(() => {
     const path = location.pathname.replace(/\/+$/, "") || "/";
-    if (path === "/blog" || path.startsWith("/blog/")) return "articles";
+    if (path === "/discover-websites") return "discover";
+    if (path === "/new-websites") return "new";
     if (path === "/trending") return "trending";
     if (path === "/collections" || path.startsWith("/collections/")) return "collections";
     if (path === "/submit") return "submit";
@@ -138,14 +142,20 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     return new URLSearchParams(location.search).get("category") ?? "";
   }, [location.pathname, location.search]);
 
+  // The action rows follow the visitor around the site, page by page.
+  const context = useMemo(
+    () => navContextFor(location.pathname, location.search),
+    [location.pathname, location.search],
+  );
+
   /** True when an action points at the exact page (and filters) we are on. */
   function isCurrent(action: NavAction): boolean {
     if (!action.to) return false;
     const [target] = action.to.split("#");
     if (!target) return false;
-    const [path, query = ""] = target.split("?");
+    const [actionPath, query = ""] = target.split("?");
     const here = `${location.pathname.replace(/\/+$/, "") || "/"}${location.search}`;
-    const there = `${(path || "/").replace(/\/+$/, "") || "/"}${query ? `?${query}` : ""}`;
+    const there = `${(actionPath || "/").replace(/\/+$/, "") || "/"}${query ? `?${query}` : ""}`;
     return here === there;
   }
 
@@ -183,6 +193,18 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     navigate(href);
   }
 
+  /** The Bored button, same as the one on the home page: one random site. */
+  function openRandomSite() {
+    const pool = lastRandom.current
+      ? sites.filter((site) => site.id !== lastRandom.current)
+      : sites;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    if (!pick) return;
+    lastRandom.current = pick.id;
+    onNavigate?.();
+    window.open(pick.url, "_blank", "noopener,noreferrer");
+  }
+
   function runSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = query.trim();
@@ -212,7 +234,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               setSearchOpen(true);
             }}
             onFocus={() => setSearchOpen(true)}
-            placeholder={`Search ${directory.sites.length} sites`}
+            placeholder="Search sites"
           />
           <span className="keycap" aria-hidden="true">
             ⌘K
@@ -248,7 +270,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             )}
             <button type="button" className="sidenav-results-all" onClick={() => go(`/?q=${encodeURIComponent(query.trim())}#explore`)}>
               {matches.length > 0
-                ? `See all ${matches.length} results →`
+                ? "See all results →"
                 : "Search the full directory →"}
             </button>
           </div>
@@ -266,13 +288,12 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               aria-current={isActive ? "page" : undefined}
               onClick={() => go(section.to)}
             >
-              <span className="sidenav-icon" aria-hidden="true">
-                {section.icon}
-              </span>
-              <span>{section.label}</span>
-              {section.id === "articles" && (
-                <span className="sidenav-badge">{posts.length}</span>
+              {section.icon && (
+                <span className="sidenav-icon" aria-hidden="true">
+                  {section.icon}
+                </span>
               )}
+              <span>{section.label}</span>
             </button>
           );
         })}
@@ -280,6 +301,8 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="sidenav-divider" />
 
+      {/* What this page can do next: it changes with the route, and with the
+          category or search you have open. */}
       <div className="sidenav-group sidenav-context">
         <span className="sidenav-context-title">{context.title}</span>
         {context.note && <span className="sidenav-context-note">{context.note}</span>}
@@ -320,6 +343,35 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="sidenav-group">
         <SectionToggle
+          label="Games"
+          open={Boolean(openGroups.games)}
+          onToggle={() => toggleGroup("games")}
+        />
+        {openGroups.games && (
+          <div className="sidenav-sub">
+            <button type="button" className="sidenav-subitem" onClick={openRandomSite}>
+              Bored button
+            </button>
+            <button
+              type="button"
+              className="sidenav-subitem"
+              onClick={() => go("/this-or-that")}
+            >
+              This or That
+            </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${location.pathname === "/site-tinder" ? " active-sub" : ""}`}
+              onClick={() => go("/site-tinder")}
+            >
+              Site Tinder
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="sidenav-group">
+        <SectionToggle
           label="Libraries"
           open={Boolean(openGroups.libraries)}
           onToggle={() => toggleGroup("libraries")}
@@ -327,10 +379,21 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         {openGroups.libraries && (
           <div className="sidenav-sub">
             <button type="button" className="sidenav-subitem" onClick={() => go("/#explore")}>
-              All sites <span className="sidenav-badge">{directory.sites.length}</span>
+              All sites <span className="sidenav-badge">{sites.length}</span>
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/trending")}>
-              Top {directory.sites.length} ranking
+              Top {sites.length} ranking
+            </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${
+                location.pathname === "/blog" || location.pathname.startsWith("/blog/")
+                  ? " active-sub"
+                  : ""
+              }`}
+              onClick={() => go("/blog")}
+            >
+              Articles <span className="sidenav-badge">{posts.length}</span>
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/submit")}>
               Submit your site
@@ -346,20 +409,23 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           onToggle={() => toggleGroup("categories")}
         />
         {openGroups.categories !== false && (
-          <div className="sidenav-sub">            {directory.categoriesInUse().map(({ category, count }) => (
-              <button
-                key={category.id}
-                type="button"
-                className={`sidenav-subitem${
-                  activeCategory === category.id ? " active-sub" : ""
-                }`}
-                aria-current={activeCategory === category.id ? "true" : undefined}
-                onClick={() => go(`/?category=${category.id}#explore`) }
-              >
-                {category.label}
-                <span className="sidenav-badge">{count}</span>
-              </button>
-            ))}
+          <div className="sidenav-sub">
+            {categoryFilters
+              .filter((category) => category.id !== "all")
+              .map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`sidenav-subitem${
+                    activeCategory === category.id ? " active-sub" : ""
+                  }`}
+                  aria-current={activeCategory === category.id ? "true" : undefined}
+                  onClick={() => go(`/?category=${category.id}#explore`)}
+                >
+                  {category.label}
+                  <span className="sidenav-badge">{categoryCount(category.id)}</span>
+                </button>
+              ))}
           </div>
         )}
       </div>
@@ -403,9 +469,15 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             {context.secondary.label}
           </button>
         )}
-        <Link to="/auth" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
-          Sign in
-        </Link>
+        {user ? (
+          <Link to="/profile" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
+            Your account
+          </Link>
+        ) : (
+          <Link to="/auth" className="sidenav-foot-link" onClick={() => onNavigate?.()}>
+            Sign in
+          </Link>
+        )}
       </div>
     </div>
   );

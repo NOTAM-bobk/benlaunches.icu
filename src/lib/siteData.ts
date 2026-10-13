@@ -3,17 +3,13 @@ import categoriesJson from "../../config/categories.json";
 import sitesJson from "../../config/sites.json";
 import siteJson from "../../config/site.json";
 import trendingJson from "../../config/trending.json";
+import changelogJson from "../../config/changelog.json";
+import servicesJson from "../../config/services.json";
 
 export interface SiteCategory {
   id: string;
   label: string;
   blurb?: string;
-}
-
-/** One question/answer pair on an auto-generated detail page. */
-export interface SiteFaqItem {
-  question: string;
-  answer: string;
 }
 
 export interface Site {
@@ -26,20 +22,14 @@ export interface Site {
   tags: string[];
   trending?: number;
   launched?: string;
+  /** A listing a person has checked and marked as verified. */
+  verified?: boolean;
   /**
-   * The rest of the record is the same shape a submission arrives in. Every
-   * field is optional, and the detail page renders a section only when its data
-   * is actually there — so a site never needs a hand-written page.
+   * Any field beyond the ones above, kept as readable text. Listings carry the
+   * details that came in with a submission (tagline, pricing, FAQ, …), and the
+   * site page prints whatever is there without needing a code change.
    */
-  tagline?: string;
-  useCases?: string[];
-  alternatives?: string[];
-  pricing?: string;
-  faq?: SiteFaqItem[];
-  openSource?: boolean;
-  /** ISO timestamp, set for entries that came through the review queue. */
-  submittedAt?: string;
-  source?: "config" | "submitted";
+  extras?: Record<string, string>;
 }
 
 export interface SiteCollection {
@@ -50,11 +40,56 @@ export interface SiteCollection {
 }
 
 export interface TrendingConfig {
+  /** How many sites the trending page shows. `0` ranks every listed site. */
   topLimit: number;
   title: string;
   tagline: string;
   boost: Record<string, number>;
   exclude: string[];
+}
+
+export interface ChangelogEntry {
+  version: string;
+  date: string;
+  title: string;
+  changes: string[];
+}
+
+export interface ChangelogConfig {
+  /** The version the site is on right now; printed in the footer. */
+  version: string;
+  updated?: string;
+  intro?: string;
+  entries: ChangelogEntry[];
+}
+
+export interface ServiceItem {
+  id: string;
+  group: string;
+  name: string;
+  price: string;
+  unit: string;
+  description: string;
+  /** The short checklist shown on the advertise cards, if the option has one. */
+  details?: string[];
+  featured?: boolean;
+  /** A longer opening paragraph for the service's own page. */
+  summary: string;
+  includes: string[];
+  steps: string[];
+  goodFor: string;
+}
+
+export interface ServiceGroup {
+  id: string;
+  label: string;
+  note: string;
+}
+
+export interface ServiceConfig {
+  boost: { eyebrow: string; title: string; note: string };
+  groups: ServiceGroup[];
+  items: ServiceItem[];
 }
 
 export interface ExploreConfig {
@@ -64,53 +99,62 @@ export interface ExploreConfig {
   newAdditionsLimit: number;
   featuredSitesLimit: number;
   trendingPreviewCount: number;
+  /** Slugs for the home page's "very interesting" section, in display order. */
+  interestingSlugs: string[];
+  /** Hand-picked directory slugs featured after "Very Interesting". */
+  editorsPickSlugs: string[];
   collections: SiteCollection[];
 }
 
 /* ---------------- normalising the config files ---------------- */
 
-/**
- * Folds the free-text fields submissions use ("one per line") and the array
- * form the config files can use into one list.
- */
-export function asLines(value: unknown): string[] {
-  const raw = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split("\n")
-      : [];
-  return raw.map((line) => String(line).trim()).filter(Boolean);
+/** The fields a listing is expected to have; everything else is extra detail. */
+const SITE_FIELDS = new Set([
+  "id",
+  "name",
+  "slug",
+  "url",
+  "description",
+  "category",
+  "tags",
+  "trending",
+  "launched",
+  "verified",
+]);
+
+/** Any JSON value as one line of readable text, or "" when there is nothing to show. */
+function describeValue(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) {
+    return value.map(describeValue).filter(Boolean).join(", ");
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([key, entry]) => {
+        const text = describeValue(entry);
+        return text ? `${humanizeKey(key)}: ${text}` : "";
+      })
+      .filter(Boolean)
+      .join(" · ");
+  }
+  return "";
 }
 
-/** "Question? Answer." per line, or { question, answer } objects. */
-export function asFaq(value: unknown): SiteFaqItem[] {
-  const raw = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split("\n")
-      : [];
-  const items: SiteFaqItem[] = [];
-  for (const entry of raw) {
-    if (entry && typeof entry === "object") {
-      const record = entry as { question?: unknown; answer?: unknown };
-      const question = String(record.question ?? "").trim();
-      if (question) items.push({ question, answer: String(record.answer ?? "").trim() });
-      continue;
-    }
-    const text = String(entry ?? "").trim();
-    if (!text) continue;
-    const [head, ...rest] = text.split("?");
-    const question = head?.trim() ?? text;
-    items.push({
-      question: rest.length > 0 ? `${question}?` : question,
-      answer: rest.join("?").trim(),
-    });
+/** Extra listing detail, keyed the way it was written in the JSON. */
+function extraDetails(site: Record<string, unknown>): Record<string, string> | undefined {
+  const extras: Record<string, string> = {};
+  for (const [key, value] of Object.entries(site)) {
+    if (SITE_FIELDS.has(key)) continue;
+    const text = describeValue(value);
+    if (text) extras[key] = text;
   }
-  return items;
+  return Object.keys(extras).length > 0 ? extras : undefined;
 }
 
 function normalizeSites(value: unknown): Site[] {
-  const parsed = value as { sites?: Partial<Site>[] } | null | undefined;
+  const parsed = value as { sites?: Array<Partial<Site> & Record<string, unknown>> } | null | undefined;
   if (!Array.isArray(parsed?.sites)) return [];
   return parsed.sites.map((site) => ({
     id: site.id ?? site.slug ?? crypto.randomUUID(),
@@ -122,14 +166,8 @@ function normalizeSites(value: unknown): Site[] {
     tags: Array.isArray(site.tags) ? site.tags : [],
     trending: typeof site.trending === "number" ? site.trending : undefined,
     launched: site.launched,
-    tagline: site.tagline,
-    useCases: asLines(site.useCases),
-    alternatives: asLines(site.alternatives),
-    pricing: site.pricing,
-    faq: asFaq(site.faq),
-    openSource: site.openSource === true ? true : undefined,
-    submittedAt: site.submittedAt,
-    source: site.source ?? "config",
+    verified: site.verified === true,
+    extras: extraDetails(site),
   }));
 }
 
@@ -180,12 +218,41 @@ export const siteKeywords = site.keywords ?? [];
 export const siteAuthor = site.author ?? siteName;
 export const siteLinks = site.links ?? {};
 
+export const changelog: ChangelogConfig = {
+  version: changelogJson.version ?? "0.0.0",
+  updated: changelogJson.updated,
+  intro: changelogJson.intro,
+  entries: changelogJson.entries ?? [],
+};
+
+/** The version shown in the footer and at the top of the changelog. */
+export const appVersion = changelog.version;
+
+export const serviceConfig: ServiceConfig = {
+  boost: servicesJson.boost,
+  groups: servicesJson.groups ?? [],
+  items: servicesJson.items ?? [],
+};
+
+/** One offering by its URL id, or undefined when the id is unknown. */
+export function serviceById(id: string): ServiceItem | undefined {
+  return serviceConfig.items.find((item) => item.id === id);
+}
+
+/** Every offering in a group, in config order. */
+export function servicesInGroup(groupId: string): ServiceItem[] {
+  return serviceConfig.items.filter((item) => item.group === groupId);
+}
+
 export const sites = normalizeSites(sitesJson);
 export const categories = normalizeCategories(categoriesJson);
 export const collections = normalizeCollections(explore.collections);
 
 export const trendingConfig: TrendingConfig = {
-  topLimit: trending.topLimit ?? sites.length,
+  topLimit:
+    typeof trending.topLimit === "number" && trending.topLimit > 0
+      ? trending.topLimit
+      : sites.length,
   title: trending.title ?? "Trending",
   tagline: trending.tagline ?? "Most active this week.",
   boost: trending.boost ?? {},
@@ -199,17 +266,56 @@ export const exploreConfig: ExploreConfig = {
   newAdditionsLimit: explore.newAdditionsLimit ?? 40,
   featuredSitesLimit: explore.featuredSitesLimit ?? 40,
   trendingPreviewCount: explore.trendingPreviewCount ?? 3,
+  interestingSlugs: explore.interestingSlugs ?? [],
+  editorsPickSlugs: explore.editorsPickSlugs ?? [],
   collections,
 };
 
-/** "All" first, then the categories from config/categories.json. */
+/** Every category in the config, including the ones no listing uses yet. */
+export const categoryChoices: SiteCategory[] = categories;
+
+/** Categories at least one listing is filed under, in config order. */
+const usedCategoryIds = new Set(sites.map((site) => site.category));
+
+/** Ids a listing uses that the config has no entry for, so they still show up. */
+const unlistedCategories: SiteCategory[] = [...usedCategoryIds]
+  .filter((id) => id !== "all" && !categories.some((category) => category.id === id))
+  .sort()
+  .map((id) => ({ id, label: humanizeKey(id) }));
+
+/**
+ * What the filter row and the side menu offer: "All", then the categories that
+ * have at least one listing. A niche category added to the config stays out of
+ * the way until a site uses it, so nothing leads to an empty page.
+ */
 export const categoryFilters: SiteCategory[] = [
   { id: "all", label: "All" },
-  ...categories,
+  ...categories.filter((category) => usedCategoryIds.has(category.id)),
+  ...unlistedCategories,
 ];
 
 export function categoryById(id: string): SiteCategory | undefined {
   return categories.find((category) => category.id === id);
+}
+
+/** Short words that read better in caps when a listing uses them lowercase. */
+const ACRONYMS = new Set(["faq", "seo", "url", "api", "rss", "id", "ui", "ux", "css", "html"]);
+
+/** "targetAudience" -> "Target Audience", "faq" -> "FAQ", "FAQ" stays "FAQ". */
+export function humanizeKey(key: string): string {
+  const words = key
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return words
+    .map((word) => {
+      const lower = word.toLowerCase();
+      if (ACRONYMS.has(lower)) return lower.toUpperCase();
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
 
 export function categoryLabel(id: string): string {
@@ -217,13 +323,9 @@ export function categoryLabel(id: string): string {
   return categoryById(id)?.label ?? id;
 }
 
-export function sitesInCategory(list: Site[], categoryId: string): Site[] {
-  if (categoryId === "all") return list;
-  return list.filter((site) => site.category === categoryId);
-}
-
 export function sitesByCategory(categoryId: string): Site[] {
-  return sitesInCategory(sites, categoryId);
+  if (categoryId === "all") return sites;
+  return sites.filter((site) => site.category === categoryId);
 }
 
 export function categoryCount(categoryId: string): number {
@@ -260,33 +362,6 @@ function byRank(a: Site, b: Site): number {
   return (b.launched ?? "").localeCompare(a.launched ?? "");
 }
 
-/* ---------------- list helpers (shared with the live directory) ---------------- */
-
-/** Ranked copy of any list, newest launch breaking ties. */
-export function sortByRank(list: Site[]): Site[] {
-  return [...list].sort(byRank);
-}
-
-/** Free-text match over name, description, tags and category. */
-export function searchList(list: Site[], query: string): Site[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return list;
-  return list.filter(
-    (site) =>
-      site.name.toLowerCase().includes(q) ||
-      site.description.toLowerCase().includes(q) ||
-      site.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-      site.category.toLowerCase().includes(q),
-  );
-}
-
-/** Newest launch first, for the "new additions" rows. */
-export function newestFirst(list: Site[], count = 10, offset = 0): Site[] {
-  return [...list]
-    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
-    .slice(offset, offset + count);
-}
-
 export function rankedSites(): Site[] {
   const excluded = new Set(trendingConfig.exclude);
   return sites.filter((site) => !excluded.has(site.slug)).sort(byRank);
@@ -298,7 +373,9 @@ export function trendingSites(count = 6, offset = 0): Site[] {
 
 /** Newest launch date first. */
 export function newAdditions(count = 10, offset = 0): Site[] {
-  return newestFirst(sites, count, offset);
+  return [...sites]
+    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
+    .slice(offset, offset + count);
 }
 
 /** The home hero picks, falling back to the top ranked sites. */
@@ -311,6 +388,16 @@ export function featuredSites(): Site[] {
   return [...picked, ...filler].slice(0, exploreConfig.featuredCount);
 }
 
+/** The hand-picked "very interesting" picks, in the order the config lists them. */
+export function interestingSites(): Site[] {
+  return sitesBySlugs(exploreConfig.interestingSlugs);
+}
+
+/** The hand-picked "Editors' Picks", in the order the config lists them. */
+export function editorsPicks(): Site[] {
+  return sitesBySlugs(exploreConfig.editorsPickSlugs);
+}
+
 /** Ranked sites with the featured picks removed. */
 export function featuredSiteRows(count = 40): Site[] {
   const featured = new Set(featuredSites().map((site) => site.slug));
@@ -320,5 +407,13 @@ export function featuredSiteRows(count = 40): Site[] {
 }
 
 export function searchSites(query: string): Site[] {
-  return searchList(sites, query);
+  const q = query.trim().toLowerCase();
+  if (!q) return sites;
+  return sites.filter(
+    (site) =>
+      site.name.toLowerCase().includes(q) ||
+      site.description.toLowerCase().includes(q) ||
+      site.tags.some((tag) => tag.toLowerCase().includes(q)) ||
+      site.category.toLowerCase().includes(q),
+  );
 }

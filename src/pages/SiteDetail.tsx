@@ -1,358 +1,309 @@
-import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
-import { SiteSeo } from "../components/SeoHead";
+import { ReportProblem } from "../components/ReportProblem";
+import { ShareSite } from "../components/ShareSite";
 import { SiteIcon } from "../components/SiteIcon";
+import { VerifiedStamp } from "../components/VerifiedStamp";
+import { SiteSeo } from "../components/SeoHead";
+import { avatarUrl, getSiteSupporters, useAuth, type SiteSupporter } from "../lib/auth";
+import { screenshotUrl } from "../lib/shots";
+import { useSiteVote } from "../lib/votes";
+import {
+  categoryLabel,
+  collections,
+  humanizeKey,
+  rankedSites,
+  siteBySlug,
+  siteName,
+  siteUrl,
+  sites,
+  sitesByCategory,
+} from "../lib/siteData";
 import { formatDate } from "../lib/posts";
-import { siteName, siteUrl } from "../lib/siteData";
-import { useDirectory } from "../lib/siteDirectory";
 import { siteDomain } from "../lib/siteTile";
 
-/**
- * Every listing shares this one page. Nothing here is written per site: the
- * sections below appear only when the record actually carries that field, so a
- * site submitted through the form and one written into config/sites.json both
- * get a full page the moment they are listed.
- */
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="fact">
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  note,
-  children,
-}: {
-  title: string;
-  note?: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="detail-section">
-      <div className="sec-head">
-        <h2>{title}</h2>
-        {note && <span className="detail-note">{note}</span>}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function lines(values: string[] | undefined): string[] {
-  return (values ?? []).map((value) => value.trim()).filter(Boolean);
-}
+/** Keep longer submitted details in a predictable, readable order. */
+const DETAIL_ORDER = [
+  "tagline",
+  "launchDate",
+  "targetAudience",
+  "problem",
+  "features",
+  "useCases",
+  "alternatives",
+  "pricing",
+  "openSource",
+  "socialLinks",
+  "faq",
+];
 
 export default function SiteDetail() {
   const { slug = "" } = useParams();
-  const directory = useDirectory();
-  const site = directory.siteBySlug(decodeURIComponent(slug));
+  const { user, toggleSaved } = useAuth();
+  const site = siteBySlug(slug);
+  const vote = useSiteVote(slug, site?.trending ?? 0);
+  const [supporters, setSupporters] = useState<SiteSupporter[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    if (!site) return () => { active = false; };
+    void getSiteSupporters(site.slug).then((value) => {
+      if (active) setSupporters(value);
+    });
+    return () => { active = false; };
+  }, [site?.slug]);
 
   if (!site) {
     return (
       <>
         <SiteSeo title="Site not found" path={`/sites/${slug}`} noindex />
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center gap-4 text-center">
-          <span className="detail-flag">404</span>
-          <h1 className="text-3xl font-bold tracking-[-0.02em]">That site is not on the list</h1>
-          <p className="max-w-md" style={{ color: "var(--muted)" }}>
-            “{slug}” is not one of the {directory.sites.length} sites listed on {siteName}. It may
-            have been renamed, or it may not be here yet.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/#all-sites" className="nav-cta">
-              Browse the directory
-            </Link>
-            <Link to="/submit" className="btn ghost">
-              Submit your site
-            </Link>
-          </div>
-        </div>
+        <main className="site-not-found mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16">
+          <span className="site-detail-kicker">404 · Not in the directory</span>
+          <h1>That site is not listed</h1>
+          <p>“{slug}” is not one of the {sites.length} sites on {siteName}.</p>
+          <Link to="/" className="btn accent">Browse the list</Link>
+        </main>
       </>
     );
   }
 
+  const rank = rankedSites().findIndex((entry) => entry.slug === site.slug) + 1;
+  const lists = collections.filter((collection) => collection.siteSlugs.includes(site.slug));
+  const neighbours = sitesByCategory(site.category)
+    .filter((entry) => entry.slug !== site.slug)
+    .slice(0, 6);
+  const builderSites = neighbours;
+  const siteSlug = site.slug;
+  async function voteAndRefreshSupporters() {
+    await vote.vote();
+    const updated = await getSiteSupporters(siteSlug);
+    setSupporters(updated);
+  }
   const domain = siteDomain(site.url);
-  const category = directory.categoryLabel(site.category);
-  const tags = lines(site.tags);
-  const useCases = lines(site.useCases);
-  const alternatives = lines(site.alternatives);
-  const faq = site.faq ?? [];
-  const rank = directory.rankOf(site);
-  const inCollections = directory.collectionsForSite(site.slug);
-  const related = directory.relatedSites(site, 4);
-  const recentlyAdded = directory.newest(4).filter((entry) => entry.slug !== site.slug).slice(0, 3);
-
-  const facts: Array<{ label: string; value: string }> = [
-    { label: "Category", value: category },
-    { label: "Domain", value: domain },
-  ];
-  if (site.launched) facts.push({ label: "Listed", value: formatDate(site.launched) });
-  if (rank > 0) facts.push({ label: "Ranking", value: `#${rank} of ${directory.sites.length}` });
-  if (site.pricing) facts.push({ label: "Pricing", value: site.pricing });
-  facts.push({ label: "Access", value: site.openSource ? "Open source" : "Closed source" });
-  facts.push({
-    label: "Source",
-    value: site.source === "submitted" ? "Submitted by its maker" : "Curated by hand",
+  const extras = Object.entries(site.extras ?? {}).sort(([left], [right]) => {
+    const leftOrder = DETAIL_ORDER.indexOf(left);
+    const rightOrder = DETAIL_ORDER.indexOf(right);
+    if (leftOrder === -1 && rightOrder === -1) return left.localeCompare(right);
+    if (leftOrder === -1) return 1;
+    if (rightOrder === -1) return -1;
+    return leftOrder - rightOrder;
   });
-
-  const about = site.description;
-  const lede = site.tagline && site.tagline !== about ? site.tagline : undefined;
-
+  const details = extras.filter(([key, value]) => key !== "tagline" && value.trim().length > 0);
   const pageUrl = `${siteUrl}/sites/${site.slug}`;
+  const launched = site.launched ? formatDate(site.launched) : "Not listed";
+  const tagline = site.extras?.tagline?.trim();
+  const saved = Boolean(user?.saved.includes(site.slug));
 
   return (
     <>
       <SiteSeo
         title={site.name}
-        description={lede ?? about}
+        description={`${site.description} Listed on ${siteName} — open ${domain}, see its details, and find similar sites.`}
         path={`/sites/${site.slug}`}
-        keywords={[...tags, category, site.name]}
+        keywords={[
+          site.name,
+          domain,
+          ...site.tags,
+          categoryLabel(site.category).toLowerCase(),
+          "quiet websites",
+        ]}
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: site.name,
             url: site.url,
-            description: about,
+            description: site.description,
             inLanguage: "en",
-            keywords: tags.join(", "),
-            datePublished: site.launched,
           },
           {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: `${siteUrl}/` },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: category,
-                item: `${siteUrl}/?category=${site.category}`,
-              },
-              { "@type": "ListItem", position: 3, name: site.name, item: pageUrl },
+              { "@type": "ListItem", position: 2, name: site.name, item: pageUrl },
             ],
           },
         ]}
       />
 
-      <article className="site-detail mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
-        <header className="detail-hero">
-          <Link to="/#all-sites" className="detail-back">
-            ← All {directory.sites.length} sites
-          </Link>
-          <div className="detail-head">
-            <SiteIcon site={site} size={56} label={false} />
-            <div className="min-w-0 flex flex-col gap-1">
-              <span className="detail-kicker">
-                {category}
-                {site.launched && ` · ${formatDate(site.launched)}`}
-              </span>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">{site.name}</h1>
-              <span className="text-[12px] font-mono" style={{ color: "var(--muted)" }}>
-                {domain}
-              </span>
+      <div className="site-detail-page">
+        {/* The site itself is the backdrop: a live shot of the page, veiled so the
+            name, blurb and actions stay readable on top of it. */}
+        <section className="site-detail-hero" aria-labelledby="site-detail-title">
+          <span
+            className="site-detail-hero-shot"
+            aria-hidden="true"
+            style={{ backgroundImage: `url("${screenshotUrl(site.url, 1400, 900)}")` }}
+          />
+          <span className="site-detail-hero-veil" aria-hidden="true" />
+
+          <div className="site-detail-hero-inner mx-auto w-full max-w-5xl px-4 sm:px-6">
+            <div className="site-detail-identity">
+              <SiteIcon site={site} size={64} label={false} />
+              <div className="site-detail-title-block">
+                <h1 id="site-detail-title">
+                  {site.name}
+                  {site.verified && <VerifiedStamp size={20} />}
+                </h1>
+                <a
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="site-detail-domain"
+                >
+                  {domain} <span aria-hidden="true">↗</span>
+                </a>
+              </div>
             </div>
-          </div>
 
-          <p className="detail-lede">{lede ?? about}</p>
+            {tagline && <p className="site-detail-tagline">{tagline}</p>}
+            <p className="site-detail-lede">{site.description}</p>
 
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn accent"
-              title={`Open ${domain}`}
-            >
-              Visit {domain} <span aria-hidden="true">→</span>
-            </a>
-            <Link to={`/?category=${site.category}#explore`} className="btn ghost">
-              More in {category}
-            </Link>
-          </div>
+            {site.tags.length > 0 && (
+              <ul className="site-detail-tags" aria-label="Site tags">
+                {site.tags.map((tag) => <li key={tag}>{tag}</li>)}
+              </ul>
+            )}
 
-          {site.source === "submitted" && (
-            <p className="detail-source">
-              Sent in through the submit form
-              {site.submittedAt ? ` and approved on ${formatDate(site.submittedAt.slice(0, 10))}` : ""}
-              . Its own maker wrote the text below.
-            </p>
-          )}
-        </header>
-
-        <Section title="The details">
-          <dl className="fact-grid">
-            {facts.map((fact) => (
-              <Fact key={fact.label} label={fact.label} value={fact.value} />
-            ))}
-          </dl>
-        </Section>
-
-        {lede && (
-          <Section title="At a glance">
-            <p className="detail-body">{about}</p>
-          </Section>
-        )}
-
-        {useCases.length > 0 && (
-          <Section title="Good for" note="what it is actually used for">
-            <ul className="detail-list">
-              {useCases.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </Section>
-        )}
-
-        {alternatives.length > 0 && (
-          <Section title="Alternatives worth knowing" note="listed here when we have them">
-            <ul className="detail-list">
-              {alternatives.map((item) => {
-                const match = directory.sites.find(
-                  (candidate) => candidate.name.toLowerCase() === item.toLowerCase(),
-                );
-                return (
-                  <li key={item}>
-                    {match ? (
-                      <Link to={`/sites/${match.slug}`} className="accent-text font-bold underline underline-offset-4">
-                        {item}
-                      </Link>
-                    ) : (
-                      item
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Section>
-        )}
-
-        {site.pricing && (
-          <Section title="What it costs">
-            <p className="detail-body">{site.pricing}</p>
-          </Section>
-        )}
-
-        {faq.length > 0 && (
-          <Section title="Questions" note={`${faq.length} answered`}>
-            <div className="faq-list">
-              {faq.map((item) => (
-                <details key={item.question} className="faq-item">
-                  <summary>{item.question}</summary>
-                  {item.answer && <p className="detail-body">{item.answer}</p>}
-                </details>
-              ))}
+            <div className="site-detail-actions">
+              <a
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn accent"
+              >
+                Visit {domain} <span aria-hidden="true">→</span>
+              </a>
+              {user ? (
+                <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
+                  {saved ? "Saved ✓" : "Save site"}
+                </button>
+              ) : (
+                <Link to="/auth" className="btn ghost">Sign in to save</Link>
+              )}
+              <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
             </div>
-          </Section>
-        )}
-
-        {tags.length > 0 && (
-          <Section title="Tags">
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Link key={tag} to={`/?q=${encodeURIComponent(tag)}#explore`} className="chip">
-                  {tag}
-                </Link>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {inCollections.length > 0 && (
-          <Section title="Appears in">
-            <ul className="detail-list">
-              {inCollections.map((collection) => (
-                <li key={collection.id}>
-                  <Link
-                    to={`/collections/${collection.id}`}
-                    className="accent-text font-bold underline underline-offset-4"
-                  >
-                    {collection.title}
-                  </Link>
-                  {collection.description && (
-                    <span style={{ color: "var(--muted)" }}> — {collection.description}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
-
-        {related.length > 0 && (
-          <Section title={`More in ${category}`} note="picked from the same shelf">
-            <ul className="detail-related">
-              {related.map((entry) => (
-                <li key={entry.id}>
-                  <Link to={`/sites/${entry.slug}`} className="card card-link p-4 flex items-center gap-4">
-                    <SiteIcon site={entry} size={36} label={false} />
-                    <span className="min-w-0 flex flex-1 flex-col gap-0.5">
-                      <span className="text-base font-bold truncate" style={{ color: "var(--ink)" }}>
-                        {entry.name}
-                      </span>
-                      <span className="text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>
-                        {entry.tagline ?? entry.description}
-                      </span>
-                    </span>
-                    <span className="detail-arrow" aria-hidden="true">
-                      →
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
-
-        {recentlyAdded.length > 0 && (
-          <Section title="Recently listed" note="the newest arrivals">
-            <ul className="detail-list">
-              {recentlyAdded.map((entry) => (
-                <li key={entry.id}>
-                  <Link
-                    to={`/sites/${entry.slug}`}
-                    className="font-bold accent-text underline underline-offset-4"
-                  >
-                    {entry.name}
-                  </Link>
-                  {entry.launched && (
-                    <span className="text-[12px] font-mono" style={{ color: "var(--muted)" }}>
-                      {" "}
-                      · {formatDate(entry.launched)}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
-
-        <section className="cta-band">
-          <div className="cta-copy">
-            <span className="hero-eyebrow">
-              <span className="hero-blip" aria-hidden="true" />
-              Add another
-            </span>
-            <h2 className="text-2xl font-bold tracking-[-0.02em]">Know a site like this one?</h2>
-            <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-              Send it in. Every entry on the list is read by hand, and the page above is written
-              from what the form collects — nothing is hand-built per site.
-            </p>
-          </div>
-          <div className="cta-actions">
-            <Link to="/submit" className="btn accent">
-              Submit your site
-            </Link>
-            <Link to="/trending" className="btn ghost">
-              See what’s trending
-            </Link>
           </div>
         </section>
-      </article>
+
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-5 sm:px-6">
+          <Link to="/" className="site-detail-back">
+            <span aria-hidden="true">←</span> All {sites.length} sites
+          </Link>
+
+          <section className="site-detail-facts" aria-label="Listing facts">
+            <div><span>Category</span><strong>{categoryLabel(site.category)}</strong></div>
+            <div><span>Launched</span><strong>{launched}</strong></div>
+            <div><span>Votes</span><strong>{vote.count}</strong></div>
+            <div><span>Rank</span><strong>{rank > 0 ? `#${rank} of ${sites.length}` : "—"}</strong></div>
+          </section>
+
+          <section className="site-detail-section site-supporters-section" aria-labelledby="supporters-heading">
+            <div className="site-detail-section-heading"><div><span className="site-detail-kicker">The people behind the signal</span><h2 id="supporters-heading">Supporters</h2></div><span className="site-supporters-count">{supporters.length}</span></div>
+            {supporters.length > 0 ? <ul className="site-supporters-list">{supporters.map((supporter) => <li key={supporter.id}><Link to={`/users/${supporter.id}`} className="site-supporter"><img src={avatarUrl(supporter.avatarSeed)} alt="" width="34" height="34" loading="lazy" /><span>{supporter.name}</span></Link></li>)}</ul> : <p className="site-supporters-empty">Be the first person to support {site.name}.</p>}
+          </section>
+
+          {details.length > 0 && (
+            <section className="site-detail-section">
+              <h2>Details</h2>
+              <dl className="site-detail-extra-grid">
+                {details.map(([key, value]) => (
+                  <div className="site-detail-extra" key={key}>
+                    <dt>{humanizeKey(key)}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {lists.length > 0 && (
+            <section className="site-detail-section">
+              <h2>In collections</h2>
+              <ul className="site-detail-collection-list">
+                {lists.map((collection) => (
+                  <li key={collection.id}>
+                    <Link to={`/collections/${collection.id}`}>
+                      <span>{collection.title}</span>
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {builderSites.length > 0 && (
+            <section className="site-detail-section">
+              <div className="site-detail-section-heading"><div><span className="site-detail-kicker">Keep exploring</span><h2>More from this builder</h2></div><span className="site-supporters-count">{builderSites.length}</span></div>
+              <ul className="site-detail-related-grid">
+                {builderSites.map((entry) => (
+                  <li key={entry.id}>
+                    <Link to={`/sites/${entry.slug}`} className="site-detail-related-card">
+                      <SiteIcon site={entry} size={36} label={false} />
+                      <span>
+                        <strong>{entry.name}</strong>
+                        <small>{siteDomain(entry.url)}</small>
+                      </span>
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* The last thing on the page: hand this listing to someone else. */}
+          <section className="site-detail-section site-detail-share">
+            <h2>Share this site</h2>
+            <p>
+              Send {site.name} to someone who would like it, or keep the link for later.
+            </p>
+            <ShareSite site={site} pageUrl={pageUrl} />
+          </section>
+        </div>
+      </div>
+
+      {/*
+        Phones get the two things a visitor actually does here. It is portaled to
+        <body> because the page's slide-in transition leaves an identity
+        transform on the route pane, and a transform turns the pane into the
+        containing block for `position: fixed` — the bar would sit at the bottom
+        of the document instead of the bottom of the screen.
+      */}
+      {createPortal(
+        <div className="site-detail-bar">
+          <button
+            type="button"
+            className={`site-detail-bar-vote${vote.voted ? " is-voted" : ""}`}
+            onClick={() => void voteAndRefreshSupporters()}
+            disabled={vote.voted || vote.pending}
+            aria-label={
+              vote.voted
+                ? `You voted for ${site.name}, ${vote.count} votes`
+                : `Vote for ${site.name}, ${vote.count} votes`
+            }
+          >
+            <span aria-hidden="true">{vote.voted ? "✓" : "▲"}</span>
+            <span className="site-detail-bar-copy">
+              <strong>{vote.pending ? "Counting…" : vote.voted ? "Voted" : "Vote"}</strong>
+              <small>{vote.count} {vote.count === 1 ? "vote" : "votes"}</small>
+            </span>
+          </button>
+          <a
+            className="site-detail-bar-visit"
+            href={site.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit <span className="site-detail-bar-domain">{domain}</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>,
+        document.body,
+      )}
     </>
   );
 }

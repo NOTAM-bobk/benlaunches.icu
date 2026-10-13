@@ -1,5 +1,14 @@
 import { posts } from "./posts";
-import type { Directory } from "./siteDirectory";
+import {
+  categoryById,
+  categoryCount,
+  categoryLabel,
+  collections,
+  collectionSites,
+  rankedSites,
+  siteBySlug,
+  sites,
+} from "./siteData";
 import { siteDomain } from "./siteTile";
 
 /** One row in the contextual group of the side menu. */
@@ -26,63 +35,78 @@ export interface NavContext {
 
 const SUBMIT: NavAction = { id: "submit", label: "Submit your site", to: "/submit" };
 const TRENDING: NavAction = { id: "trending", label: "Top ranking", to: "/trending" };
+const DIRECTORY: NavAction = { id: "directory", label: "Browse the directory", to: "/#all-sites" };
+const BORED: NavAction = { id: "bored", label: "I'm bored", to: "/this-or-that" };
+
+function directoryAction(): NavAction {
+  return { ...DIRECTORY, badge: String(sites.length) };
+}
 
 /**
  * The actions for wherever the visitor is standing: the home page, a category,
- * a search, a blog note, a collection, a single listing, or the submit form.
- * Everything is derived from the live directory, so a new sites changes these
- * rows without any edits here.
+ * a search, a listing, the notes, a collection, or one of the games. Everything
+ * is derived from the directory, so adding a site changes these rows without
+ * touching this file.
  */
-export function navContextFor(
-  pathname: string,
-  search: string,
-  directory: Directory,
-): NavContext {
+export function navContextFor(pathname: string, search: string): NavContext {
   const path = pathname.replace(/\/+$/, "") || "/";
   const params = new URLSearchParams(search);
-  const total = directory.sites.length;
+  const total = sites.length;
   const listing = path.startsWith("/sites/")
-    ? directory.siteBySlug(decodeURIComponent(path.slice("/sites/".length)))
+    ? siteBySlug(decodeURIComponent(path.slice("/sites/".length)))
     : undefined;
 
   if (listing) {
     const domain = siteDomain(listing.url);
-    const inCollections = directory.collectionsForSite(listing.slug);
+    const inCollections = collections.filter((collection) =>
+      collection.siteSlugs.includes(listing.slug),
+    );
     const actions: NavAction[] = [
       { id: "open", label: `Open ${domain}`, href: listing.url },
       {
         id: "category",
-        label: `More in ${directory.categoryLabel(listing.category)}`,
+        label: `More in ${categoryLabel(listing.category)}`,
         to: `/?category=${listing.category}#explore`,
-        badge: String(directory.categoryCount(listing.category)),
+        badge: String(categoryCount(listing.category)),
       },
-      { id: "all", label: "Back to the directory", to: "/#all-sites", badge: String(total) },
+      { ...directoryAction() },
     ];
     if (inCollections[0]) {
       actions.push({
         id: "collection",
         label: inCollections[0].title,
         to: `/collections/${inCollections[0].id}`,
-        badge: String(directory.collectionMembers(inCollections[0]).length),
+        badge: String(collectionSites(inCollections[0]).length),
       });
     }
     return {
       id: "listing",
       title: "This listing",
-      note: `${directory.categoryLabel(listing.category)}${listing.source === "submitted" ? " · just submitted" : ""}`,
+      note: categoryLabel(listing.category),
       actions,
       primary: { id: "visit", label: `Visit ${domain}`, href: listing.url },
-      secondary: { id: "elsewhere", label: "More sites like this", to: `/?category=${listing.category}#explore` },
+      secondary: {
+        id: "similar",
+        label: "More sites like this",
+        to: `/?category=${listing.category}#explore`,
+      },
     };
   }
 
   if (path === "/") {
     const query = params.get("q")?.trim() ?? "";
     const categoryId = params.get("category") ?? "all";
-    const category = categoryId === "all" ? undefined : directory.categoryById(categoryId);
+    const category = categoryId === "all" ? undefined : categoryById(categoryId);
 
     if (query) {
-      const matches = directory.searchSites(query);
+      const needle = query.toLowerCase();
+      const matches = sites.filter(
+        (site) =>
+          site.name.toLowerCase().includes(needle) ||
+          site.description.toLowerCase().includes(needle) ||
+          site.tags.some((tag) => tag.toLowerCase().includes(needle)) ||
+          site.category.toLowerCase().includes(needle),
+      );
       return {
         id: "search",
         title: "Your search",
@@ -95,65 +119,80 @@ export function navContextFor(
             to: `/sites/${site.slug}`,
             badge: siteDomain(site.url),
           })),
-          { id: "all", label: "Browse the directory", to: "/#all-sites", badge: String(total) },
+          { ...directoryAction() },
         ],
-        primary: { id: "browse", label: "Browse the directory", to: "/#all-sites" },
+        primary: { ...directoryAction() },
         secondary: SUBMIT,
       };
     }
 
     if (category) {
-      const others = directory
-        .categoriesInUse()
-        .filter((entry) => entry.category.id !== category.id);
       return {
         id: "category",
         title: `Category: ${category.label}`,
-        note: `${directory.categoryCount(category.id)} sites`,
+        note: `${categoryCount(category.id)} sites`,
         actions: [
           { id: "all", label: "All sites", to: "/#all-sites", badge: String(total) },
-          ...others.map((entry) => ({
-            id: `category-${entry.category.id}`,
-            label: entry.category.label,
-            to: `/?category=${entry.category.id}#explore`,
-            badge: String(entry.count),
+          ...collections.slice(0, 2).map((collection) => ({
+            id: `collection-${collection.id}`,
+            label: collection.title,
+            to: `/collections/${collection.id}`,
+            badge: String(collectionSites(collection).length),
           })),
+          { ...TRENDING },
         ],
         primary: TRENDING,
         secondary: { id: "everything", label: "All categories", to: "/#explore" },
       };
     }
 
-    const newest = directory.newest(1)[0];
-    const arrivals = directory.newest(3);
+    const arrivals = rankedSites().slice(0, 3);
     return {
       id: "home",
       title: "On this page",
-      note: newest ? `Newest listing: ${newest.name}` : undefined,
+      note: "every listing is checked by hand",
       actions: [
         { id: "all", label: "All sites", to: "/#all-sites", badge: String(total) },
-        ...arrivals
-          .filter((site) => site.launched)
-          .map((site) => ({
-            id: `new-${site.slug}`,
-            label: site.name,
-            to: `/sites/${site.slug}`,
-            badge: site.launched,
-          })),
+        ...arrivals.map((site, index) => ({
+          id: `pick-${site.slug}`,
+          label: site.name,
+          to: `/sites/${site.slug}`,
+          badge: `#${index + 1}`,
+        })),
         {
           id: "collections",
           label: "Latest collections",
           to: "/#collections",
-          badge: String(directory.collections.length),
+          badge: String(collections.length),
         },
       ],
       primary: SUBMIT,
-      secondary: TRENDING,
+      secondary: BORED,
+    };
+  }
+
+  if (path === "/discover-websites" || path === "/new-websites") {
+    const isNew = path === "/new-websites";
+    return {
+      id: isNew ? "new" : "discover",
+      title: isNew ? "New and upcoming" : "Discover",
+      note: isNew ? "the latest launches" : "hand-picked corners of the web",
+      actions: [
+        { ...directoryAction() },
+        { id: "trending", label: "Trending now", to: "/trending" },
+        {
+          id: "other",
+          label: isNew ? "Discover websites" : "New and upcoming",
+          to: isNew ? "/discover-websites" : "/new-websites",
+        },
+      ],
+      primary: isNew ? { id: "discover", label: "Discover websites", to: "/discover-websites" } : SUBMIT,
+      secondary: isNew ? SUBMIT : BORED,
     };
   }
 
   if (path === "/trending") {
-    const top = directory.trending(3);
+    const top = rankedSites().slice(0, 3);
     return {
       id: "trending",
       title: "Trending now",
@@ -165,14 +204,10 @@ export function navContextFor(
           to: `/sites/${site.slug}`,
           badge: `#${index + 1}`,
         })),
-        {
-          id: "how",
-          label: "How voting works",
-          to: "/blog/how-voting-works",
-        },
-        { id: "all", label: "Browse the directory", to: "/#all-sites", badge: String(total) },
+        { id: "how", label: "How voting works", to: "/blog/how-voting-works" },
+        { ...directoryAction() },
       ],
-      primary: { id: "browse", label: "Browse the directory", to: "/#all-sites" },
+      primary: { ...directoryAction() },
       secondary: SUBMIT,
     };
   }
@@ -182,7 +217,9 @@ export function navContextFor(
     const current = slug ? posts.find((post) => post.slug === slug) : undefined;
     const index = current ? posts.findIndex((post) => post.slug === current.slug) : -1;
     const nextPost = index >= 0 ? posts[index - 1] : posts[0];
-    const rest = posts.filter((post) => post.slug !== current?.slug && post.slug !== nextPost?.slug);
+    const rest = posts.filter(
+      (post) => post.slug !== current?.slug && post.slug !== nextPost?.slug,
+    );
 
     return {
       id: "notes",
@@ -190,13 +227,7 @@ export function navContextFor(
       note: current ? current.date : `${posts.length} notes`,
       actions: [
         ...(nextPost
-          ? [
-              {
-                id: `next-${nextPost.slug}`,
-                label: nextPost.title,
-                to: `/blog/${nextPost.slug}`,
-              },
-            ]
+          ? [{ id: `next-${nextPost.slug}`, label: nextPost.title, to: `/blog/${nextPost.slug}` }]
           : []),
         ...rest.slice(0, 3).map((post) => ({
           id: `post-${post.slug}`,
@@ -205,23 +236,21 @@ export function navContextFor(
         })),
         { id: "all", label: "All notes", to: "/blog", badge: String(posts.length) },
       ],
-      primary: current
-        ? { id: "all-notes", label: "All notes", to: "/blog" }
-        : SUBMIT,
-      secondary: { id: "directory", label: "Browse the directory", to: "/#all-sites" },
+      primary: current ? { id: "all-notes", label: "All notes", to: "/blog" } : SUBMIT,
+      secondary: { ...directoryAction() },
     };
   }
 
   if (path === "/collections" || path.startsWith("/collections/")) {
     const id = path.startsWith("/collections/") ? path.slice("/collections/".length) : "";
-    const current = id ? directory.collectionById(id) : undefined;
-    const others = directory.collections.filter((collection) => collection.id !== current?.id);
+    const current = id ? collections.find((collection) => collection.id === id) : undefined;
+    const others = collections.filter((collection) => collection.id !== current?.id);
     return {
       id: "collections",
       title: current ? current.title : "Collections",
       note: current
-        ? `${directory.collectionMembers(current).length} sites`
-        : `${directory.collections.length} collections`,
+        ? `${collectionSites(current).length} sites`
+        : `${collections.length} collections`,
       actions: [
         ...(current
           ? [
@@ -229,7 +258,7 @@ export function navContextFor(
                 id: "members",
                 label: "Open the list",
                 to: "/#all-sites",
-                badge: String(directory.collectionMembers(current).length),
+                badge: String(collectionSites(current).length),
               },
             ]
           : []),
@@ -237,14 +266,34 @@ export function navContextFor(
           id: `collection-${collection.id}`,
           label: collection.title,
           to: `/collections/${collection.id}`,
-          badge: String(directory.collectionMembers(collection).length),
+          badge: String(collectionSites(collection).length),
         })),
-        { id: "all", label: "All collections", to: "/collections", badge: String(directory.collections.length) },
+        {
+          id: "all",
+          label: "All collections",
+          to: "/collections",
+          badge: String(collections.length),
+        },
       ],
       primary: current
         ? { id: "all-collections", label: "All collections", to: "/collections" }
         : SUBMIT,
-      secondary: { id: "directory", label: "Browse the directory", to: "/#all-sites" },
+      secondary: { ...directoryAction() },
+    };
+  }
+
+  if (path === "/this-or-that" || path === "/site-tinder") {
+    return {
+      id: "games",
+      title: "Games",
+      note: "one site, or two to pick between",
+      actions: [
+        { id: "or", label: "This or That", to: "/this-or-that" },
+        { id: "tinder", label: "Site Tinder", to: "/site-tinder" },
+        { ...directoryAction() },
+      ],
+      primary: { ...directoryAction() },
+      secondary: SUBMIT,
     };
   }
 
@@ -256,10 +305,25 @@ export function navContextFor(
       actions: [
         { id: "launched", label: "What counts as launched", to: "/blog/what-counts-as-launched" },
         { id: "voting", label: "How voting works", to: "/blog/how-voting-works" },
-        { id: "all", label: "See what is already listed", to: "/#all-sites", badge: String(total) },
+        { ...directoryAction() },
       ],
-      primary: { id: "directory", label: "Browse the directory", to: "/#all-sites" },
+      primary: { ...directoryAction() },
       secondary: TRENDING,
+    };
+  }
+
+  if (path === "/advertise" || path.startsWith("/services")) {
+    return {
+      id: "advertise",
+      title: "Get seen",
+      note: "clearly labelled placements",
+      actions: [
+        SUBMIT,
+        { ...directoryAction() },
+        { id: "stats", label: "Directory stats", to: "/stats" },
+      ],
+      primary: SUBMIT,
+      secondary: { ...directoryAction() },
     };
   }
 
@@ -267,13 +331,13 @@ export function navContextFor(
     return {
       id: "admin",
       title: "Review queue",
-      note: `${directory.submittedCount} approved from the queue`,
+      note: "submissions and reports",
       actions: [
-        { id: "all", label: "Browse the directory", to: "/#all-sites", badge: String(total) },
+        { ...directoryAction() },
         SUBMIT,
-        TRENDING,
+        { id: "stats", label: "Directory stats", to: "/stats" },
       ],
-      primary: { id: "directory", label: "Browse the directory", to: "/#all-sites" },
+      primary: { ...directoryAction() },
       secondary: SUBMIT,
     };
   }
@@ -283,11 +347,12 @@ export function navContextFor(
     title: "Elsewhere",
     note: path === "/auth" ? "Signing in is optional" : undefined,
     actions: [
-      { id: "all", label: "Browse the directory", to: "/#all-sites", badge: String(total) },
-      TRENDING,
+      { ...directoryAction() },
+      { ...TRENDING },
       { id: "collections", label: "Collections", to: "/collections" },
+      { id: "bored", label: "I'm bored", to: "/this-or-that" },
     ],
-    primary: { id: "directory", label: "Browse the directory", to: "/#all-sites" },
+    primary: { ...directoryAction() },
     secondary: SUBMIT,
   };
 }

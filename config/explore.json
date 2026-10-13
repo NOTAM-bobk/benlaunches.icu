@@ -5,6 +5,21 @@
   "newAdditionsLimit": 40,
   "featuredSitesLimit": 40,
   "trendingPreviewCount": 3,
+  "interestingSlugs": [
+    "ciechanowski",
+    "pudding",
+    "desmos",
+    "wiby",
+    "are-na",
+    "music-for-programming"
+  ],
+  "editorsPickSlugs": [
+    "weather-gov",
+    "openstreetmap",
+    "practical-typography",
+    "fonts-in-use",
+    "a-soft-murmur"
+  ],
   "collections": [
     {
       "id": "quiet-desk",
@@ -29,6 +44,30 @@
       "title": "The old web, kept alive",
       "description": "Handmade home pages, tiny pages, and the people still publishing without a platform.",
       "siteSlugs": ["neocities", "512kb-club", "brutalist-websites", "suckless", "micro-blog", "write-as"]
+    },
+    {
+      "id": "small-web-search",
+      "title": "Find the small web",
+      "description": "Search engines, directories, and discovery spaces that help you wander beyond the algorithmic feed.",
+      "siteSlugs": ["marginalia-search", "wiby", "are-na", "ooh-directory", "dense-discovery", "neocities"]
+    },
+    {
+      "id": "learn-by-moving",
+      "title": "Learn by moving things",
+      "description": "Interactive explainers and tools that make an idea clearer when you can poke, drag, graph, or inspect it.",
+      "siteSlugs": ["pudding", "ciechanowski", "desmos", "compiler-explorer", "mdn", "openstreetmap"]
+    },
+    {
+      "id": "careful-design-kit",
+      "title": "A careful design kit",
+      "description": "Type, icons, layout, logos, and a blank canvas for making the next page feel considered.",
+      "siteSlugs": ["lucide", "svgl", "tldraw", "practical-typography", "fonts-in-use", "every-layout"]
+    },
+    {
+      "id": "make-room-to-focus",
+      "title": "Make room to focus",
+      "description": "Gentle sound, quiet feeds, and low-distraction utilities for settling into a longer stretch of work.",
+      "siteSlugs": ["music-for-programming", "a-soft-murmur", "rainy-mood", "miniflux", "freshrss", "time-is"]
     }
   ]
 }

@@ -1,0 +1,54 @@
+# Boring Internet: AI crawler guide
+
+## What this site is
+Boring Internet is a directory for people who want to discover websites without algorithmic feeds. Pages are curated by hand and organized so visitors can move website to website quickly.
+
+## Core pages to index
+
+1) Home directory
+- Path: /
+- Focus: broad discovery, category filtering, featured links, launches, and internal navigation
+- Query intent: discover websites, find websites, bored button alternatives
+
+2) Discover websites
+- Path: /discover-websites
+- Focus: direct discovery path for visitors who want to jump between sites
+- Query intent: website to website, discover websites
+
+3) New and upcoming websites
+- Path: /new-websites
+- Focus: latest launches and recent additions
+- Query intent: new and upcoming websites, launch new websites
+
+4) Trending
+- Path: /trending
+- Focus: currently popular sites based on voting
+- Query intent: trending websites, discover websites
+
+5) Collections
+- Path: /collections
+- Focus: grouped sets of related websites
+- Query intent: curated website lists, find websites by theme
+
+6) Blog
+- Path: /blog
+- Focus: editorial explanations of curation and launch decisions
+
+7) Submit
+- Path: /submit
+- Focus: how creators submit launched websites for review
+
+8) Site pages
+- Path: /sites/<slug>
+- Focus: everything known about one listed site, plus its link out, category, tags, votes, and collections
+- Query intent: <site name>, site details, similar quiet websites
+
+9) This or that
+- Path: /this-or-that
+- Focus: two random listings framed side by side with a single vote for the better one
+- Query intent: compare websites, vote on websites, this or that
+
+## Crawl notes
+- Public pages are static and indexable.
+- /admin is intentionally blocked in robots directives.
+- Sitemap includes all core listing routes, one page per listed site, collection pages, and blog posts.

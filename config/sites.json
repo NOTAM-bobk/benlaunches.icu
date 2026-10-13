@@ -8,7 +8,7 @@
       "description": "Links and discussion for people who build things, on a page that has barely changed since 2007.",
       "category": "news",
       "tags": ["news", "tech", "classic"],
-      "trending": 51,
+      "verified": true,
       "launched": "2026-10-03"
     },
     {
@@ -19,7 +19,7 @@
       "description": "NPR's headlines as bare text, with no images, scripts, or ads.",
       "category": "news",
       "tags": ["news", "text", "lowdata"],
-      "trending": 50,
+      "verified": true,
       "launched": "2026-06-11"
     },
     {
@@ -30,7 +30,7 @@
       "description": "CNN stripped down to a text-only page that opens instantly on any connection.",
       "category": "news",
       "tags": ["news", "text", "fast"],
-      "trending": 49,
+      "verified": false,
       "launched": "2026-05-24"
     },
     {
@@ -41,7 +41,7 @@
       "description": "One screen of world news, rewritten to be readable instead of clickable.",
       "category": "news",
       "tags": ["news", "summaries", "calm"],
-      "trending": 48,
+      "verified": false,
       "launched": "2026-09-12"
     },
     {
@@ -52,7 +52,7 @@
       "description": "Live sports scores rendered as plain text you could read over a terminal.",
       "category": "news",
       "tags": ["sports", "scores", "text"],
-      "trending": 47,
+      "verified": false,
       "launched": "2026-08-30"
     },
     {
@@ -63,7 +63,7 @@
       "description": "Volunteers re-typeset public-domain books so the free version looks better than the paid one.",
       "category": "books",
       "tags": ["books", "ebooks", "free"],
-      "trending": 46,
+      "verified": false,
       "launched": "2026-07-19"
     },
     {
@@ -74,7 +74,7 @@
       "description": "The original library of free public-domain ebooks, still running on plain HTML.",
       "category": "books",
       "tags": ["books", "archive", "classic"],
-      "trending": 45,
+      "verified": true,
       "launched": "2026-04-02"
     },
     {
@@ -85,7 +85,7 @@
       "description": "A lending library cataloguing nearly every book ever published.",
       "category": "books",
       "tags": ["books", "lending", "catalog"],
-      "trending": 44,
+      "verified": true,
       "launched": "2026-03-15"
     },
     {
@@ -96,7 +96,7 @@
       "description": "Essays on books, science, and living, published by one person since 2006.",
       "category": "reading",
       "tags": ["essays", "books", "longform"],
-      "trending": 43,
+      "verified": false,
       "launched": "2026-02-27"
     },
     {
@@ -107,7 +107,7 @@
       "description": "Essays on programming and startups, hand-written in plain HTML for two decades.",
       "category": "reading",
       "tags": ["essays", "startups", "writing"],
-      "trending": 42,
+      "verified": false,
       "launched": "2026-01-30"
     },
     {
@@ -118,7 +118,7 @@
       "description": "Very short notes and books from a programmer who writes to think.",
       "category": "reading",
       "tags": ["notes", "books", "short"],
-      "trending": 41,
+      "verified": false,
       "launched": "2026-09-21"
     },
     {
@@ -129,7 +129,7 @@
       "description": "Programming explanations and hand-drawn comics that assume nothing.",
       "category": "reading",
       "tags": ["comics", "programming", "beginner"],
-      "trending": 40,
+      "verified": false,
       "launched": "2026-08-08"
     },
     {
@@ -140,7 +140,7 @@
       "description": "Long, data-heavy posts about hardware, companies, and how systems really behave.",
       "category": "reading",
       "tags": ["performance", "longform", "systems"],
-      "trending": 39,
+      "verified": false,
       "launched": "2026-07-25"
     },
     {
@@ -151,7 +151,7 @@
       "description": "A single site of endlessly revised research notes with footnotes for everything.",
       "category": "reading",
       "tags": ["research", "notes", "longform"],
-      "trending": 38,
+      "verified": false,
       "launched": "2026-05-09"
     },
     {
@@ -162,7 +162,7 @@
       "description": "Walking, books, and photography written up as quiet, photo-heavy essays.",
       "category": "reading",
       "tags": ["essays", "walking", "photography"],
-      "trending": 37,
+      "verified": false,
       "launched": "2026-06-28"
     },
     {
@@ -173,7 +173,7 @@
       "description": "The web platform reference, written for humans and kept current by Mozilla.",
       "category": "dev",
       "tags": ["docs", "reference", "web"],
-      "trending": 36,
+      "verified": true,
       "launched": "2026-02-14"
     },
     {
@@ -184,7 +184,7 @@
       "description": "A search engine that deliberately favours small, text-heavy pages over big ones.",
       "category": "tools",
       "tags": ["search", "indie", "text"],
-      "trending": 35,
+      "verified": true,
       "launched": "2026-09-29"
     },
     {
@@ -195,7 +195,7 @@
       "description": "A search engine for hand-made pages, plus a button that drops you somewhere random.",
       "category": "tools",
       "tags": ["search", "oldweb", "random"],
-      "trending": 34,
+      "verified": true,
       "launched": "2026-08-17"
     },
     {
@@ -206,8 +206,19 @@
       "description": "Publish a post without an account, a dashboard, or anything to configure.",
       "category": "tools",
       "tags": ["writing", "blog", "minimal"],
-      "trending": 33,
+      "verified": false,
       "launched": "2026-07-07"
+    },
+    {
+      "id": "bear-blog",
+      "name": "Bear Blog",
+      "slug": "bear-blog",
+      "url": "https://bearblog.dev",
+      "description": "A tiny blogging platform with no trackers, no scripts, and a dashboard that fits on one screen.",
+      "category": "tools",
+      "tags": ["blog", "smallweb", "minimal"],
+      "verified": false,
+      "launched": "2026-10-09"
     },
     {
       "id": "excalidraw",
@@ -217,21 +228,8 @@
       "description": "Hand-drawn style diagrams that stay in your browser until you export them.",
       "category": "tools",
       "tags": ["diagrams", "drawing", "local"],
-      "trending": 32,
-      "launched": "2026-06-19",
-      "tagline": "Sketches that look hand-drawn, drawn in a tab with nothing to install.",
-      "useCases": [
-        "Sketching a screen flow before anyone opens a design tool",
-        "Marking up a screenshot in a bug report",
-        "Whiteboarding in a call without a sign-in"
-      ],
-      "alternatives": ["tldraw", "Draw.io"],
-      "pricing": "Free, no account. Paid team folders if you want them.",
-      "faq": [
-        { "question": "Does it work offline?", "answer": "Yes — the whole editor runs in the tab and only leaves the browser when you export." },
-        { "question": "Can I keep the files?", "answer": "Every drawing exports as .excalidraw, PNG, or SVG, so nothing is locked in." }
-      ],
-      "openSource": true
+      "verified": true,
+      "launched": "2026-06-19"
     },
     {
       "id": "tldraw",
@@ -241,7 +239,7 @@
       "description": "An infinite canvas for sketching that opens instantly and shares with one link.",
       "category": "tools",
       "tags": ["canvas", "drawing", "fast"],
-      "trending": 31,
+      "verified": false,
       "launched": "2026-05-30"
     },
     {
@@ -252,7 +250,7 @@
       "description": "A full image editor that runs in the browser and opens Photoshop files.",
       "category": "tools",
       "tags": ["images", "editor", "browser"],
-      "trending": 30,
+      "verified": false,
       "launched": "2026-04-18"
     },
     {
@@ -263,7 +261,7 @@
       "description": "Compress and resize images in the tab, with nothing uploaded anywhere.",
       "category": "tools",
       "tags": ["images", "compression", "local"],
-      "trending": 29,
+      "verified": true,
       "launched": "2026-03-27"
     },
     {
@@ -274,7 +272,7 @@
       "description": "See the assembly your compiler actually generates, side by side with your source.",
       "category": "dev",
       "tags": ["code", "compilers", "dev"],
-      "trending": 28,
+      "verified": false,
       "launched": "2026-08-26"
     },
     {
@@ -285,7 +283,7 @@
       "description": "Build a regular expression and have every character explained back to you.",
       "category": "dev",
       "tags": ["regex", "dev", "explain"],
-      "trending": 27,
+      "verified": false,
       "launched": "2026-07-31"
     },
     {
@@ -296,7 +294,7 @@
       "description": "A consistent open-source icon set you can copy out as a single SVG.",
       "category": "design",
       "tags": ["icons", "svg", "design"],
-      "trending": 26,
+      "verified": false,
       "launched": "2026-06-05"
     },
     {
@@ -307,7 +305,7 @@
       "description": "Brand logos as tidy SVGs, searchable and ready to paste into a project.",
       "category": "design",
       "tags": ["logos", "svg", "design"],
-      "trending": 25,
+      "verified": false,
       "launched": "2026-05-16"
     },
     {
@@ -318,7 +316,7 @@
       "description": "Generate colour palettes fast, then lock the ones worth keeping.",
       "category": "design",
       "tags": ["colour", "palettes", "design"],
-      "trending": 24,
+      "verified": false,
       "launched": "2026-04-28"
     },
     {
@@ -329,7 +327,7 @@
       "description": "Small CSS layout primitives that teach the idea instead of hiding it.",
       "category": "design",
       "tags": ["css", "layout", "learning"],
-      "trending": 23,
+      "verified": false,
       "launched": "2026-03-08"
     },
     {
@@ -340,7 +338,7 @@
       "description": "A tiny self-hosted RSS reader with a keyboard-first interface.",
       "category": "tools",
       "tags": ["rss", "selfhosted", "reader"],
-      "trending": 22,
+      "verified": false,
       "launched": "2026-09-08"
     },
     {
@@ -351,7 +349,7 @@
       "description": "A hand-checked directory of blogs, sorted by the subject they actually write about.",
       "category": "culture",
       "tags": ["blogs", "directory", "curated"],
-      "trending": 21,
+      "verified": false,
       "launched": "2026-08-21"
     },
     {
@@ -362,7 +360,7 @@
       "description": "Short posts and a timeline you own, with no algorithm deciding the order.",
       "category": "culture",
       "tags": ["blogging", "social", "indieweb"],
-      "trending": 20,
+      "verified": false,
       "launched": "2026-07-12"
     },
     {
@@ -373,7 +371,7 @@
       "description": "Free home pages for people who miss the handmade, link-happy web.",
       "category": "culture",
       "tags": ["hosting", "oldweb", "personal"],
-      "trending": 19,
+      "verified": false,
       "launched": "2026-06-24"
     },
     {
@@ -384,7 +382,7 @@
       "description": "Collect links and images into quiet channels, then browse what others are collecting.",
       "category": "culture",
       "tags": ["collections", "research", "visual"],
-      "trending": 18,
+      "verified": false,
       "launched": "2026-05-03"
     },
     {
@@ -395,7 +393,7 @@
       "description": "The web's attic: old sites, books, audio, and software kept available for good.",
       "category": "culture",
       "tags": ["archive", "history", "library"],
-      "trending": 17,
+      "verified": true,
       "launched": "2026-04-11"
     },
     {
@@ -406,7 +404,7 @@
       "description": "A weekly letter of tools, articles, and thoughtful design, with no sponsored filler.",
       "category": "culture",
       "tags": ["newsletter", "design", "weekly"],
-      "trending": 16,
+      "verified": false,
       "launched": "2026-03-22"
     },
     {
@@ -417,7 +415,7 @@
       "description": "A whole book on typography you can read in the browser for free.",
       "category": "design",
       "tags": ["typography", "book", "design"],
-      "trending": 15,
+      "verified": false,
       "launched": "2026-02-09"
     },
     {
@@ -428,7 +426,7 @@
       "description": "A public archive of typography spotted on signage, packaging, and album covers.",
       "category": "design",
       "tags": ["typography", "archive", "design"],
-      "trending": 14,
+      "verified": false,
       "launched": "2026-01-26"
     },
     {
@@ -439,7 +437,7 @@
       "description": "Long, wordless mixes made for working, listed with the notes behind each one.",
       "category": "sound",
       "tags": ["music", "focus", "mixes"],
-      "trending": 13,
+      "verified": false,
       "launched": "2026-08-14"
     },
     {
@@ -450,7 +448,7 @@
       "description": "A list of sites whose whole page weighs less than half a megabyte.",
       "category": "culture",
       "tags": ["performance", "list", "web"],
-      "trending": 12,
+      "verified": false,
       "launched": "2026-07-04"
     },
     {
@@ -461,7 +459,7 @@
       "description": "Software philosophy and small programs that do one thing without configuration.",
       "category": "culture",
       "tags": ["software", "minimal", "philosophy"],
-      "trending": 11,
+      "verified": false,
       "launched": "2026-06-16"
     },
     {
@@ -472,7 +470,7 @@
       "description": "A gallery of sites that ignore the template and show their structure instead.",
       "category": "culture",
       "tags": ["gallery", "design", "web"],
-      "trending": 10,
+      "verified": false,
       "launched": "2026-05-21"
     },
     {
@@ -483,7 +481,7 @@
       "description": "Visual essays that explain a cultural question with data instead of paragraphs.",
       "category": "experiment",
       "tags": ["data", "essays", "visual"],
-      "trending": 9,
+      "verified": false,
       "launched": "2026-09-02"
     },
     {
@@ -494,7 +492,7 @@
       "description": "Interactive articles that let you drag the physics until it clicks.",
       "category": "experiment",
       "tags": ["interactive", "physics", "explainers"],
-      "trending": 8,
+      "verified": false,
       "launched": "2026-07-28"
     },
     {
@@ -505,7 +503,7 @@
       "description": "A graphing calculator in the browser that renders equations as you type them.",
       "category": "experiment",
       "tags": ["math", "graphs", "calculator"],
-      "trending": 7,
+      "verified": false,
       "launched": "2026-06-30"
     },
     {
@@ -516,7 +514,7 @@
       "description": "The exact time anywhere, on a page that is almost entirely numbers.",
       "category": "experiment",
       "tags": ["time", "clock", "simple"],
-      "trending": 6,
+      "verified": false,
       "launched": "2026-05-12"
     },
     {
@@ -527,7 +525,7 @@
       "description": "A government forecast page with no ads, no app prompts, and real radar data.",
       "category": "experiment",
       "tags": ["weather", "data", "forecast"],
-      "trending": 5,
+      "verified": false,
       "launched": "2026-04-06"
     },
     {
@@ -538,7 +536,7 @@
       "description": "A world map anyone can edit and everyone can use without a key.",
       "category": "experiment",
       "tags": ["maps", "open", "geo"],
-      "trending": 4,
+      "verified": false,
       "launched": "2026-03-02"
     },
     {
@@ -549,7 +547,7 @@
       "description": "A self-hosted feed reader that keeps your subscriptions on your own server.",
       "category": "experiment",
       "tags": ["rss", "selfhosted", "feeds"],
-      "trending": 3,
+      "verified": false,
       "launched": "2026-02-20"
     },
     {
@@ -560,7 +558,7 @@
       "description": "Mix rain, thunder, and wind into a background hum and leave it running.",
       "category": "sound",
       "tags": ["ambient", "sound", "focus"],
-      "trending": 2,
+      "verified": false,
       "launched": "2026-01-18"
     },
     {
@@ -571,7 +569,7 @@
       "description": "One page that plays rain and does absolutely nothing else.",
       "category": "sound",
       "tags": ["ambient", "rain", "single"],
-      "trending": 1,
+      "verified": false,
       "launched": "2026-01-05"
     }
   ]

@@ -1,0 +1,33 @@
+{
+  "eyebrow": "Checkout",
+  "title": "Pay for your boost",
+  "intro": "Pick what you want, check the total, and pay with PayPal. Nothing is charged until you approve it there.",
+  "currency": "USD",
+  "contact": {
+    "label": "Questions before you pay?",
+    "email": "hello@base31.org",
+    "phone": "612 444 3853",
+    "note": "Email or call and a person will answer — no chatbot, no form to fill in."
+  },
+  "promises": [
+    "Nothing is charged until you approve it inside PayPal.",
+    "Your card and bank details stay with PayPal — this site never sees them.",
+    "Every order gets a short email from a person within a working day."
+  ],
+  "offline": {
+    "title": "Checkout is not switched on yet",
+    "body": "The PayPal keys are not in place on this deployment, so nothing can be paid for right now. The prices below are still correct — email or call and we will sort it out by hand.",
+    "emailAction": "Email hello@base31.org"
+  },
+  "success": {
+    "eyebrow": "Payment received",
+    "contactLabel": "Something not right with this order?",
+    "title": "Thank you — that is booked in",
+    "intro": "PayPal has taken the payment and emailed you a receipt. Keep that email: it has the transaction id on it.",
+    "steps": [
+      "You get a short confirmation from a person, usually within one working day.",
+      "Work on a placement or a service starts as soon as that email lands.",
+      "Anything unclear, reply to that email — it comes straight to us."
+    ]
+  }
+}

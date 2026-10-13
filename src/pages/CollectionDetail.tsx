@@ -1,16 +1,20 @@
 import { Link, useParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { siteUrl, siteName } from "../lib/siteData";
-import { useDirectory } from "../lib/siteDirectory";
+import {
+  collectionById,
+  collectionSites,
+  collections,
+  siteUrl,
+  siteName,
+} from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 
 /** One collection: its name, its blurb, and every site in it as a link out. */
 export default function CollectionDetail() {
   const { id = "" } = useParams();
-  const directory = useDirectory();
-  const collection = directory.collectionById(id);
-  const members = collection ? directory.collectionMembers(collection) : [];
+  const collection = collectionById(id);
+  const members = collection ? collectionSites(collection) : [];
 
   if (!collection) {
     return (
@@ -25,7 +29,7 @@ export default function CollectionDetail() {
           </span>
           <h1 className="text-3xl font-bold tracking-[-0.02em]">That collection is not here</h1>
           <p className="max-w-md" style={{ color: "var(--muted)" }}>
-            “{id}” is not one of the {directory.collections.length} collections on {siteName}.
+            “{id}” is not one of the {collections.length} collections on {siteName}.
           </p>
           <Link to="/collections" className="nav-cta">
             Browse all collections
@@ -35,7 +39,7 @@ export default function CollectionDetail() {
     );
   }
 
-  const others = directory.collections.filter((entry) => entry.id !== collection.id).slice(0, 3);
+  const others = collections.filter((entry) => entry.id !== collection.id).slice(0, 3);
   const pageUrl = `${siteUrl}/collections/${collection.id}`;
 
   return (
@@ -99,16 +103,17 @@ export default function CollectionDetail() {
         <ul className="flex flex-col gap-3">
           {members.map((site) => (
             <li key={site.id}>
-              <div className="card card-link p-4 flex items-center gap-4">
+              <a
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="card card-link p-4 flex items-center gap-4"
+              >
                 <SiteIcon site={site} size={38} label={false} />
                 <span className="min-w-0 flex flex-1 flex-col gap-0.5">
-                  <Link
-                    to={`/sites/${site.slug}`}
-                    className="text-base font-bold truncate hover:underline underline-offset-4"
-                    style={{ color: "var(--ink)" }}
-                  >
+                  <span className="text-base font-bold truncate" style={{ color: "var(--ink)" }}>
                     {site.name}
-                  </Link>
+                  </span>
                   <span className="text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>
                     {site.description}
                   </span>
@@ -116,24 +121,10 @@ export default function CollectionDetail() {
                     {siteDomain(site.url)}
                   </span>
                 </span>
-                <span className="flex items-center gap-3">
-                  <Link
-                    to={`/sites/${site.slug}`}
-                    className="text-[11px] font-bold uppercase tracking-[0.14em] whitespace-nowrap underline underline-offset-4"
-                    style={{ color: "var(--muted)" }}
-                  >
-                    Details
-                  </Link>
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text whitespace-nowrap"
-                  >
-                    Visit →
-                  </a>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text whitespace-nowrap">
+                  Visit →
                 </span>
-              </div>
+              </a>
             </li>
           ))}
         </ul>

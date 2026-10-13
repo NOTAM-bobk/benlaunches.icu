@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
-import { SiteIcon } from "../components/SiteIcon";
-import { trendingConfig, type Site } from "../lib/siteData";
-import { useDirectory } from "../lib/siteDirectory";
-import { siteDomain } from "../lib/siteTile";
+import { SiteVoteRow } from "../components/SiteVoteRow";
+import { rankedSites, siteName, siteUrl, trendingConfig, type Site } from "../lib/siteData";
 import {
   castVote,
   fetchSharedCounts,
@@ -28,17 +26,33 @@ const MODE_NOTES: Record<Exclude<VoteMode, "shared">, string> = {
 };
 
 export default function Trending() {
-  const directory = useDirectory();
-  const ranked = useMemo(() => directory.trending(TOP_N), [directory]);
+  // Every listed site can climb, not just the ones that start in the top slots.
+  const pool = useMemo(() => rankedSites(), []);
 
   const [counts, setCounts] = useState<Record<string, number>>(() => {
     const base: Record<string, number> = {};
-    for (const site of ranked) base[site.slug] = site.trending ?? 0;
+    for (const site of pool) base[site.slug] = site.trending ?? 0;
     return { ...base, ...readLocalCounts() };
   });
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [mode, setMode] = useState<VoteMode>(votesConnected ? "checking" : "local");
   const [pending, setPending] = useState<string[]>([]);
+
+  /*
+    The ranking is the votes: a site that collects more of them moves straight to
+    the top, and the ones it passes slide down. Sites on equal votes keep the
+    configured order, so the list is stable until somebody votes.
+  */
+  const ranked = useMemo(() => {
+    const configured = new Map(pool.map((site, index) => [site.slug, index]));
+    return [...pool]
+      .sort((a, b) => {
+        const votes = (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0);
+        if (votes !== 0) return votes;
+        return (configured.get(a.slug) ?? 0) - (configured.get(b.slug) ?? 0);
+      })
+      .slice(0, TOP_N);
+  }, [pool, counts]);
 
   useEffect(() => {
     let active = true;
@@ -80,7 +94,32 @@ export default function Trending() {
         title={trendingConfig.title}
         description={`${trendingConfig.tagline} The top ${TOP_N} launched sites, ranked by stored votes and a small editorial boost.`}
         path="/trending"
-        keywords={["trending sites", "site ranking", "vote for sites"]}
+        keywords={[
+          "discover websites",
+          "find websites",
+          "new and upcoming websites",
+          "website ranking",
+          "bored button alternatives",
+        ]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: `${siteName} trending websites`,
+            url: `${siteUrl}/trending`,
+            numberOfItems: ranked.length,
+            itemListElement: ranked.map((site, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              item: {
+                "@type": "WebSite",
+                name: site.name,
+                url: site.url,
+                description: site.description,
+              },
+            })),
+          },
+        ]}
       />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 text-center">
@@ -90,6 +129,17 @@ export default function Trending() {
           <p className="text-base" style={{ color: "var(--muted)" }}>
             {trendingConfig.tagline} The top {ranked.length} launched sites, stacked in order — one
             vote each.
+          </p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Looking to discover websites fast? Start here, then jump to{" "}
+            <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+              curated discovery paths
+            </Link>{" "}
+            or{" "}
+            <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
+              newly launched websites
+            </Link>
+            .
           </p>
         </header>
 
@@ -106,65 +156,20 @@ export default function Trending() {
           </p>
         )}
 
-        <ol className="stack">
-          {ranked.map((site, index) => {
-            const hasVoted = voted.includes(site.slug);
-            const count = counts[site.slug] ?? site.trending ?? 0;
-            return (
-              <li key={site.id} className="stack-row">
-                <span
-                  className={`rank${index < 3 ? ` rank-top rank-${index + 1}` : ""}`}
-                >
-                  {index + 1}
-                </span>
-
-                <SiteIcon site={site} size={44} label={false} />
-
-                <div className="min-w-0 flex flex-col gap-0.5">
-                  <span className="flex items-center gap-2">
-                    <Link
-                      to={`/sites/${site.slug}`}
-                      className="font-bold truncate hover:underline underline-offset-4"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {site.name}
-                    </Link>
-                    <a
-                      href={site.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rank-visit"
-                      title={`Open ${siteDomain(site.url)}`}
-                    >
-                      ↗
-                    </a>
-                  </span>
-                  <p className="text-[13px] truncate" style={{ color: "var(--muted)" }}>
-                    {site.description}
-                  </p>
-                  <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                    {siteDomain(site.url)}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  className="vote-btn"
-                  onClick={() => void vote(site)}
-                  disabled={hasVoted}
-                  aria-label={
-                    hasVoted
-                      ? `${site.name} voted, ${count} votes`
-                      : `Vote for ${site.name}, ${count} votes`
-                  }
-                  title={hasVoted ? "You already voted for this site" : "Vote for this site"}
-                >
-                  <span aria-hidden="true">{hasVoted ? "✓" : "▲"}</span>
-                  {count}
-                </button>
-              </li>
-            );
-          })}
+        <ol className="vote-rows">
+          {ranked.map((site, index) => (
+            <SiteVoteRow
+              key={site.id}
+              site={site}
+              rank={index + 1}
+              medal
+              leader={index === 0}
+              count={counts[site.slug] ?? site.trending ?? 0}
+              voted={voted.includes(site.slug)}
+              pending={pending.includes(site.slug)}
+              onVote={() => void vote(site)}
+            />
+          ))}
         </ol>
 
         <p className="text-sm text-center" style={{ color: "var(--muted)" }}>
@@ -172,6 +177,10 @@ export default function Trending() {
           <a href="/#explore" className="accent-text font-bold underline underline-offset-4">
             Browse all sites
           </a>
+          {" · "}
+          <Link to="/collections" className="accent-text font-bold underline underline-offset-4">
+            Open curated collections
+          </Link>
         </p>
       </div>
     </>

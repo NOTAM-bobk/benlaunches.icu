@@ -2,18 +2,23 @@
   "name": "Boring Internet",
   "tagline": "A quiet list of launched sites, kept small on purpose.",
   "description": "A hand-checked directory of launched sites that load fast, respect your attention, and skip the growth tactics. Browse by category, see what is trending, and submit your own.",
-  "url": "https://boringinternet.org",
+  "url": "https://www.benlaunches.icu",
   "locale": "en_US",
   "keywords": [
-    "launched sites",
-    "indie web directory",
-    "minimal web",
-    "site directory",
+    "bored button",
+    "website to website",
+    "website launch",
+    "upcoming launches",
+    "launch new websites",
+    "find websites",
+    "discover websites",
+    "new and upcoming websites",
+    "launched sites directory",
     "submit your site"
   ],
   "author": "Boring Internet",
   "links": {
     "github": "https://github.com/NOTAM-bobk/boringinternet.org",
-    "contact": "mailto:hello@boringinternet.example"
+    "contact": "mailto:hello@base31.org"
   }
 }

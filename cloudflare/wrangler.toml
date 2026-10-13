@@ -10,4 +10,4 @@ binding = "VOTES"
 id = "36580dc8d626443cbe3783979036b9b9"
 
 [vars]
-ALLOWED_ORIGIN = "*"
+ALLOWED_ORIGIN = "https://boringinternet.org,https://new.base31.org,https://boringinternet.vercel.app"

@@ -5,8 +5,8 @@ import {
   siteName,
   siteTagline,
   siteUrl,
+  sites,
 } from "../lib/siteData";
-import { useDirectory } from "../lib/siteDirectory";
 
 type JsonLd = Record<string, unknown>;
 
@@ -25,7 +25,8 @@ export interface SeoHeadProps {
 
 function canonicalFor(path: string | undefined, fallback: string): string {
   if (path === undefined) return fallback;
-  return `${siteUrl}${path === "/" ? "/" : path.replace(/\/+$/, "")}`;
+  const cleanPath = path === "/" ? "/" : path.replace(/\/+$/, "");
+  return `${siteUrl}${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
 }
 
 export function SeoHead({
@@ -43,7 +44,11 @@ export function SeoHead({
   const pageDescription = description ?? siteDescription;
   const url = canonicalFor(path, canonical ?? `${siteUrl}/`);
   const image = `${siteUrl}/og.png`;
-  const keywordList = keywords && keywords.length > 0 ? keywords : siteKeywords;
+  // Keep this useful for older SEO panels and avoid repeating noisy keywords.
+  const keywordList = [...new Set(keywords && keywords.length > 0 ? keywords : siteKeywords)]
+    .map((keyword) => keyword.trim())
+    .filter(Boolean)
+    .slice(0, 8);
 
   return (
     <>
@@ -64,6 +69,7 @@ export function SeoHead({
       <meta property="og:description" content={pageDescription} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image} />
+      <meta property="og:image:secure_url" content={image} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/png" />
@@ -76,6 +82,7 @@ export function SeoHead({
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={image} />
       <meta name="twitter:image:alt" content={`${siteName} — ${siteTagline}`} />
+      <meta name="twitter:domain" content="www.benlaunches.icu" />
 
       <link rel="icon" href="/favicon.ico" sizes="32x32" />
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -144,16 +151,89 @@ function websiteJsonLd(): JsonLd {
   };
 }
 
-export function HomepageSeo() {
-  const total = useDirectory().sites.length;
+function itemListJsonLd({
+  name,
+  path,
+  items,
+}: {
+  name: string;
+  path: string;
+  items: Array<{ name: string; url: string; description?: string }>;
+}): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    url: `${siteUrl}${path}`,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "WebSite",
+        name: item.name,
+        url: item.url,
+        description: item.description,
+      },
+    })),
+  };
+}
+
+export function HomepageSeo({
+  featuredSites = [],
+  newSites = [],
+  trendingSites = [],
+}: {
+  featuredSites?: Array<{ name: string; url: string; description?: string }>;
+  newSites?: Array<{ name: string; url: string; description?: string }>;
+  trendingSites?: Array<{ name: string; url: string; description?: string }>;
+}) {
+  const total = sites.length;
   const description = `${siteTagline} Browse all ${total} sites by category, see what is trending, and submit your own.`;
+  const keywords = [
+    "bored button",
+    "website to website",
+    "discover websites",
+    "find websites",
+    "new and upcoming websites",
+  ];
+  const jsonLd: JsonLd[] = [websiteJsonLd()];
+
+  if (featuredSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "Featured launched websites",
+        path: "/",
+        items: featuredSites,
+      }),
+    );
+  }
+  if (newSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "New and upcoming websites",
+        path: "/",
+        items: newSites,
+      }),
+    );
+  }
+  if (trendingSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "Trending discovered websites",
+        path: "/trending",
+        items: trendingSites,
+      }),
+    );
+  }
 
   return (
     <SeoHead
       title={siteName}
       description={description}
       path="/"
-      jsonLd={[websiteJsonLd()]}
+      keywords={keywords}
+      jsonLd={jsonLd}
     />
   );
 }

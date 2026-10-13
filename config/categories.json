@@ -44,6 +44,196 @@
       "id": "sound",
       "label": "Sound",
       "blurb": "Ambient audio and wordless mixes for a long afternoon."
+    },
+    {
+      "id": "science",
+      "label": "Science",
+      "blurb": "Explorers, visualisations and papers for a curious afternoon."
+    },
+    {
+      "id": "math",
+      "label": "Math",
+      "blurb": "Numbers, proofs and toys that make them click."
+    },
+    {
+      "id": "space",
+      "label": "Space",
+      "blurb": "Sky maps, launch trackers and what is overhead tonight."
+    },
+    {
+      "id": "maps",
+      "label": "Maps",
+      "blurb": "Atlases, projections and places drawn by hand."
+    },
+    {
+      "id": "weather",
+      "label": "Weather",
+      "blurb": "Forecasts, radar and quiet climate data."
+    },
+    {
+      "id": "history",
+      "label": "History",
+      "blurb": "Archives, timelines and the dustier corners of the record."
+    },
+    {
+      "id": "language",
+      "label": "Language",
+      "blurb": "Dictionaries, etymology and learning another tongue."
+    },
+    {
+      "id": "learning",
+      "label": "Learning",
+      "blurb": "Courses, explainers and study tools that respect your time."
+    },
+    {
+      "id": "reference",
+      "label": "Reference",
+      "blurb": "Manuals, guides and lookup tables worth bookmarking."
+    },
+    {
+      "id": "writing",
+      "label": "Writing",
+      "blurb": "Drafting, editing and keeping a notebook."
+    },
+    {
+      "id": "notes",
+      "label": "Notes",
+      "blurb": "Zettelkasten, plain text and thinking out loud."
+    },
+    {
+      "id": "typography",
+      "label": "Typography",
+      "blurb": "Type specimens, pairing tools and letterform trivia."
+    },
+    {
+      "id": "photography",
+      "label": "Photography",
+      "blurb": "Framing, film and photo archives."
+    },
+    {
+      "id": "music",
+      "label": "Music",
+      "blurb": "Theory, tools and quiet places to listen."
+    },
+    {
+      "id": "radio",
+      "label": "Radio",
+      "blurb": "Stations, scanners and streams from far away."
+    },
+    {
+      "id": "podcasts",
+      "label": "Podcasts",
+      "blurb": "Shows and directories you can listen to offline."
+    },
+    {
+      "id": "video",
+      "label": "Video",
+      "blurb": "Player tools, film archives and small screens."
+    },
+    {
+      "id": "gaming",
+      "label": "Gaming",
+      "blurb": "Games and emulators that run in a browser tab."
+    },
+    {
+      "id": "board-games",
+      "label": "Board games",
+      "blurb": "Rules references, communities and print-and-play."
+    },
+    {
+      "id": "cooking",
+      "label": "Cooking",
+      "blurb": "Recipes, timers and food reference."
+    },
+    {
+      "id": "gardening",
+      "label": "Gardening",
+      "blurb": "Planting calendars, plant ID and garden logs."
+    },
+    {
+      "id": "travel",
+      "label": "Travel",
+      "blurb": "Transit, timetables and maps for getting there."
+    },
+    {
+      "id": "finance",
+      "label": "Finance",
+      "blurb": "Budgets, calculators and plain-English money tools."
+    },
+    {
+      "id": "fitness",
+      "label": "Fitness",
+      "blurb": "Training logs and movement references."
+    },
+    {
+      "id": "health",
+      "label": "Health",
+      "blurb": "Plain reference for bodies, symptoms and sleep."
+    },
+    {
+      "id": "productivity",
+      "label": "Productivity",
+      "blurb": "Task tools and focus timers that stay out of the way."
+    },
+    {
+      "id": "privacy",
+      "label": "Privacy",
+      "blurb": "Blockers, audits and things that keep data yours."
+    },
+    {
+      "id": "security",
+      "label": "Security",
+      "blurb": "Advisories, password tools and hardening guides."
+    },
+    {
+      "id": "self-hosting",
+      "label": "Self-hosting",
+      "blurb": "Run it yourself: servers, apps and backups."
+    },
+    {
+      "id": "linux",
+      "label": "Linux",
+      "blurb": "Terminals, distributions and the command line."
+    },
+    {
+      "id": "retro",
+      "label": "Retro",
+      "blurb": "Old computers, BBSs and the web that was."
+    },
+    {
+      "id": "minimal",
+      "label": "Minimal",
+      "blurb": "Sites that are almost nothing, on purpose."
+    },
+    {
+      "id": "offline",
+      "label": "Offline",
+      "blurb": "Read, listen and work without a connection."
+    },
+    {
+      "id": "api",
+      "label": "APIs",
+      "blurb": "Endpoints, docs and data you can build on."
+    },
+    {
+      "id": "datasets",
+      "label": "Datasets",
+      "blurb": "Open data, tables and downloads worth keeping."
+    },
+    {
+      "id": "archives",
+      "label": "Archives",
+      "blurb": "Libraries, scans and things kept for later."
+    },
+    {
+      "id": "nature",
+      "label": "Nature",
+      "blurb": "Birds, plants, water and the outdoors."
+    },
+    {
+      "id": "craft",
+      "label": "Craft",
+      "blurb": "Making things by hand, step by step."
     }
   ]
 }
