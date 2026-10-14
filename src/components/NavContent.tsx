@@ -221,6 +221,28 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="sidenav-body">
+      {/*
+        What this rail is for: where you are standing, how much is behind it,
+        and one tap back to something random.
+      */}
+      <div className="sidenav-head">
+        <div className="sidenav-head-copy">
+          <span className="sidenav-head-label">
+            {SECTIONS.find((section) => section.id === activeSection)?.label ?? "Directory"}
+          </span>
+          <span className="sidenav-head-note">{sites.length} sites in the directory</span>
+        </div>
+        <button
+          type="button"
+          className="sidenav-dice"
+          onClick={openRandomSite}
+          title="Open a random site in a new tab"
+          aria-label="Open a random site in a new tab"
+        >
+          <span aria-hidden="true">🎲</span>
+        </button>
+      </div>
+
       <div className="sidenav-search-wrap" ref={searchRef}>
         <form className="sidenav-search" onSubmit={runSearch} role="search">
           <span aria-hidden="true" className="sidenav-search-icon">

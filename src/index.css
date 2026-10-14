@@ -964,17 +964,20 @@ hr {
   z-index: 40;
   padding-top: env(safe-area-inset-top);
   background: #ffffff;
-  border-bottom: 1px solid var(--ink);
-  box-shadow: 0 12px 26px -20px rgba(26, 18, 11, 0.6);
+  border-bottom: 2px solid var(--ink);
 }
 
+/*
+ * The tabs are plain buttons now: the pill that used to wrap them is gone, so
+ * every label sits in its own box, exactly like the other buttons on the site.
+ */
 .site-header .site-header-nav {
-  gap: 0.15rem;
-  padding: 0.22rem;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #fff 0%, #faf8ff 100%);
-  box-shadow: 0 4px 12px rgba(48, 35, 82, 0.06);
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .site-header .site-header-nav .nav-link {
@@ -982,32 +985,46 @@ hr {
   min-height: 2.35rem;
   align-items: center;
   justify-content: center;
-  padding: 0.58rem 0.82rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 0.76rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.14em;
   line-height: 1;
   text-decoration: none;
+  text-transform: uppercase;
   white-space: nowrap;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  box-shadow: 0 2px 0 0 var(--ink);
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease,
+    color 160ms ease;
 }
 
 .site-header .site-header-nav .nav-link:hover {
-  background: #f3efff;
+  background: var(--surface);
   color: var(--ink);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--ink);
 }
 
 .site-header .site-header-nav .nav-link.active {
-  border-color: rgba(112, 76, 226, 0.18);
-  background: linear-gradient(135deg, rgba(112, 76, 226, 0.12), rgba(66, 132, 230, 0.1));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 2px 4px rgba(66, 49, 108, 0.06);
-  color: var(--accent);
+  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.site-header .site-header-nav .nav-link.active:hover {
+  background: var(--accent);
+  box-shadow: 0 3px 0 0 var(--ink);
 }
 
 .site-header .site-header-nav .nav-link:focus-visible {
-  outline: 3px solid rgba(112, 76, 226, 0.42);
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -1078,7 +1095,7 @@ hr {
   height: 1.4rem;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--surface);
   font-size: 1rem;
@@ -1115,18 +1132,27 @@ hr {
   }
 }
 
+/* The wordmark sits on a solid block of ink — no rounded card around it. */
 .brand-mark {
   font-family: var(--display);
-  display: inline-block;
-  padding: 0.36rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.7rem;
   border: 1px solid var(--ink);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  box-shadow: 0 2px 0 0 var(--ink);
-  font-size: 0.7rem;
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: 0 2px 0 0 var(--accent);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.brand-mark:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--accent);
 }
 
 .nav-btn,
@@ -1310,7 +1336,7 @@ hr {
   }
 }
 
-/* ---------- floating 3D side nav (large screens) ---------- */
+/* ---------- side nav panel (large screens) ---------- */
 
 .sidenav {
   display: none;
@@ -1320,7 +1346,8 @@ hr {
  * It lives in the same grid row as the page, so it sticks while you scroll the
  * page but its bottom edge lands where the content ends — never over the
  * full-width footer. The height is capped by that row, so short pages do not
- * leave a tall empty panel behind.
+ * leave a tall empty panel behind. The panel itself is flat: a paper surface,
+ * a thick ink edge, and one hard shadow.
  */
 @media (min-width: 1024px) {
   .sidenav {
@@ -1341,25 +1368,7 @@ hr {
       calc(100% - var(--sidenav-bottom-gap))
     );
     z-index: 30;
-    perspective: 1400px;
   }
-}
-
-.sidenav-layer {
-  position: absolute;
-  inset: 0;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-lg);
-}
-
-.sidenav-layer-back {
-  transform: translate3d(16px, 16px, -160px) rotateY(7deg);
-  background: linear-gradient(160deg, #f7e0c6 0%, #e0bd97 100%);
-}
-
-.sidenav-layer-mid {
-  transform: translate3d(8px, 8px, -80px) rotateY(3.5deg);
-  background: linear-gradient(160deg, #fff7ee 0%, #f1d5b7 100%);
 }
 
 .sidenav-panel {
@@ -1368,17 +1377,68 @@ hr {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #ffffff 0%, var(--surface) 55%, #fdf0e2 100%);
-  box-shadow: var(--shadow-float);
-  transform: rotateY(2.4deg);
-  transform-origin: left center;
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-thick);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .sidenav:hover .sidenav-panel {
-  transform: rotateY(0deg) translateZ(14px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Where you are, what the panel is for, and how much is behind it. */
+.sidenav-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sidenav-head-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sidenav-head-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sidenav-head-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.sidenav-dice {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: 0 2px 0 0 var(--ink);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.sidenav-dice:hover {
+  background: var(--surface);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--ink);
 }
 
 .sidenav-body {
@@ -1439,33 +1499,32 @@ hr {
   gap: 0.6rem;
   width: 100%;
   padding: 0.5rem 0.55rem;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   font: inherit;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .sidenav-item:hover {
+  border-color: var(--ink);
   background: #fff;
-  box-shadow: inset 0 0 0 1px var(--rule);
-  transform: translateX(2px);
+  box-shadow: 0 2px 0 0 var(--ink);
+  transform: translateY(-1px);
 }
 
-.sidenav-item.active {
+.sidenav-item.active,
+.sidenav-item.active:hover {
+  border-color: var(--ink);
   background: var(--accent);
   color: var(--on-accent);
-  box-shadow: 0 3px 0 0 var(--ink);
-}
-
-.sidenav-item.active:hover {
-  background: var(--accent);
-  box-shadow: 0 3px 0 0 var(--ink);
+  box-shadow: 0 2px 0 0 var(--ink);
   transform: none;
 }
 
@@ -1505,11 +1564,16 @@ hr {
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   color: var(--ink);
+  text-transform: uppercase;
   cursor: pointer;
+}
+
+.sidenav-toggle:hover {
+  color: var(--accent);
 }
 
 .chev {
@@ -1537,7 +1601,7 @@ hr {
   gap: 0.5rem;
   width: 100%;
   padding: 0.42rem 0.55rem;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   font: inherit;
@@ -1545,18 +1609,20 @@ hr {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .sidenav-subitem:hover {
+  border-color: var(--ink);
   background: #fff;
-  box-shadow: inset 0 0 0 1px var(--rule);
+  box-shadow: 0 2px 0 0 var(--ink);
 }
 
 .sidenav-subitem.active-sub {
+  border-color: var(--ink);
   background: #fff;
   font-weight: 700;
-  box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--rule);
+  box-shadow: 0 2px 0 0 var(--ink), inset 3px 0 0 var(--accent);
 }
 
 .sidenav-badge {
@@ -7078,150 +7144,74 @@ button.sidenav-foot-link:hover {
 }
 
 
-/* ---------- refreshed launch hero and navigation surfaces ---------- */
+/* ---------- launch hero ---------- */
 .find-heading {
   position: relative;
-  isolation: isolate;
   width: fit-content;
   max-width: 100%;
   padding: clamp(1.1rem, 2.8vw, 1.7rem) clamp(1.15rem, 3vw, 2rem);
-  overflow: hidden;
-  border: 1px solid rgba(124, 92, 246, 0.18);
-  border-radius: 1.45rem;
-  background:
-    radial-gradient(circle at 88% 0%, rgba(89, 190, 255, 0.2), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgba(145, 105, 255, 0.15), transparent 46%),
-    rgba(255, 255, 255, 0.82);
-  box-shadow: 0 18px 48px rgba(52, 33, 94, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(14px);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-thick);
 }
+
+/* The label above the headline: no pill around it, just words and a square. */
 .find-heading-kicker {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  padding: 0.38rem 0.72rem;
-  border: 1px solid rgba(124, 92, 246, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: #655a7f;
-  font-size: 0.66rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   line-height: 1.2;
   text-transform: uppercase;
 }
+
 .find-heading-dot {
-  width: 0.48rem;
-  height: 0.48rem;
+  width: 0.5rem;
+  height: 0.5rem;
   flex: none;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #22c5e5);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  background: var(--accent);
 }
+
 .find-title {
-  margin: 0.9rem 0 0;
+  margin: 0.85rem 0 0;
   color: var(--ink);
   font-size: clamp(2.2rem, 6.8vw, 4.2rem);
   font-weight: 800;
   letter-spacing: -0.06em;
   line-height: 0.98;
 }
+
 .find-title-lead,
 .find-title-highlight {
   display: block;
 }
+
+/* The second line carries its own ink block, so the words sit on a background. */
 .find-title-highlight {
-  margin-top: 0.08em;
-  background: linear-gradient(100deg, #7c3aed 4%, #5364e8 54%, #0891b2 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  width: fit-content;
+  margin-top: 0.18em;
+  padding: 0.04em 0.24em 0.12em;
+  background: var(--ink);
+  color: var(--surface);
 }
-.bored-btn {
-  border-color: rgba(52, 33, 94, 0.15);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 7px 18px rgba(52, 33, 94, 0.08);
-  font-size: 0.78rem;
-  letter-spacing: 0.025em;
-  text-transform: none;
-}
-.bored-btn:hover {
-  border-color: rgba(124, 92, 246, 0.38);
-  background: linear-gradient(120deg, #7c3aed, #5965e8);
-  box-shadow: 0 10px 24px rgba(92, 77, 196, 0.2);
-}
+
 @media (max-width: 420px) {
   .find-heading {
     padding: 1rem;
-    border-radius: 1.15rem;
   }
   .find-heading-kicker {
-    font-size: 0.58rem;
-    letter-spacing: 0.08em;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
   }
   .find-title {
     font-size: clamp(2rem, 9vw, 2.55rem);
   }
 }
-@media (min-width: 1024px) {
-  .sidenav-panel {
-    border: 1px solid rgba(124, 92, 246, 0.16);
-    border-radius: 1.2rem;
-    background: rgba(255, 252, 249, 0.9);
-    box-shadow: 0 18px 52px rgba(52, 33, 94, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(18px);
-    transform: none;
-  }
-  .sidenav:hover .sidenav-panel {
-    box-shadow: 0 23px 60px rgba(52, 33, 94, 0.17), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    transform: translateY(-2px);
-  }
-  .sidenav-search {
-    border-color: rgba(52, 33, 94, 0.13);
-    border-radius: 0.8rem;
-    box-shadow: none;
-  }
-  .sidenav-item,
-  .sidenav-subitem {
-    border-radius: 0.75rem;
-  }
-  .sidenav-item:hover {
-    background: rgba(124, 92, 246, 0.07);
-    box-shadow: none;
-    transform: none;
-  }
-  .sidenav-item.active,
-  .sidenav-item.active:hover {
-    background: linear-gradient(115deg, #7c3aed, #5965e8);
-    color: #fff;
-    box-shadow: 0 7px 18px rgba(92, 77, 196, 0.2);
-  }
-  .sidenav-subitem:hover {
-    background: rgba(124, 92, 246, 0.07);
-    box-shadow: none;
-  }
-  .sidenav-subitem.active-sub {
-    background: rgba(124, 92, 246, 0.08);
-    box-shadow: inset 3px 0 0 #7c3aed;
-  }
-  .sidenav-cta {
-    border: 0;
-    border-radius: 0.8rem;
-    background: linear-gradient(115deg, #7c3aed, #5965e8);
-    box-shadow: 0 8px 18px rgba(92, 77, 196, 0.2);
-    letter-spacing: 0.04em;
-  }
-  .sidenav-cta:hover {
-    box-shadow: 0 11px 24px rgba(92, 77, 196, 0.25);
-  }
-  .sidenav-foot-link {
-    letter-spacing: 0.04em;
-  }
-}
-
 /* ---------- monthly trending archive ---------- */
 .trending-month-archive {
   margin: 1.25rem 0 1.1rem;
