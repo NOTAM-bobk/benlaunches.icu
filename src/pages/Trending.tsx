@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteVoteRow } from "../components/SiteVoteRow";
 import { rankedSites, siteName, siteUrl, trendingConfig, type Site } from "../lib/siteData";
 import {
   castVote,
   fetchSharedCounts,
+  fetchMonthlyCounts,
+  fetchMonthlyMonths,
   markVoted,
+  readLocalMonthlyCounts,
+  readLocalMonthlyMonths,
   readLocalCounts,
   readVotedSlugs,
   votesConnected,
@@ -14,6 +18,15 @@ import {
 } from "../lib/votes";
 
 const TOP_N = trendingConfig.topLimit;
+const CURRENT_UTC_MONTH = new Date().toISOString().slice(0, 7);
+
+function monthLabel(month: string, style: "short" | "long" = "long") {
+  return new Intl.DateTimeFormat("en-US", {
+    month: style,
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${month}-01T00:00:00.000Z`));
+}
 
 type VoteMode = "checking" | "shared" | "local" | "unreachable";
 
@@ -26,6 +39,19 @@ const MODE_NOTES: Record<Exclude<VoteMode, "shared">, string> = {
 };
 
 export default function Trending() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentMonth = CURRENT_UTC_MONTH;
+  const monthParam = searchParams.get("month");
+  const selectedMonth = monthParam && /^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam)
+    ? monthParam
+    : currentMonth;
+  const isCurrentMonth = selectedMonth === currentMonth;
+  const [archiveMonths, setArchiveMonths] = useState([currentMonth]);
+  const [monthlyCounts, setMonthlyCounts] = useState<Record<string, number>>(
+    () => readLocalMonthlyCounts(currentMonth),
+  );
+  const [monthlyCounterAvailable, setMonthlyCounterAvailable] = useState(false);
+
   // Every listed site can climb, not just the ones that start in the top slots.
   const pool = useMemo(() => rankedSites(), []);
 
@@ -47,12 +73,12 @@ export default function Trending() {
     const configured = new Map(pool.map((site, index) => [site.slug, index]));
     return [...pool]
       .sort((a, b) => {
-        const votes = (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0);
+        const votes = (monthlyCounts[b.slug] ?? 0) - (monthlyCounts[a.slug] ?? 0);
         if (votes !== 0) return votes;
         return (configured.get(a.slug) ?? 0) - (configured.get(b.slug) ?? 0);
       })
       .slice(0, TOP_N);
-  }, [pool, counts]);
+  }, [pool, monthlyCounts]);
 
   useEffect(() => {
     let active = true;
@@ -70,11 +96,45 @@ export default function Trending() {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    fetchMonthlyMonths().then((sharedMonths) => {
+      if (!active) return;
+      setMonthlyCounterAvailable(sharedMonths !== null);
+      const months = sharedMonths ?? readLocalMonthlyMonths();
+      setArchiveMonths([...new Set([currentMonth, ...months])].sort((a, b) => b.localeCompare(a)));
+    });
+    return () => {
+      active = false;
+    };
+  }, [currentMonth]);
+
+  useEffect(() => {
+    let active = true;
+    fetchMonthlyCounts(selectedMonth).then((sharedCounts) => {
+      if (!active) return;
+      if (sharedCounts !== null) {
+        setMonthlyCounterAvailable(true);
+        setMonthlyCounts(sharedCounts);
+      } else {
+        setMonthlyCounts(readLocalMonthlyCounts(selectedMonth));
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [selectedMonth]);
+
   async function vote(site: Site) {
+    if (!isCurrentMonth) return;
     if (voted.includes(site.slug) || pending.includes(site.slug)) return;
 
     const optimistic = (counts[site.slug] ?? 0) + 1;
     setCounts((current) => ({ ...current, [site.slug]: optimistic }));
+    setMonthlyCounts((current) => ({
+      ...current,
+      [site.slug]: (current[site.slug] ?? 0) + 1,
+    }));
     setVoted((current) => [...current, site.slug]);
     setPending((current) => [...current, site.slug]);
     markVoted(site.slug);
@@ -86,6 +146,14 @@ export default function Trending() {
       writeLocalCount(site.slug, serverCount);
     }
     setPending((current) => current.filter((slug) => slug !== site.slug));
+  }
+
+  function chooseMonth(month: string) {
+    setMonthlyCounts(readLocalMonthlyCounts(month));
+    const next = new URLSearchParams(searchParams);
+    if (month === currentMonth) next.delete("month");
+    else next.set("month", month);
+    setSearchParams(next);
   }
 
   return (
@@ -127,8 +195,7 @@ export default function Trending() {
             {trendingConfig.title} <span aria-hidden="true">🔥</span>
           </h1>
           <p className="text-base" style={{ color: "var(--muted)" }}>
-            {trendingConfig.tagline} The top {ranked.length} launched sites, stacked in order — one
-            vote each.
+            {trendingConfig.tagline} Rankings use community upvotes cast during {monthLabel(selectedMonth)}.
           </p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>
             Looking to discover websites fast? Start here, then jump to{" "}
@@ -142,6 +209,38 @@ export default function Trending() {
             .
           </p>
         </header>
+
+        <section className="trending-month-archive" aria-label="Monthly trending archive">
+          <div className="trending-month-heading">
+            <span>Monthly rankings</span>
+            <span className="trending-month-current">Showing {monthLabel(selectedMonth)}</span>
+          </div>
+          <div className="trending-month-cards" role="group" aria-label="Choose a month">
+            {archiveMonths.map((month) => (
+              <button
+                key={month}
+                type="button"
+                className={`trending-month-card${selectedMonth === month ? " is-active" : ""}`}
+                aria-pressed={selectedMonth === month}
+                onClick={() => chooseMonth(month)}
+              >
+                <span className="trending-month-name">{monthLabel(month, "short").split(" ")[0]}</span>
+                <span className="trending-month-year">{month.slice(0, 4)}</span>
+                <span className="trending-month-kind">{month === currentMonth ? "Current" : "Archive"}</span>
+              </button>
+            ))}
+          </div>
+          {archiveMonths.length === 1 && monthlyCounterAvailable && (
+            <p className="trending-month-note">
+              Earlier months will appear here as they close. Existing lifetime votes cannot be split into past months.
+            </p>
+          )}
+          {!monthlyCounterAvailable && (
+            <p className="trending-month-note">
+              Shared monthly history starts when the updated vote counter is deployed. This browser can still keep its own month-by-month votes; older totals are not available by month.
+            </p>
+          )}
+        </section>
 
         {mode !== "shared" && (
           <p
@@ -164,9 +263,10 @@ export default function Trending() {
               rank={index + 1}
               medal
               leader={index === 0}
-              count={counts[site.slug] ?? site.trending ?? 0}
-              voted={voted.includes(site.slug)}
+              count={monthlyCounts[site.slug] ?? 0}
+              voted={isCurrentMonth && voted.includes(site.slug)}
               pending={pending.includes(site.slug)}
+              readOnly={!isCurrentMonth}
               onVote={() => void vote(site)}
             />
           ))}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Highlight } from "./Highlight";
 import { SiteIcon } from "./SiteIcon";
@@ -67,6 +67,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const searchId = `nav-search-${useId().replace(/:/g, "")}`;
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
@@ -75,12 +76,12 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return { categories: true };
+    if (typeof window === "undefined") return {};
     try {
-      const raw = window.localStorage.getItem("bi:nav-groups");
-      return raw ? (JSON.parse(raw) as Record<string, boolean>) : { categories: true };
+      const raw = window.localStorage.getItem("bi:nav-groups:v2");
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
     } catch {
-      return { categories: true };
+      return {};
     }
   });
 
@@ -147,6 +148,10 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     () => navContextFor(location.pathname, location.search),
     [location.pathname, location.search],
   );
+  const contextActions = useMemo(
+    () => context.actions.filter((action) => action.id !== context.primary.id && action.id !== context.secondary.id),
+    [context],
+  );
 
   /** True when an action points at the exact page (and filters) we are on. */
   function isCurrent(action: NavAction): boolean {
@@ -164,7 +169,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       const next = { ...current, [id]: !current[id] };
       if (typeof window !== "undefined") {
         try {
-          window.localStorage.setItem("bi:nav-groups", JSON.stringify(next));
+          window.localStorage.setItem("bi:nav-groups:v2", JSON.stringify(next));
         } catch {
           /* private mode */
         }
@@ -221,11 +226,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           <span aria-hidden="true" className="sidenav-search-icon">
             ⌕
           </span>
-          <label htmlFor="nav-search" className="sr-only">
+          <label htmlFor={searchId} className="sr-only">
             Search sites by title, tag, or description
           </label>
           <input
-            id="nav-search"
+            id={searchId}
             ref={inputRef}
             type="search"
             value={query}
@@ -301,45 +306,47 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="sidenav-divider" />
 
-      {/* What this page can do next: it changes with the route, and with the
-          category or search you have open. */}
-      <div className="sidenav-group sidenav-context">
-        <span className="sidenav-context-title">{context.title}</span>
-        {context.note && <span className="sidenav-context-note">{context.note}</span>}
-        <div className="sidenav-sub">
-          {context.actions.map((action) => {
-            const current = isCurrent(action);
-            const body = (
-              <>
-                <span className="sidenav-context-label">{action.label}</span>
-                {action.badge && <span className="sidenav-badge">{action.badge}</span>}
-              </>
-            );
-            return action.href ? (
-              <a
-                key={action.id}
-                className="sidenav-subitem"
-                href={action.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => onNavigate?.()}
-              >
-                {body}
-              </a>
-            ) : (
-              <button
-                key={action.id}
-                type="button"
-                className={`sidenav-subitem${current ? " active-sub" : ""}`}
-                aria-current={current ? "true" : undefined}
-                onClick={() => go(action.to ?? "/")}
-              >
-                {body}
-              </button>
-            );
-          })}
+      {/* Page-specific shortcuts stay useful by omitting actions already shown
+          as the primary or secondary buttons at the bottom of this panel. */}
+      {contextActions.length > 0 && (
+        <div className="sidenav-group sidenav-context">
+          <span className="sidenav-context-title">{context.title}</span>
+          {context.note && <span className="sidenav-context-note">{context.note}</span>}
+          <div className="sidenav-sub">
+            {contextActions.map((action) => {
+              const current = isCurrent(action);
+              const body = (
+                <>
+                  <span className="sidenav-context-label">{action.label}</span>
+                  {action.badge && <span className="sidenav-badge">{action.badge}</span>}
+                </>
+              );
+              return action.href ? (
+                <a
+                  key={action.id}
+                  className="sidenav-subitem"
+                  href={action.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => onNavigate?.()}
+                >
+                  {body}
+                </a>
+              ) : (
+                <button
+                  key={action.id}
+                  type="button"
+                  className={`sidenav-subitem${current ? " active-sub" : ""}`}
+                  aria-current={current ? "true" : undefined}
+                  onClick={() => go(action.to ?? "/")}
+                >
+                  {body}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="sidenav-group">
         <SectionToggle
@@ -372,31 +379,27 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="sidenav-group">
         <SectionToggle
-          label="Libraries"
-          open={Boolean(openGroups.libraries)}
-          onToggle={() => toggleGroup("libraries")}
+          label="More"
+          open={Boolean(openGroups.more)}
+          onToggle={() => toggleGroup("more")}
         />
-        {openGroups.libraries && (
+        {openGroups.more && (
           <div className="sidenav-sub">
-            <button type="button" className="sidenav-subitem" onClick={() => go("/#explore")}>
-              All sites <span className="sidenav-badge">{sites.length}</span>
-            </button>
-            <button type="button" className="sidenav-subitem" onClick={() => go("/trending")}>
-              Top {sites.length} ranking
-            </button>
             <button
               type="button"
-              className={`sidenav-subitem${
-                location.pathname === "/blog" || location.pathname.startsWith("/blog/")
-                  ? " active-sub"
-                  : ""
-              }`}
+              className={`sidenav-subitem${location.pathname === "/blog" || location.pathname.startsWith("/blog/") ? " active-sub" : ""}`}
+              aria-current={location.pathname === "/blog" || location.pathname.startsWith("/blog/") ? "page" : undefined}
               onClick={() => go("/blog")}
             >
               Articles <span className="sidenav-badge">{posts.length}</span>
             </button>
-            <button type="button" className="sidenav-subitem" onClick={() => go("/submit")}>
-              Submit your site
+            <button
+              type="button"
+              className={`sidenav-subitem${location.pathname === "/stats" ? " active-sub" : ""}`}
+              aria-current={location.pathname === "/stats" ? "page" : undefined}
+              onClick={() => go("/stats")}
+            >
+              Directory stats
             </button>
           </div>
         )}
@@ -405,10 +408,10 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="sidenav-group">
         <SectionToggle
           label="Categories"
-          open={openGroups.categories !== false}
+          open={Boolean(openGroups.categories)}
           onToggle={() => toggleGroup("categories")}
         />
-        {openGroups.categories !== false && (
+        {openGroups.categories && (
           <div className="sidenav-sub">
             {categoryFilters
               .filter((category) => category.id !== "all")

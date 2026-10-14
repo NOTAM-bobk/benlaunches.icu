@@ -52,6 +52,7 @@ export function SiteVoteRow({
   voted,
   pending = false,
   leader = false,
+  readOnly = false,
   onVote,
 }: {
   site: Site;
@@ -62,6 +63,8 @@ export function SiteVoteRow({
   count: number;
   voted: boolean;
   pending?: boolean;
+  /** Archived ranking rows are historical and cannot accept new votes. */
+  readOnly?: boolean;
   /** The current top site gets the filled button. */
   leader?: boolean;
   onVote: () => void;
@@ -79,7 +82,7 @@ export function SiteVoteRow({
   }, [burst]);
 
   function handleVote() {
-    if (voted || pending) return;
+    if (voted || pending || readOnly) return;
     setBurst((value) => value + 1);
     onVote();
   }
@@ -118,15 +121,23 @@ export function SiteVoteRow({
 
       <button
         type="button"
-        className={`vote-circle${voted ? " voted" : ""}`}
+        className={`vote-circle${voted ? " voted" : ""}${readOnly ? " read-only" : ""}`}
         onClick={handleVote}
-        disabled={voted || pending}
+        disabled={voted || pending || readOnly}
         aria-label={
-          voted
-            ? `${site.name}, you voted, ${count} votes`
-            : `Vote for ${site.name}, ${count} ${count === 1 ? "vote" : "votes"}`
+          readOnly
+            ? `${site.name}, ${count} votes in the archived month`
+            : voted
+              ? `${site.name}, you voted, ${count} votes`
+              : `Vote for ${site.name}, ${count} ${count === 1 ? "vote" : "votes"}`
         }
-        title={voted ? "You already voted for this site" : "Vote for this site"}
+        title={
+          readOnly
+            ? "Archived month — voting is available in the current month"
+            : voted
+              ? "You already voted for this site"
+              : "Vote for this site"
+        }
       >
         <span className="vote-circle-arrow" aria-hidden="true">
           {voted ? "✓" : "▲"}

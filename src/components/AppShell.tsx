@@ -6,7 +6,6 @@ import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SideNav } from "./SideNav";
 import { trackPageView } from "../lib/analytics";
-import WelcomeGate from "./WelcomeGate";
 
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
@@ -230,7 +229,6 @@ export function AppShell() {
       {FOOTER_ROUTES.has(path) && <Footer />}
 
       <BackToTop />
-      <WelcomeGate />
     </div>
   );
 }

@@ -475,11 +475,15 @@ export default function Home() {
     <section className="flex flex-col gap-4">
       {/* The page's own headline, then what the place is, then the ways to
           browse, then the crowd. */}
-      <h2 className="find-title">
-        Launch your product
-        <br />
-        Get discovered now
-      </h2>
+      <div className="find-heading">
+        <p className="find-heading-kicker">
+          <span className="find-heading-dot" aria-hidden="true" /> Independent websites, found here
+        </p>
+        <h2 className="find-title">
+          <span className="find-title-lead">Launch your product</span>
+          <span className="find-title-highlight">Get discovered now</span>
+        </h2>
+      </div>
 
       {/* Above the search box: one click, one random site, in a new tab. */}
       <div className="bored-row">
@@ -494,7 +498,6 @@ export default function Home() {
         <Link to="/this-or-that" className="bored-btn">
           <span aria-hidden="true">🆚</span> This or that
         </Link>
-        <span className="bored-note">One random site, or two to vote on.</span>
       </div>
 
       <AvatarRow />

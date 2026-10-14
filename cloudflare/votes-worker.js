@@ -17,6 +17,7 @@
  */
 
 const VOTE_PREFIX = "vote:";
+const MONTHLY_VOTE_PREFIX = "monthly-vote:";
 const SUBMISSION_PREFIX = "submission:";
 const REPORT_PREFIX = "report:";
 const PURCHASE_PREFIX = "purchase:";
@@ -231,6 +232,43 @@ async function allVoteCounts(env) {
   return counts;
 }
 
+function isVoteMonth(value) {
+  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+}
+
+function currentVoteMonth() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+async function monthlyVoteCounts(env, month) {
+  const counts = {};
+  const prefix = `${MONTHLY_VOTE_PREFIX}${month}:`;
+  let cursor;
+  do {
+    const page = await env.VOTES.list({ prefix, cursor, limit: 1000 });
+    for (const key of page.keys) {
+      const slug = key.name.slice(prefix.length);
+      counts[slug] = Number(key.metadata?.count ?? (await env.VOTES.get(key.name))) || 0;
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return counts;
+}
+
+async function monthlyVoteMonths(env) {
+  const months = new Set([currentVoteMonth()]);
+  let cursor;
+  do {
+    const page = await env.VOTES.list({ prefix: MONTHLY_VOTE_PREFIX, cursor, limit: 1000 });
+    for (const key of page.keys) {
+      const month = key.name.slice(MONTHLY_VOTE_PREFIX.length).split(":", 1)[0];
+      if (isVoteMonth(month)) months.add(month);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return [...months].sort((a, b) => b.localeCompare(a));
+}
+
 /* ---------------- submissions ---------------- */
 
 const CATEGORY_LIMIT = 8;
@@ -381,6 +419,16 @@ export default {
       return json(await allVoteCounts(env), headers);
     }
 
+    if (pathname === "/monthly-months" && request.method === "GET") {
+      return json({ months: await monthlyVoteMonths(env) }, headers);
+    }
+
+    if (pathname === "/monthly-counts" && request.method === "GET") {
+      const month = new URL(request.url).searchParams.get("month") || currentVoteMonth();
+      if (!isVoteMonth(month)) return json({ error: "invalid month" }, headers, 400);
+      return json(await monthlyVoteCounts(env, month), headers);
+    }
+
     if (pathname === "/analytics/view" && request.method === "POST") {
       const body = await readBody(request);
       const day = analyticsDay();
@@ -511,6 +559,14 @@ export default {
       await env.VOTES.put(voteKey(slug), String(next), {
         metadata: { count: next, updatedAt: Date.now() },
       });
+      if (pathname === "/vote") {
+        const month = currentVoteMonth();
+        const monthlyKey = `${MONTHLY_VOTE_PREFIX}${month}:${slug}`;
+        const monthlyCount = (Number(await env.VOTES.get(monthlyKey)) || 0) + 1;
+        await env.VOTES.put(monthlyKey, String(monthlyCount), {
+          metadata: { count: monthlyCount, updatedAt: Date.now() },
+        });
+      }
       const user = await currentUser(request, env);
       if (user) {
         user.voted = user.voted || [];

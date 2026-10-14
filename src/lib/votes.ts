@@ -18,6 +18,7 @@ export const votesConnected = votesEndpoint.length > 0;
 
 const VOTED_KEY = "bi:voted";
 const COUNT_KEY = "bi:vote-counts:v2";
+const MONTHLY_COUNT_KEY = "bi:monthly-vote-counts:v1";
 
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -63,6 +64,69 @@ export function writeLocalCount(slug: string, count: number) {
   writeJson(COUNT_KEY, { ...readLocalCounts(), [slug]: count });
 }
 
+type MonthlyCounts = Record<string, Record<string, number>>;
+
+export function readLocalMonthlyCounts(month: string): Record<string, number> {
+  const months = readJson<MonthlyCounts>(MONTHLY_COUNT_KEY, {});
+  const raw = months[month] ?? {};
+  return Object.fromEntries(
+    Object.entries(raw).filter(([, count]) => typeof count === "number" && Number.isFinite(count)),
+  );
+}
+
+export function readLocalMonthlyMonths(): string[] {
+  const months = readJson<MonthlyCounts>(MONTHLY_COUNT_KEY, {});
+  return Object.keys(months).filter((month) => /^\d{4}-(0[1-9]|1[0-2])$/.test(month));
+}
+
+function recordLocalMonthlyVote(slug: string) {
+  const month = new Date().toISOString().slice(0, 7);
+  const months = readJson<MonthlyCounts>(MONTHLY_COUNT_KEY, {});
+  const counts = months[month] ?? {};
+  writeJson(MONTHLY_COUNT_KEY, {
+    ...months,
+    [month]: { ...counts, [slug]: (Number(counts[slug]) || 0) + 1 },
+  });
+}
+
+export async function fetchMonthlyCounts(month: string): Promise<Record<string, number> | null> {
+  if (!votesConnected) return null;
+  try {
+    const res = await fetch(`${votesEndpoint}/monthly-counts?month=${encodeURIComponent(month)}`, {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Record<string, unknown>;
+    const counts: Record<string, number> = {};
+    for (const [slug, value] of Object.entries(data)) {
+      const count = Number(value);
+      if (Number.isFinite(count)) counts[slug] = count;
+    }
+    return counts;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchMonthlyMonths(): Promise<string[] | null> {
+  if (!votesConnected) return null;
+  try {
+    const res = await fetch(`${votesEndpoint}/monthly-months`, {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { months?: unknown };
+    if (!Array.isArray(data.months)) return null;
+    return data.months.filter(
+      (month): month is string => typeof month === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(month),
+    );
+  } catch {
+    return null;
+  }
+}
+
 /** All shared counts, or `null` when the Worker is not connected/reachable. */
 export async function fetchSharedCounts(): Promise<Record<string, number> | null> {
   if (!votesConnected) return null;
@@ -83,6 +147,7 @@ export async function fetchSharedCounts(): Promise<Record<string, number> | null
 
 /** Casts a vote. Returns the shared count, or `null` in local-only mode. */
 export async function castVote(slug: string, direction: "up" | "down" = "up"): Promise<number | null> {
+  if (direction === "up") recordLocalMonthlyVote(slug);
   if (!votesConnected) return null;
   try {
     const res = await fetch(`${votesEndpoint}/${direction === "up" ? "vote" : "unvote"}`, {
