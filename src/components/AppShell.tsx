@@ -187,10 +187,14 @@ export function AppShell() {
           </Link>
 
           <nav
-            className="hidden lg:flex justify-self-center items-center gap-6 text-[13px] font-bold"
+            className="site-header-nav hidden lg:flex justify-self-center items-center"
             aria-label="Main"
           >
-            <a href="/#explore" className="nav-link">
+            <a
+              href="/#explore"
+              className={`nav-link${path === "/" ? " active" : ""}`}
+              aria-current={path === "/" ? "page" : undefined}
+            >
               Explore
             </a>
             <NavItem to="/discover-websites">Discover</NavItem>

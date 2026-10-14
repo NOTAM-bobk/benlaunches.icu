@@ -25,7 +25,7 @@ interface Plan {
   includes: string[];
 }
 
-/** " one time" / "/ week" -> a tidy line beside the price. */
+/** " one time" / "for 30 days" -> a tidy line beside the price. */
 function unitLabel(unit: string): string {
   const value = unit.trim();
   if (value.includes("one time")) return "one-time";
@@ -92,7 +92,7 @@ const PLANS: Plan[] = [
     badge: "Most popular",
     rows: [
       { label: "Review", value: "By hand" },
-      { label: "On the homepage", value: "7 days pinned on top" },
+      { label: "On the homepage", value: "30 days pinned on top" },
       { label: "Backlink", value: "Dofollow, permanent" },
     ],
   }),
@@ -145,7 +145,7 @@ export default function Advertise() {
             "@type": "WebPage",
             name: "Pricing — advertise with Boring Internet",
             url: `${siteUrl}/advertise`,
-            description: "One-off and weekly options to launch and promote a website listing, priced in USD.",
+            description: "One-off services and 30-day placements to launch and promote a website listing, priced in USD.",
             inLanguage: "en",
           },
         ]}
@@ -180,7 +180,7 @@ export default function Advertise() {
               Pick how you launch
             </h2>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
-              Priced in USD. Every option is a one-off or a weekly slot — there is no subscription.
+              Priced in USD. Featured placements are one-time purchases for a full 30-day run; there is no recurring subscription.
             </p>
           </div>
 

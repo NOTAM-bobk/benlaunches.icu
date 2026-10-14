@@ -5,7 +5,7 @@
     "note": "Optional extras that put a listing in front of more of the right people. Clearly labeled, priced in USD, and never required to be considered for the directory."
   },
   "groups": [
-    { "id": "placements", "label": "Placements", "note": "A clearly marked spot for a launch, run for a week." },
+    { "id": "placements", "label": "Placements", "note": "A clearly marked spot for a launch, run for 30 days." },
     { "id": "services", "label": "One-off services", "note": "Bought on their own or alongside a placement, charged once." }
   ],
   "items": [
@@ -14,18 +14,18 @@
       "group": "placements",
       "name": "Promoted spot",
       "price": "$3",
-      "unit": "/ week",
+      "unit": "for 30 days",
       "description": "A clearly labeled promoted position near the top of a relevant category.",
-      "details": ["One category placement", "Clearly labeled as promoted", "Seven-day run"],
+      "details": ["One category placement", "Clearly labeled as promoted", "30-day run"],
       "summary": "A single promoted slot near the top of the category your site belongs to, marked as promoted so nobody is misled.",
       "includes": [
         "One promoted slot in one category, above the standard listings",
         "A promoted label on the listing, plus a note in the category header",
-        "A seven-day run, starting the day it goes live"
+        "A full 30-day run, starting the day it goes live"
       ],
       "steps": [
         "Submit your site and get it approved like any other listing.",
-        "Pick the category you want to stand out in and the week you want.",
+        "Pick the category you want to stand out in and the 30-day window you want.",
         "We position the listing, label it, and send you a short note when the run ends."
       ],
       "goodFor": "A launch that needs a small, honest lift inside its own category — not a site that wants to shout across the whole directory."
@@ -35,20 +35,20 @@
       "group": "placements",
       "name": "Homepage spotlight",
       "price": "$6",
-      "unit": "/ week",
+      "unit": "for 30 days",
       "description": "A larger featured placement for a launch you want more people to notice.",
-      "details": ["Homepage feature slot", "Links directly to your site", "Seven-day run"],
+      "details": ["Homepage feature slot", "Links directly to your site", "30-day run"],
       "featured": true,
-      "summary": "The biggest placement we offer: a labelled feature slot on the homepage, pointing straight at your site for a week.",
+      "summary": "The biggest placement we offer: a labelled feature slot on the homepage, pointing straight at your site for a full month.",
       "includes": [
         "A labelled feature slot in the homepage's featured row",
         "A direct link to your site plus your icon and one-line description",
-        "A seven-day run, with one rotation swap if the artwork needs a fix"
+        "A full 30-day run, with one rotation swap if the artwork needs a fix"
       ],
       "steps": [
         "Submit your site so we have your name, link, and one-line description on file.",
-        "Reserve the week you want — one spotlight runs at a time.",
-        "Your slot goes live at the start of the week and stays labeled as a spotlight."
+        "Reserve the 30-day window you want — one spotlight runs at a time.",
+        "Your slot goes live on the agreed start date and stays labeled as a spotlight for 30 days."
       ],
       "goodFor": "A launch week, a relaunch, or a site that has no audience yet and needs its first real visitors."
     },

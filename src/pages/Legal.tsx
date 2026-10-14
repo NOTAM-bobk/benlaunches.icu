@@ -178,7 +178,7 @@ const TERMS: LegalSection[] = [
           The placements and services on the <Link to="/advertise">advertise page</Link> can be
           bought on the <Link to="/checkout">checkout page</Link>. Payment is taken by PayPal, so
           your card and bank details never reach this site. Prices are in US dollars and are
-          charged once, even for the options that run for a week.
+          charged once, even for placements that run for a full 30 days.
         </p>
         <p>
           Paid placements are always labelled as paid, and paying is never required to be listed
