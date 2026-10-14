@@ -7027,3 +7027,132 @@ button.sidenav-foot-link:hover {
   font-size: 10px;
   opacity: 0.72;
 }
+
+
+/* ---------- Ben Launches reintroduction gate ---------- */
+.welcome-gate-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: rgba(26, 18, 11, 0.66);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.welcome-gate-card {
+  position: relative;
+  width: min(100%, 34rem);
+  padding: clamp(1.5rem, 6vw, 3rem);
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  box-shadow: 8px 8px 0 rgba(26, 18, 11, 0.3);
+  text-align: center;
+  animation: welcome-gate-arrive 220ms ease-out both;
+}
+
+.welcome-gate-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.42rem;
+  background: var(--accent);
+  content: "";
+}
+
+.welcome-gate-eyebrow {
+  margin: 0 0 1.1rem;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.welcome-gate-title {
+  max-width: 12ch;
+  margin: 0 auto;
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 7vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.welcome-gate-copy {
+  margin: 1rem 0 1.8rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 3.4vw, 1.2rem);
+}
+
+.welcome-gate-copy strong {
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 700;
+}
+
+.welcome-gate-primary {
+  display: flex;
+  width: 100%;
+  min-height: 3.4rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+  cursor: pointer;
+  font: 700 1rem/1.25 var(--sans);
+  letter-spacing: 0.015em;
+  text-align: center;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.welcome-gate-primary:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+.welcome-gate-primary:focus-visible,
+.welcome-gate-legacy:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.welcome-gate-legacy {
+  display: inline-block;
+  margin-top: 1.15rem;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 600 0.78rem/1.4 var(--sans);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.2rem;
+}
+
+.welcome-gate-legacy:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+@keyframes welcome-gate-arrive {
+  from { opacity: 0; transform: translateY(0.55rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-gate-card {
+    animation: none;
+  }
+  .welcome-gate-primary {
+    transition: none;
+  }
+}
