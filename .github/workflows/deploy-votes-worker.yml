@@ -1,0 +1,79 @@
+name: Deploy votes Worker
+
+# Deploys cloudflare/votes-worker.js to Cloudflare. Everything here runs on
+# GitHub, so it needs no local computer: add the two secrets below once, then
+# use Actions → Deploy votes Worker → Run workflow.
+#
+#   CLOUDFLARE_ACCOUNT_ID   Cloudflare dashboard → Workers & Pages → account ID
+#   CLOUDFLARE_API_TOKEN    Create Custom Token with:
+#                             Account → Workers Scripts → Edit
+#                             Account → Workers KV Storage → Edit
+#
+# ADMIN_PASSWORD is a Worker secret and is NOT set here — deploying code never
+# clears existing secrets or the VOTES KV binding.
+
+on:
+  workflow_dispatch:
+  push:
+    # Only the default branch: this deploys straight to the live Worker.
+    branches: [main]
+    paths:
+      - "cloudflare/**"
+      - ".github/workflows/deploy-votes-worker.yml"
+
+concurrency:
+  group: deploy-votes-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      WORKER_URL: ${{ vars.WORKER_URL || 'https://boring-internet-votes.sawyerbobk563.workers.dev' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy the Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config cloudflare/wrangler.toml
+
+      # A stale deployment is the failure mode that hides votes and stats: the
+      # pages call routes an older script does not have and read the 404 as "no
+      # data". Fail the run if what is live still answers like the old Worker.
+      - name: Verify the deployed routes
+        run: |
+          echo "Checking $WORKER_URL/health"
+          for attempt in 1 2 3 4 5 6; do
+            health=$(curl -fsS -m 20 "$WORKER_URL/health" 2>/dev/null || true)
+            echo "attempt $attempt: ${health:-<no response>}"
+            case "$health" in
+              *adminConfigured*)
+                echo "Worker is current."
+                break
+                ;;
+            esac
+            if [ "$attempt" = "6" ]; then
+              echo "::error::The live Worker still looks like the old script. Check the deploy output above."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          for path in "/monthly-months" "/monthly-counts?month=$(date -u +%Y-%m)"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 20 "$WORKER_URL$path")
+            echo "$path → $code"
+            if [ "$code" != "200" ]; then
+              echo "::error::$path answered $code instead of 200 — the deployment did not take."
+              exit 1
+            fi
+          done
+
+          case "$health" in
+            *'"adminConfigured":false'*)
+              echo "::warning::ADMIN_PASSWORD is not set on this Worker — /admin will stay locked. Set it in the Cloudflare dashboard under the Worker's Settings → Variables and Secrets."
+              ;;
+          esac

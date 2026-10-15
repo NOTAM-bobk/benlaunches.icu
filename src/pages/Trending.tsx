@@ -30,6 +30,14 @@ function monthLabel(month: string, style: "short" | "long" = "long") {
 
 type VoteMode = "checking" | "shared" | "local" | "unreachable";
 
+/**
+ * Which set of counts the list is showing. "lifetime" is the fallback: the
+ * lifetime totals from `/counts`, used whenever the monthly counter is not
+ * answering, so a Worker that predates the monthly routes still shows real
+ * vote numbers instead of zeros.
+ */
+type CountScope = "lifetime" | "monthly";
+
 const MODE_NOTES: Record<Exclude<VoteMode, "shared">, string> = {
   checking: "Checking the vote counter…",
   local:
@@ -45,12 +53,16 @@ export default function Trending() {
   const selectedMonth = monthParam && /^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam)
     ? monthParam
     : currentMonth;
+  /* An archived month is only meaningful with the shared monthly counter: this
+     browser cannot hold anyone else's past votes. */
+  const [scope, setScope] = useState<CountScope>("monthly");
+  const monthlyView = scope === "monthly";
   const isCurrentMonth = selectedMonth === currentMonth;
+  const canVote = monthlyView && isCurrentMonth;
   const [archiveMonths, setArchiveMonths] = useState([currentMonth]);
   const [monthlyCounts, setMonthlyCounts] = useState<Record<string, number>>(
     () => readLocalMonthlyCounts(currentMonth),
   );
-  const [monthlyCounterAvailable, setMonthlyCounterAvailable] = useState(false);
 
   // Every listed site can climb, not just the ones that start in the top slots.
   const pool = useMemo(() => rankedSites(), []);
@@ -71,14 +83,15 @@ export default function Trending() {
   */
   const ranked = useMemo(() => {
     const configured = new Map(pool.map((site, index) => [site.slug, index]));
+    const ranking = monthlyView ? monthlyCounts : counts;
     return [...pool]
       .sort((a, b) => {
-        const votes = (monthlyCounts[b.slug] ?? 0) - (monthlyCounts[a.slug] ?? 0);
+        const votes = (ranking[b.slug] ?? 0) - (ranking[a.slug] ?? 0);
         if (votes !== 0) return votes;
         return (configured.get(a.slug) ?? 0) - (configured.get(b.slug) ?? 0);
       })
       .slice(0, TOP_N);
-  }, [pool, monthlyCounts]);
+  }, [pool, monthlyView, monthlyCounts, counts]);
 
   useEffect(() => {
     let active = true;
@@ -100,7 +113,6 @@ export default function Trending() {
     let active = true;
     fetchMonthlyMonths().then((sharedMonths) => {
       if (!active) return;
-      setMonthlyCounterAvailable(sharedMonths !== null);
       const months = sharedMonths ?? readLocalMonthlyMonths();
       setArchiveMonths([...new Set([currentMonth, ...months])].sort((a, b) => b.localeCompare(a)));
     });
@@ -114,10 +126,11 @@ export default function Trending() {
     fetchMonthlyCounts(selectedMonth).then((sharedCounts) => {
       if (!active) return;
       if (sharedCounts !== null) {
-        setMonthlyCounterAvailable(true);
+        setScope("monthly");
         setMonthlyCounts(sharedCounts);
       } else {
         setMonthlyCounts(readLocalMonthlyCounts(selectedMonth));
+        setScope("lifetime");
       }
     });
     return () => {
@@ -126,7 +139,7 @@ export default function Trending() {
   }, [selectedMonth]);
 
   async function vote(site: Site) {
-    if (!isCurrentMonth) return;
+    if (!canVote) return;
     if (voted.includes(site.slug) || pending.includes(site.slug)) return;
 
     const optimistic = (counts[site.slug] ?? 0) + 1;
@@ -195,7 +208,10 @@ export default function Trending() {
             {trendingConfig.title} <span aria-hidden="true">🔥</span>
           </h1>
           <p className="text-base" style={{ color: "var(--muted)" }}>
-            {trendingConfig.tagline} Rankings use community upvotes cast during {monthLabel(selectedMonth)}.
+            {trendingConfig.tagline}{" "}
+            {monthlyView
+              ? `Rankings use community upvotes cast during ${monthLabel(selectedMonth)}.`
+              : "Rankings use every community upvote a site has collected."}
           </p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>
             Looking to discover websites fast? Start here, then jump to{" "}
@@ -210,37 +226,40 @@ export default function Trending() {
           </p>
         </header>
 
-        <section className="trending-month-archive" aria-label="Monthly trending archive">
-          <div className="trending-month-heading">
-            <span>Monthly rankings</span>
-            <span className="trending-month-current">Showing {monthLabel(selectedMonth)}</span>
-          </div>
-          <div className="trending-month-cards" role="group" aria-label="Choose a month">
-            {archiveMonths.map((month) => (
-              <button
-                key={month}
-                type="button"
-                className={`trending-month-card${selectedMonth === month ? " is-active" : ""}`}
-                aria-pressed={selectedMonth === month}
-                onClick={() => chooseMonth(month)}
-              >
-                <span className="trending-month-name">{monthLabel(month, "short").split(" ")[0]}</span>
-                <span className="trending-month-year">{month.slice(0, 4)}</span>
-                <span className="trending-month-kind">{month === currentMonth ? "Current" : "Archive"}</span>
-              </button>
-            ))}
-          </div>
-          {archiveMonths.length === 1 && monthlyCounterAvailable && (
-            <p className="trending-month-note">
-              Earlier months will appear here as they close. Existing lifetime votes cannot be split into past months.
-            </p>
-          )}
-          {!monthlyCounterAvailable && (
-            <p className="trending-month-note">
-              Shared monthly history starts when the updated vote counter is deployed. This browser can still keep its own month-by-month votes; older totals are not available by month.
-            </p>
-          )}
-        </section>
+        {monthlyView ? (
+          <section className="trending-month-archive" aria-label="Monthly trending archive">
+            <div className="trending-month-heading">
+              <span>Monthly rankings</span>
+              <span className="trending-month-current">Showing {monthLabel(selectedMonth)}</span>
+            </div>
+            <div className="trending-month-cards" role="group" aria-label="Choose a month">
+              {archiveMonths.map((month) => (
+                <button
+                  key={month}
+                  type="button"
+                  className={`trending-month-card${selectedMonth === month ? " is-active" : ""}`}
+                  aria-pressed={selectedMonth === month}
+                  onClick={() => chooseMonth(month)}
+                >
+                  <span className="trending-month-name">{monthLabel(month, "short").split(" ")[0]}</span>
+                  <span className="trending-month-year">{month.slice(0, 4)}</span>
+                  <span className="trending-month-kind">{month === currentMonth ? "Current" : "Archive"}</span>
+                </button>
+              ))}
+            </div>
+            {archiveMonths.length === 1 && (
+              <p className="trending-month-note">
+                Earlier months will appear here as they close. Existing lifetime votes cannot be split into past months.
+              </p>
+            )}
+          </section>
+        ) : (
+          <p className="trending-month-note">
+            {mode === "shared"
+              ? "Month-by-month rankings start once the updated vote counter is deployed. Until then this list ranks every site by its total votes, which is the same number each site shows on its own page."
+              : "Month-by-month rankings start once the shared vote counter is reachable. Until then this list ranks every site by the votes this browser can see."}
+          </p>
+        )}
 
         {mode !== "shared" && (
           <p
@@ -263,10 +282,10 @@ export default function Trending() {
               rank={index + 1}
               medal
               leader={index === 0}
-              count={monthlyCounts[site.slug] ?? 0}
-              voted={isCurrentMonth && voted.includes(site.slug)}
+              count={monthlyView ? monthlyCounts[site.slug] ?? 0 : counts[site.slug] ?? 0}
+              voted={canVote && voted.includes(site.slug)}
               pending={pending.includes(site.slug)}
-              readOnly={!isCurrentMonth}
+              readOnly={!canVote}
               onVote={() => void vote(site)}
             />
           ))}

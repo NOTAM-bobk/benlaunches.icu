@@ -13,6 +13,16 @@ export interface AnalyticsStats {
   topPages: Array<{ path: string; views: number }>;
 }
 
+/**
+ * Why the stats page has no numbers. "missing" means the Worker answered but
+ * does not have the analytics routes yet (an older deployment), which is a
+ * different problem from a Worker that is down or unreachable.
+ */
+export type AnalyticsResult =
+  | { status: "ok"; stats: AnalyticsStats }
+  | { status: "missing" }
+  | { status: "unavailable" };
+
 const VISITOR_KEY = "bi:analytics-visitor";
 
 function visitorId(): string {
@@ -38,13 +48,14 @@ export function trackPageView(path: string): void {
   }).catch(() => undefined);
 }
 
-export async function fetchAnalyticsStats(): Promise<AnalyticsStats | null> {
-  if (!votesConnected) return null;
+export async function fetchAnalyticsStats(): Promise<AnalyticsResult> {
+  if (!votesConnected) return { status: "unavailable" };
   try {
     const response = await fetch(`${votesEndpoint}/analytics/stats`, { headers: { Accept: "application/json" } });
-    if (!response.ok) return null;
-    return await response.json() as AnalyticsStats;
+    if (response.status === 404) return { status: "missing" };
+    if (!response.ok) return { status: "unavailable" };
+    return { status: "ok", stats: (await response.json()) as AnalyticsStats };
   } catch {
-    return null;
+    return { status: "unavailable" };
   }
 }

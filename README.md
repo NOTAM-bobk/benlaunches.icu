@@ -174,7 +174,9 @@ The Worker at `cloudflare/votes-worker.js` handles votes, submissions, profiles,
 | `GET /profiles/:id/submissions` | public | approved URLs for a public profile; `?private=1` also includes moderation status for the signed-in account UI |
 | `POST /analytics/view` | public | count a page view and a daily unique visitor without cookies or IP storage |
 | `GET /analytics/stats` | public | rolling 30-day totals, daily chart data, and top pages for `/stats` |
-| `GET /health` | public | liveness + whether the admin password is set |
+| `GET /monthly-counts?month=YYYY-MM` | public | votes per site for one month |
+| `GET /monthly-months` | public | which months have stored votes |
+| `GET /health` | public | liveness, whether the admin password is set, submission and purchase counts |
 
 Deployed at `https://boring-internet-votes.sawyerbobk563.workers.dev`.
 
@@ -187,8 +189,89 @@ Setup notes:
 3. `wrangler deploy --config cloudflare/wrangler.toml`
 4. Set the site's `VITE_VOTES_API_URL` to the Worker URL
 
+`cloudflare/wrangler.toml` also sets `ALLOWED_ORIGIN`, the comma-separated list
+of browser origins the Worker answers for (`boringinternet.org`,
+`new.base31.org`, `boringinternet.vercel.app`, `www.benlaunches.icu`,
+`benlaunches.icu`). Entries are exact origins — scheme and host only. A trailing
+slash, a path, or a missing `www.` will not match a real request and the Worker
+falls back to the first entry, so vote writes from that site silently fail CORS.
+
 Until `VITE_VOTES_API_URL` is set the pages say so: votes fall back to
 localStorage and the submit form is disabled.
+
+**Deploy the Worker after changing it.** The routes the pages call do not all
+arrive together, and a stale deployment fails quietly. `/counts` has existed for
+a while; `/monthly-counts`, `/monthly-months`, `/analytics/view`,
+`/analytics/stats`, `/auth/streak`, `/payments/record` and `/admin/purchases`
+were added later. An older Worker answers those with `404`, which the client
+reads as "no shared numbers" and falls back to `0` — votes look missing even
+though `/counts` still holds them.
+
+Check what is actually live before assuming the frontend is wrong:
+
+```bash
+W=https://boring-internet-votes.sawyerbobk563.workers.dev
+curl -s $W/health           # {"ok":true} on an old Worker
+curl -s $W/monthly-counts?month=$(date -u +%Y-%m)   # 404 => redeploy needed
+```
+
+The current `votes-worker.js` answers `/health` with `ok`, `adminConfigured`,
+`submissions` and `purchases`. If you only see `ok`, the deployment is behind the
+repo. Run `wrangler deploy --config cloudflare/wrangler.toml` and reload.
+
+### Deploying the Worker without a computer
+
+The Worker is plain JavaScript with no build step, so it can be deployed from a
+browser. Two ways:
+
+**Cloudflare dashboard (nothing to configure first)**
+
+1. Open <https://dash.cloudflare.com> → **Workers & Pages** →
+   **boring-internet-votes** → **Edit code** (the in-dashboard editor).
+2. In another tab, open the repo's `cloudflare/votes-worker.js` on GitHub and use
+   the **Raw** button, then select all and copy.
+3. In the dashboard editor, select the whole file and paste over it, then click
+   **Deploy**.
+4. The `VOTES` KV binding and the `ADMIN_PASSWORD` secret live in the Worker's
+   configuration, not in the code, so they survive a code-only edit. Confirm at
+   <https://boring-internet-votes.sawyerbobk563.workers.dev/health> — it should
+   list `adminConfigured`, `submissions`, and `purchases`, not just `ok`.
+
+**GitHub Actions (a button after a one-time setup)**
+
+`.github/workflows/deploy-votes-worker.yml` deploys the Worker and then fails if
+what is live still looks like the old script. Turn it on once:
+
+1. Repository **Settings** → **Secrets and variables** → **Actions** →
+   **New repository secret** → `CLOUDFLARE_ACCOUNT_ID` (the account ID shown on
+   the Workers & Pages overview).
+2. A second secret, `CLOUDFLARE_API_TOKEN`, from
+   <https://dash.cloudflare.com/profile/api-tokens>. The quickest route is the
+   **Edit Cloudflare Workers** template; if you build a **Create Custom Token**
+   instead, add two rows in the **Permissions** box by picking:
+   **Account → Workers Scripts → Edit**, then **+ Add more** and
+   **Account → Workers KV Storage → Edit**. Both are needed: the first deploys
+   the script, the second confirms the `VOTES` KV binding (`wrangler.toml`
+   references it by id, so the token must be able to read it). Leave **Account
+   Resources** on *All accounts* or pick the one owning the Worker, then
+   **Continue to summary → Create Token** and copy the value.
+3. **Actions** → **Deploy votes Worker** → **Run workflow**.
+
+After that, any commit that touches `cloudflare/` redeploys automatically, so the
+Worker can be edited straight in GitHub's web editor too. Optional: set a repo
+variable `WORKER_URL` if the Worker ever moves off its `workers.dev` address.
+
+The payment queue behind `/admin` reads `VOTES_API_URL` and
+`PAYMENTS_ADMIN_PASSWORD` from the *hosting* side, which are separate from
+`VITE_VOTES_API_URL` — set both in the host's environment settings (server-only,
+never `VITE_`-prefixed) and redeploy, or the queue stays empty even once the
+Worker is current.
+
+While the monthly routes are missing, `/trending` still ranks by the lifetime
+`/counts` totals instead of showing zeros, so the page is never blank of votes;
+it only loses the month-by-month archive until the Worker is current. `/stats`
+uses the same signal: an old Worker makes it say it is *waiting on a Worker
+redeploy* rather than showing an unexplained error.
 
 When a visitor is signed in through the account service, the submit form sends
 the profile ID with the submission. Pending, approved, and rejected URLs appear

@@ -12,7 +12,7 @@
  *
  * Secrets/vars (wrangler):
  *   ADMIN_PASSWORD   required for /admin/*  (wrangler secret put ADMIN_PASSWORD)
- *   ALLOWED_ORIGIN   CORS origin for the browser (defaults to "*")
+ *   ALLOWED_ORIGIN   comma-separated list of allowed browser origins (defaults to "*")
  *   VOTES            KV namespace binding
  */
 
@@ -34,9 +34,14 @@ const REVIEW_STATUSES = new Set(["pending", "approved", "rejected"]);
 const PURCHASE_STATUSES = new Set(["pending", "fulfilled", "refunded"]);
 
 function cors(env, request) {
-  const allowed = (env.ALLOWED_ORIGIN || "*").split(",").map((value) => value.trim());
+  // Trailing slashes are stripped: a browser's Origin header never has one, so
+  // a list entry like "https://example.org/" would never match anything.
+  const allowed = (env.ALLOWED_ORIGIN || "*")
+    .split(",")
+    .map((value) => value.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
   const requested = request.headers.get("Origin");
-  const origin = requested && allowed.includes(requested) ? requested : allowed[0];
+  const origin = requested && allowed.includes(requested) ? requested : allowed[0] || "*";
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",

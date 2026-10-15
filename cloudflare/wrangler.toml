@@ -9,5 +9,9 @@ workers_dev = true
 binding = "VOTES"
 id = "36580dc8d626443cbe3783979036b9b9"
 
+# Origins allowed to call the Worker from a browser. Comma-separated, exact
+# origin only (scheme + host) — no trailing slash and no path, because a
+# browser's Origin header never carries one. The first entry is the fallback
+# used when the caller's origin is not on the list.
 [vars]
-ALLOWED_ORIGIN = "https://boringinternet.org,https://www.benlaunches.icu,https://benlaunches.icu,https://new.base31.org,https://boringinternet.vercel.app"
+ALLOWED_ORIGIN = "https://boringinternet.org,https://new.base31.org,https://boringinternet.vercel.app,https://www.benlaunches.icu,https://benlaunches.icu"
