@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { avatarUrl, useAuth } from "../lib/auth";
+import { readVisitStreak } from "../lib/visitStreak";
 
 function Avatar({ seed, size }: { seed: string; size: number }) {
   const [failed, setFailed] = useState(false);
@@ -56,9 +57,34 @@ export function AccountMenu() {
 
   const seed = user?.avatarSeed || "boring-internet";
 
+  /*
+    Two daily streaks, one badge: a signed-in visitor keeps the streak the
+    Worker records for them, everyone else gets the localStorage streak that
+    only needs the site to be opened (see lib/visitStreak).
+  */
+  const [visitStreak] = useState(() => readVisitStreak());
+  const streakDays = user ? user.streak.current : visitStreak.current;
+  const flame = (
+    <>
+      <svg className="header-streak-flame" viewBox="0 0 32 36" aria-hidden="true"><path d="M16.6 2.5c.8 6.4-4.2 8.2-3.5 13.2-2.2-1.1-3.2-3.1-3-5.8C5.5 14.3 3.5 19 4.2 23.5 5.1 29.2 10 33 16 33s10.9-3.8 11.8-9.5c.8-5-2.2-10.7-7.8-15.7.5 4.1-1.1 6.8-3.4 8.6.7-4.8 1.4-8.8 0-13.9Z" /></svg>
+      <strong>{streakDays}d</strong>
+    </>
+  );
+
   return (
     <div className="account" ref={rootRef}>
-      {user && <Link to="/profile#streak" className="header-streak" aria-label={`${user.streak.current} day sign-in streak`}><svg className="header-streak-flame" viewBox="0 0 32 36" aria-hidden="true"><path d="M16.6 2.5c.8 6.4-4.2 8.2-3.5 13.2-2.2-1.1-3.2-3.1-3-5.8C5.5 14.3 3.5 19 4.2 23.5 5.1 29.2 10 33 16 33s10.9-3.8 11.8-9.5c.8-5-2.2-10.7-7.8-15.7.5 4.1-1.1 6.8-3.4 8.6.7-4.8 1.4-8.8 0-13.9Z" /></svg><strong>{user.streak.current}d</strong></Link>}
+      {streakDays > 0 && (user ? (
+        <Link to="/profile#streak" className="header-streak" aria-label={`${streakDays} day sign-in streak`}>
+          {flame}
+        </Link>
+      ) : (
+        <span
+          className="header-streak"
+          title={`${streakDays} day streak — open the site tomorrow to keep it going`}
+        >
+          {flame}
+        </span>
+      ))}
       <button
         type="button"
         className="account-box"

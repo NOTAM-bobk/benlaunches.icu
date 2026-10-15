@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { FeatureBadges } from "./FeatureBadges";
-import { appVersion, siteLinks } from "../lib/siteData";
+import { appVersion, siteLinks, siteName } from "../lib/siteData";
 
 /** Link columns, kept apart from the markup so the footer stays readable. */
 const DIRECTORY_LINKS: { to: string; label: string }[] = [
@@ -11,7 +11,7 @@ const DIRECTORY_LINKS: { to: string; label: string }[] = [
   { to: "/collections", label: "Collections" },
   { to: "/trending", label: "Trending 🔥" },
   { to: "/submit", label: "Submit your site" },
-  { to: "/advertise", label: "Advertise with Boring Internet" },
+  { to: "/advertise", label: `Advertise with ${siteName}` },
   { to: "/stats", label: "Directory stats" },
 ];
 
@@ -39,7 +39,7 @@ export function Footer() {
               className="text-[11px] font-bold tracking-[0.2em] uppercase"
               style={{ color: "var(--ink)" }}
             >
-              Boring Internet
+              {siteName}
             </span>
             <p className="max-w-md leading-relaxed" style={{ color: "var(--muted)" }}>
               A small directory of launched sites. Edited by hand, kept minimal on purpose.
@@ -117,7 +117,7 @@ export function Footer() {
         >
           <div className="footer-meta-row flex flex-wrap items-center justify-between gap-3">
             <p>
-              © {new Date().getFullYear()} Boring Internet · v{appVersion}
+              © {new Date().getFullYear()} {siteName} · v{appVersion}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link

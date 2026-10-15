@@ -7,6 +7,7 @@ import { NeedsSomeVotes } from "../components/NeedsSomeVotes";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import { VerifiedStamp } from "../components/VerifiedStamp";
+import { VisitorsBadge } from "../components/VisitorsBadge";
 import {
   categoryById,
   categoryCount,
@@ -500,7 +501,12 @@ export default function Home() {
         </Link>
       </div>
 
-      <AvatarRow />
+      {/* The crowd, then who else is here: one line, so the avatars and the
+          visitor count sit on the same baseline. */}
+      <div className="hero-social">
+        <AvatarRow />
+        <VisitorsBadge />
+      </div>
 
       <form className="search-box launch-form" onSubmit={handleLaunch}>
         <label htmlFor="site-url" className="sr-only">

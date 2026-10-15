@@ -8,6 +8,22 @@ import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
 import { trackPageView } from "../lib/analytics";
 
+/**
+ * The promo strip is a one-time offer: it is shown on the first visit that
+ * reaches the home page and never again, which the browser remembers.
+ */
+const PROMO_SEEN_KEY = "bi:promo-seen:v1";
+
+function promoAlreadySeen(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(PROMO_SEEN_KEY) === "1";
+  } catch {
+    // Private mode: nothing can be remembered, so let it show each visit.
+    return false;
+  }
+}
+
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
     <NavLink
@@ -104,7 +120,7 @@ function BackToTop() {
 
 export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
-  const [promoOpen, setPromoOpen] = useState(true);
+  const [promoOpen, setPromoOpen] = useState(() => !promoAlreadySeen());
   const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -153,6 +169,18 @@ export function AppShell() {
     trackPageView(`${location.pathname}${location.search}`);
   }, [location.pathname, location.search]);
 
+  // Mark the promo as seen the moment it is actually on screen. Only writing
+  // storage here — never state — keeps the strip from reappearing later.
+  const showPromo = path === "/" && promoOpen;
+  useEffect(() => {
+    if (!showPromo) return;
+    try {
+      window.localStorage.setItem(PROMO_SEEN_KEY, "1");
+    } catch {
+      /* private mode */
+    }
+  }, [showPromo]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="site-header" ref={headerRef}>
@@ -160,7 +188,7 @@ export function AppShell() {
             It only belongs on the home screen — every other page opens on the
             brand row, which also keeps the header (and the mobile menu that
             hangs off its height) shorter. */}
-        {path === "/" && promoOpen && (
+        {showPromo && (
           <div className="promo-bar">
             <p className="promo-bar-copy">
               Enhance your site’s SEO{" "}

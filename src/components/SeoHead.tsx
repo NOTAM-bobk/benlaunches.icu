@@ -5,7 +5,6 @@ import {
   siteName,
   siteTagline,
   siteUrl,
-  sites,
 } from "../lib/siteData";
 
 type JsonLd = Record<string, unknown>;
@@ -188,8 +187,9 @@ export function HomepageSeo({
   newSites?: Array<{ name: string; url: string; description?: string }>;
   trendingSites?: Array<{ name: string; url: string; description?: string }>;
 }) {
-  const total = sites.length;
-  const description = `${siteTagline} Browse all ${total} sites by category, see what is trending, and submit your own.`;
+  // The home page keeps the configured description verbatim: it is the line
+  // search results show, so nothing is appended to it.
+  const description = siteDescription;
   const keywords = [
     "bored button",
     "website to website",

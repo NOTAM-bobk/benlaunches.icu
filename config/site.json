@@ -1,7 +1,7 @@
 {
-  "name": "Boring Internet",
+  "name": "Ben Launches",
   "tagline": "A quiet list of launched sites, kept small on purpose.",
-  "description": "A hand-checked directory of launched sites that load fast, respect your attention, and skip the growth tactics. Browse by category, see what is trending, and submit your own.",
+  "description": "Launch Your Site - Get Traffic",
   "url": "https://www.benlaunches.icu",
   "locale": "en_US",
   "keywords": [
@@ -16,7 +16,7 @@
     "launched sites directory",
     "submit your site"
   ],
-  "author": "Boring Internet",
+  "author": "Ben Launches",
   "links": {
     "github": "https://github.com/NOTAM-bobk/benlaunches.icu",
     "contact": "mailto:hello@base31.org"

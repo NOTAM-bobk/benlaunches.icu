@@ -30,6 +30,10 @@ import Checkout from "./pages/Checkout.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
 import Stats from "./pages/Stats.tsx";
+import { recordVisitToday } from "./lib/visitStreak";
+
+/* Opening the site is all the daily streak needs — no account involved. */
+recordVisitToday();
 
 const router = createBrowserRouter([
   {

@@ -2560,12 +2560,35 @@ mark.hl {
   border-radius: inherit;
 }
 
-.avatar:nth-child(3n + 1) {
-  transform: translateY(-5px);
+/* Every avatar sits on the same line: the row is a line-up, not a scatter. */
+
+/* The crowd and the visitor count share one baseline under the buttons. */
+.hero-social {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
 }
 
-.avatar:nth-child(3n + 3) {
-  transform: translateY(4px);
+.visitors-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Cloudflare orange, because the mark names the service counting the visits. */
+.visitors-badge-mark {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+  display: block;
+  color: #f6821f;
 }
 
 @media (min-width: 640px) {
