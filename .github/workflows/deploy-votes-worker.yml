@@ -9,8 +9,11 @@ name: Deploy votes Worker
 #                             Account → Workers Scripts → Edit
 #                             Account → Workers KV Storage → Edit
 #
-# ADMIN_PASSWORD is a Worker secret and is NOT set here — deploying code never
-# clears existing secrets or the VOTES KV binding.
+# ADMIN_PASSWORD and GITHUB_TOKEN are Worker **secrets** and are NOT set here —
+# deploying code never clears existing secrets or the VOTES KV binding. Secrets
+# survive every deploy; plain-text variables in the dashboard do not, because
+# this deploy uploads the [vars] block from cloudflare/wrangler.toml and removes
+# any variable it does not list.
 
 on:
   workflow_dispatch:
@@ -75,5 +78,16 @@ jobs:
           case "$health" in
             *'"adminConfigured":false'*)
               echo "::warning::ADMIN_PASSWORD is not set on this Worker — /admin will stay locked. Set it in the Cloudflare dashboard under the Worker's Settings → Variables and Secrets."
+              ;;
+          esac
+
+          # This deploy just uploaded [vars] from wrangler.toml, which REPLACES
+          # the Worker's plain-text variables. A GITHUB_TOKEN stored as a
+          # variable (rather than a secret) is destroyed by this run — publish
+          # then fails with "publishing is not configured" and the only clue is
+          # this line, so say it loudly.
+          case "$health" in
+            *'"publishing":false'*)
+              echo "::warning::The Worker has no GITHUB_TOKEN, so 'Approve & publish' will refuse with a 409. It must be a SECRET, not a variable: this deploy uploads the [vars] block from cloudflare/wrangler.toml and drops any plain-text variable that block does not list, so a GITHUB_TOKEN saved as a variable is deleted by exactly this run. Re-add it under Settings → Variables and Secrets with type Secret, or `wrangler secret put GITHUB_TOKEN --config cloudflare/wrangler.toml`. Secrets survive every future deploy; variables do not."
               ;;
           esac
