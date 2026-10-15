@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
+import { SaveToCollection } from "../components/SaveToCollection";
+import { ShareLaunchCard } from "../components/ShareLaunchCard";
 import { ShareSite } from "../components/ShareSite";
 import { useSignInPrompt } from "../lib/signInPrompt";
 import { SiteIcon } from "../components/SiteIcon";
@@ -187,6 +189,7 @@ export default function SiteDetail() {
               >
                 {saved ? "Saved ✓" : "Save site"}
               </button>
+              <SaveToCollection slug={site.slug} />
               <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
             </div>
           </div>
@@ -266,6 +269,9 @@ export default function SiteDetail() {
               Send {site.name} to someone who would like it, or keep the link for later.
             </p>
             <ShareSite site={site} pageUrl={pageUrl} />
+            <div className="site-detail-card-share">
+              <ShareLaunchCard site={site} />
+            </div>
           </section>
         </div>
       </div>

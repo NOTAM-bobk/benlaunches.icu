@@ -395,6 +395,15 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             >
               Site Tinder
             </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${
+                location.pathname === "/website-personality-quiz" ? " active-sub" : ""
+              }`}
+              onClick={() => go("/website-personality-quiz")}
+            >
+              Website Personality Quiz
+            </button>
           </div>
         )}
       </div>
@@ -414,6 +423,14 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               onClick={() => go("/blog")}
             >
               Articles <span className="sidenav-badge">{posts.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${location.pathname === "/collections/mine" ? " active-sub" : ""}`}
+              aria-current={location.pathname === "/collections/mine" ? "page" : undefined}
+              onClick={() => go("/collections/mine")}
+            >
+              Your collections
             </button>
             <button
               type="button"

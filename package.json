@@ -21,7 +21,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "icons": "bun scripts/generate-icons.mjs",
-    "sitemap": "bun scripts/generate-sitemap.mjs"
+    "sitemap": "bun scripts/generate-sitemap.mjs",
+    "validate": "node scripts/validate-sites.mjs"
   },
   "type": "module",
   "dependencies": {

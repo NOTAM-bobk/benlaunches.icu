@@ -7,7 +7,9 @@ import {
   reviewSubmission,
   reviewSiteReport,
   reviewPurchase,
+  publishSubmission,
   submissionsConnected,
+  type PublishResult,
   type SiteProblemReport,
   type Submission,
   type SubmissionStatus,
@@ -42,10 +44,16 @@ function StatusChip({ status }: { status: SubmissionStatus }) {
 function SubmissionCard({
   submission,
   onReview,
+  onPublish,
+  published,
+  publishing,
   busy,
 }: {
   submission: Submission;
   onReview: (id: string, status: SubmissionStatus) => void;
+  onPublish: (id: string) => void;
+  published?: PublishResult;
+  publishing: boolean;
   busy: boolean;
 }) {
   const rows: Array<[string, string]> = [
@@ -118,6 +126,26 @@ function SubmissionCard({
       </dl>
 
       <div className="flex flex-wrap items-center gap-3 border-t pt-4" style={{ borderColor: "var(--rule)" }}>
+        {published ? (
+          <a
+            className="btn"
+            href={published.commitUrl || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Published as {published.slug} ↗
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="btn accent"
+            disabled={busy || publishing}
+            title="Approve this submission and commit it to config/sites.json on GitHub"
+            onClick={() => onPublish(submission.id)}
+          >
+            {publishing ? "Publishing…" : "Approve & publish"}
+          </button>
+        )}
         <button
           type="button"
           className="btn"
@@ -138,6 +166,12 @@ function SubmissionCard({
           {submission.id}
         </span>
       </div>
+      {published && (
+        <p className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+          Committed to {published.path}
+          {published.commit ? ` · ${published.commit.slice(0, 7)}` : ""}
+        </p>
+      )}
     </article>
   );
 }
@@ -221,6 +255,9 @@ export default function Admin() {
   const [reports, setReports] = useState<SiteProblemReport[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [filter, setFilter] = useState<SubmissionStatus | "all">("pending");
+  /* Keyed by submission id: what the GitHub commit produced, once it lands. */
+  const [published, setPublished] = useState<Record<string, PublishResult>>({});
+  const [publishing, setPublishing] = useState<string | null>(null);
 
   async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -273,6 +310,21 @@ export default function Admin() {
     }
     setSubmissions((current) =>
       current.map((item) => (item.id === id ? { ...item, status } : item)),
+    );
+  }
+
+  async function publish(id: string) {
+    setPublishing(id);
+    setError(null);
+    const result = await publishSubmission(password, id);
+    setPublishing(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setPublished((current) => ({ ...current, [id]: result.value }));
+    setSubmissions((current) =>
+      current.map((item) => (item.id === id ? { ...item, status: "approved" } : item)),
     );
   }
 
@@ -388,6 +440,7 @@ export default function Admin() {
                     setSubmissions([]);
                     setReports([]);
                     setPurchases([]);
+                    setPublished({});
                   }}
                 >
                   Lock
@@ -412,7 +465,10 @@ export default function Admin() {
                     key={submission.id}
                     submission={submission}
                     busy={busy}
+                    published={published[submission.id]}
+                    publishing={publishing === submission.id}
                     onReview={(id, status) => void review(id, status)}
+                    onPublish={(id) => void publish(id)}
                   />
                 ))}
               </div>

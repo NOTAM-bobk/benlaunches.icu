@@ -25,6 +25,7 @@ const staticPages = [
   { path: "/new-websites", priority: "0.9", changefreq: "daily" },
   { path: "/trending", priority: "0.9", changefreq: "daily" },
   { path: "/this-or-that", priority: "0.6", changefreq: "weekly" },
+  { path: "/website-personality-quiz", priority: "0.6", changefreq: "weekly" },
   { path: "/blog", priority: "0.7", changefreq: "weekly" },
   { path: "/collections", priority: "0.8", changefreq: "weekly" },
   { path: "/submit", priority: "0.6", changefreq: "monthly" },

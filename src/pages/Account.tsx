@@ -19,6 +19,7 @@ import { readTheme, setTheme, THEME_PRESETS } from "../lib/theme";
 const ACCOUNT_NAV: Array<{ to: string; label: string }> = [
   { to: "/profile", label: "Your account" },
   { to: "/saved", label: "Saved" },
+  { to: "/collections/mine", label: "Collections" },
   { to: "/settings", label: "Settings" },
 ];
 

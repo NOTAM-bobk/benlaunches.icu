@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { AvatarRow } from "../components/AvatarRow";
 import { Highlight } from "../components/Highlight";
+import { FeaturedLaunchSlots } from "../components/FeaturedLaunchSlots";
 import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
 import { NeedsSomeVotes } from "../components/NeedsSomeVotes";
 import { HomepageSeo } from "../components/SeoHead";
@@ -679,6 +680,8 @@ export default function Home() {
         {switcher}
 
         <LaunchesThisWeek />
+
+        <FeaturedLaunchSlots />
 
         <PagedRows items={additions} title="New and Upcoming Websites" note="latest launches" />
         <PagedRows items={picks} title="Featured Sites" note="top ranked" />

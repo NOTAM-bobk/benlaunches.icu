@@ -1,10 +1,26 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
+import { useAuth } from "../lib/auth";
 import { collectionSites, collections, siteName, siteUrl } from "../lib/siteData";
+import { collectionPath, listPublicCollections, type PublicCollection } from "../lib/userCollections";
 
 /** Index of every curated collection, each linking to its own page. */
 export default function Collections() {
+  const { user } = useAuth();
+  const [community, setCommunity] = useState<PublicCollection[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void listPublicCollections(6).then((result) => {
+      if (active && result.ok) setCommunity(result.value);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const grouped = collections.map((collection) => ({
     collection,
     members: collectionSites(collection),
@@ -75,6 +91,14 @@ export default function Collections() {
             </Link>
             .
           </p>
+          <div className="hero-actions">
+            <Link to="/collections/mine" className="btn accent">
+              {user ? "Your collections" : "Build your own collection"}
+            </Link>
+            <span className="text-[12px]" style={{ color: "var(--muted)" }}>
+              Bookmark listings, group them, and share the link.
+            </span>
+          </div>
         </header>
 
         <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -102,6 +126,37 @@ export default function Collections() {
             </li>
           ))}
         </ul>
+
+        {community.length > 0 && (
+          <section className="space-y-4 border-t pt-8" style={{ borderColor: "var(--rule)" }}>
+            <div>
+              <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
+                From the community
+              </span>
+              <h2 className="text-2xl font-bold">Fresh public collections</h2>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                Built by visitors, readable by anyone with the link. Follow a curator to keep up with
+                what they add next.
+              </p>
+            </div>
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {community.map((collection) => (
+                  <li key={collection.id}>
+                    <Link to={collectionPath(collection)} className="card card-link ucol-tile">
+                      <h3>{collection.title}</h3>
+                      {collection.description && <p>{collection.description}</p>}
+                      <span className="ucol-tile-meta">
+                        {collection.curator ? `by ${collection.curator.name}` : "a visitor"} · {
+                          collection.siteSlugs.length
+                        }{" "}
+                        site{collection.siteSlugs.length === 1 ? "" : "s"} · open →
+                      </span>
+                    </Link>
+                  </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </>
   );

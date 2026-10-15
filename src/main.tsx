@@ -5,12 +5,16 @@ import "./index.css";
 import "./stats-submissions.css";
 import "./streak.css";
 import "./site-supporters.css";
+import "./collections.css";
 import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
 import Collections from "./pages/Collections.tsx";
 import CollectionDetail from "./pages/CollectionDetail.tsx";
+import MyCollections from "./pages/MyCollections.tsx";
+import UserCollection from "./pages/UserCollection.tsx";
+import Curator from "./pages/Curator.tsx";
 import Trending from "./pages/Trending.tsx";
 import Submit from "./pages/Submit.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -20,6 +24,7 @@ import NewWebsites from "./pages/NewWebsites.tsx";
 import SiteDetail from "./pages/SiteDetail.tsx";
 import ThisOrThat from "./pages/ThisOrThat.tsx";
 import SiteTinder from "./pages/SiteTinder.tsx";
+import WebsitePersonalityQuiz from "./pages/WebsitePersonalityQuiz.tsx";
 import { Profile, Saved, Settings } from "./pages/Account.tsx";
 import Advertise from "./pages/Advertise.tsx";
 import Changelog from "./pages/Changelog.tsx";
@@ -61,8 +66,20 @@ const router = createBrowserRouter([
         element: <Collections />,
       },
       {
+        path: "collections/mine",
+        element: <MyCollections />,
+      },
+      {
+        path: "collections/u/:ownerId/:slug",
+        element: <UserCollection />,
+      },
+      {
         path: "collections/:id",
         element: <CollectionDetail />,
+      },
+      {
+        path: "curators/:id",
+        element: <Curator />,
       },
       {
         path: "trending",
@@ -119,6 +136,10 @@ const router = createBrowserRouter([
       {
         path: "site-tinder",
         element: <SiteTinder />,
+      },
+      {
+        path: "website-personality-quiz",
+        element: <WebsitePersonalityQuiz />,
       },
       {
         path: "admin",

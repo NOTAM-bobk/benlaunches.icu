@@ -1,0 +1,37 @@
+name: Validate site listings
+
+# Guards the directory: duplicate, broken, spammy or incomplete listings fail
+# the run. It runs on every pull request that touches config/, and on every push
+# to main that touches config/ — which includes the commits made by "Approve &
+# publish" on the admin page, so a listing is checked the moment it lands.
+
+on:
+  pull_request:
+    paths:
+      - "config/**"
+      - "scripts/validate-sites.mjs"
+      - ".github/workflows/validate-sites.yml"
+  push:
+    branches: [main]
+    paths:
+      - "config/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The URL checks need outbound network access, which the runner has.
+      - name: Validate config listings
+        run: node scripts/validate-sites.mjs

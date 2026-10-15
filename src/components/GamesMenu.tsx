@@ -6,6 +6,11 @@ import { sites } from "../lib/siteData";
 const GAMES = [
   { to: "/this-or-that", label: "This or That", note: "two sites, one pick" },
   { to: "/site-tinder", label: "Site Tinder", note: "swipe the directory" },
+  {
+    to: "/website-personality-quiz",
+    label: "The Website Personality Quiz",
+    note: "six questions, one type",
+  },
 ];
 
 /**
@@ -55,14 +60,21 @@ export function GamesMenu() {
     <div className="games-root" ref={rootRef}>
       <button
         type="button"
-        className={`nav-link games-toggle${onGames ? " active" : ""}`}
+        className={`nav-link games-toggle${onGames ? " active" : ""}${
+          open ? " games-toggle-open" : ""
+        }`}
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        Games{" "}
-        <span className={`games-caret${open ? " games-caret-open" : ""}`} aria-hidden="true">
-          ⌄
+        <span className="games-toggle-label">Games</span>
+        <span
+          className={`games-caret${open ? " games-caret-open" : ""}`}
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 12 12" focusable="false">
+            <path d="M2.75 4.5 6 7.75 9.25 4.5" />
+          </svg>
         </span>
       </button>
 

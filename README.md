@@ -13,7 +13,7 @@ redeploy — there is no CMS and nothing is fetched at build time.
 | File | What it controls |
 | --- | --- |
 | `config/site.json` | Brand name, tagline, description, canonical URL, keywords, social links |
-| `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched`, plus any extra detail fields |
+| `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched`, `featured` (true/false — see featured launch slots), plus any extra detail fields |
 | `config/categories.json` | Categories used by the filters, the side navigation, and the counts |
 | `config/trending.json` | `topLimit` for the trending page (`0` ranks every listed site), plus a `boost` map and an `exclude` list |
 | `config/explore.json` | Home page: featured picks, "Very Interesting," editor picks, row size, section limits, and collections |
@@ -26,6 +26,13 @@ redeploy — there is no CMS and nothing is fetched at build time.
 home-page ticker automatically selects the newest sites launched in the last
 seven days, shows at most five, and rotates through them. `config/launches.json`
 only changes the section title.
+
+**Feature a launch** → add `"featured": true` to a listing in
+`config/sites.json`. It fills one of the featured launch slots on the home page
+and above the launch feed, and it wears a *Featured* badge in the feed. The value
+is a plain boolean — set it to `false` or drop the line to take the listing back
+out. The slots appear only while at least one listing is marked, and the home
+page shows at most three.
 
 **Add a site** → append an object to `config/sites.json` (keep `slug` unique and
 stable — votes are stored under it), then add the slug to a collection in
@@ -51,10 +58,12 @@ order you list them. The section disappears while the list is empty.
 collection name, its blurb, and a link out to each site. `/collections` lists
 them all. Run `bun run sitemap` so the new pages are indexed.
 
-**Compare two sites** → `/this-or-that` frames two random listings side by side
-and takes one vote for whichever is better; the winner gets the same vote the
-trending list counts and the next pair appears immediately. No config: the
-pairs are drawn from `config/sites.json`.
+**Play a game** → `/this-or-that` frames two random listings side by side and
+takes one vote for whichever is better; the winner gets the same vote the
+trending list counts and the next pair appears immediately. `/site-tinder`
+swipes through the directory, and `/website-personality-quiz` asks six questions
+and hands back an archetype (and four listings to match). No config: every game
+is drawn from `config/sites.json`.
 
 **Advertise** → `/advertise` lists the promoted placements and one-off services,
 priced from `config/services.json`. Each one has its own page at
@@ -171,6 +180,7 @@ The Worker at `cloudflare/votes-worker.js` handles votes, submissions, profiles,
 | `POST /submit` | public | store a pending site submission (`/submit` page) |
 | `POST /admin/submissions` | password | list submissions for review (`/admin` page) |
 | `POST /admin/review` | password | set a submission to `approved` / `rejected` |
+| `POST /admin/publish` | password | format a submission into a `config/sites.json` entry and commit it to GitHub (`Approve & publish` on `/admin`) |
 | `GET /profiles/:id/submissions` | public | approved URLs for a public profile; `?private=1` also includes moderation status for the signed-in account UI |
 | `POST /analytics/view` | public | count a page view and a daily unique visitor without cookies or IP storage |
 | `GET /analytics/stats` | public | rolling 30-day totals, daily chart data, and top pages for `/stats` |
@@ -186,8 +196,18 @@ Setup notes:
    `cloudflare/wrangler.toml`
 2. `wrangler secret put ADMIN_PASSWORD` — the review queue password, kept as a
    Worker secret (never in the repo or the browser bundle)
-3. `wrangler deploy --config cloudflare/wrangler.toml`
-4. Set the site's `VITE_VOTES_API_URL` to the Worker URL
+3. `wrangler secret put GITHUB_TOKEN` — only needed for `Approve & publish`. Use
+   a fine-grained personal access token with **Contents: Read and write** on the
+   directory repository. The repo, branch, and file come from `GITHUB_REPO`,
+   `GITHUB_BRANCH`, and `GITHUB_SITES_PATH` in `cloudflare/wrangler.toml`.
+4. `wrangler deploy --config cloudflare/wrangler.toml`
+5. Set the site's `VITE_VOTES_API_URL` to the Worker URL
+
+**Approve & publish** on the admin page does the boring part of adding a site:
+the Worker turns the submission into a `config/sites.json` entry (tagline as the
+card blurb, the long answers as extra detail fields, a fresh unique `slug`) and
+commits it with the GitHub contents API. The token never reaches the browser, and
+the submission is marked `approved` once the commit lands.
 
 `cloudflare/wrangler.toml` also sets `ALLOWED_ORIGIN`, the comma-separated list
 of browser origins the Worker answers for (`benlaunches.icu`,
@@ -284,3 +304,69 @@ Two KV behaviours are worth knowing: writes take up to ~60 seconds to appear
 in reads from other locations (the admin page therefore polls every 30s while
 unlocked), and neither `/submit` nor `/vote` is rate limited yet, so treat the
 queue as trustworthy only behind the password.
+
+## Visitor collections and follows
+
+Accounts live in Supabase (`VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`).
+Saved websites ("bookmarks") are the `saved_sites` rows behind the Save button;
+collections are the tables added by
+`supabase/migrations/20261012_user_collections.sql`.
+
+Apply that migration in the Supabase SQL editor (or `supabase db push`) before
+using the feature:
+
+- `collections` — one row per visitor collection: owner, a per-owner `slug`,
+  title, description, and `is_public`.
+- `collection_sites` — the listings in a collection, in order.
+- `curator_follows` — the follow graph (one row per follower/curator pair).
+
+Row-level security lets anyone read public collections and the follow graph,
+while only the owner can write their own. A collection's share URL is
+`/collections/u/<owner-id>/<slug>`; the visitor manages theirs at
+`/collections/mine`, and every curator has a public page at `/curators/<id>`.
+
+`/collections` shows the newest public collections from the community next to the
+hand-built ones from `config/explore.json`.
+
+## The launch feed at `/new-websites`
+
+The page reads `config/sites.json` and offers three orders — **Newest**,
+**Recently updated**, and **Most discussed** — plus filters for launch window,
+category, tag, and free versus paid, and a **Launch of the day** spotlight.
+
+- *Newest* sorts on `launched`; *Recently updated* sorts on `updated` when a
+  listing has one and falls back to `launched`.
+- *Most discussed* adds the live vote counts from the Worker to each listing's
+  `trending` score, so it ranks by how busy a site is.
+- *Free vs paid* is read from the `pricing` detail field a submission leaves
+  behind; listings without pricing are shown under **Any price** only.
+- **Launch of the day** picks one listing launched in the last seven days, the
+  same one for everyone that day.
+
+## Checking listings before they go live
+
+`scripts/validate-sites.mjs` reads the same config files the site does and
+reports four kinds of problem:
+
+- **Duplicate** — the same id, slug, or URL twice, and names that collide.
+- **Incomplete** — a missing name, slug, URL, description, category, or tag, or
+  a description too short to be useful.
+- **Spammy** — blacklisted wording, shouting, punctuation spam, and link
+  shorteners that hide where a listing actually goes.
+- **Broken** — every URL is fetched; 404s and dead hosts are errors, while
+  403/405/429 (a site blocking automated checks) is only a warning.
+
+It also checks the config cross-references: collections, featured picks, and
+trending boost/exclude entries that point at a site that is not listed.
+
+```bash
+npm run validate                 # everything, including live URL checks
+node scripts/validate-sites.mjs --offline   # skip the network checks
+node scripts/validate-sites.mjs --strict    # warnings fail the run too
+```
+
+`.github/workflows/validate-sites.yml` runs it on every pull request that touches
+`config/`, and on every push to `main` that touches `config/`. Because "Approve &
+publish" on the admin page commits into `config/sites.json`, a listing is checked
+the moment it lands. A failing run means the JSON is not shippable — fix the
+errors it prints and push again.

@@ -159,6 +159,26 @@ export async function reviewSubmission(
   return post<{ id: string; status: SubmissionStatus }>("/admin/review", { password, id, status });
 }
 
+/** What the Worker reports after committing an approved site to the config file. */
+export interface PublishResult {
+  slug: string;
+  commit: string;
+  commitUrl: string;
+  path: string;
+}
+
+/**
+ * Approve and publish in one step: the Worker formats the submission into a
+ * config/sites.json entry and commits it through the GitHub API. The repo token
+ * stays on the Worker.
+ */
+export async function publishSubmission(
+  password: string,
+  id: string,
+): Promise<Result<PublishResult>> {
+  return post<PublishResult>("/admin/publish", { password, id });
+}
+
 export async function fetchSiteReports(
   password: string,
 ): Promise<Result<{ reports: SiteProblemReport[] }>> {

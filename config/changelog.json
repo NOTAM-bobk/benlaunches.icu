@@ -1,8 +1,30 @@
 {
-  "version": "0.5.0",
-  "updated": "2026-10-10",
+  "version": "0.7.0",
+  "updated": "2026-10-15",
   "intro": "Every release of this directory, newest first. Small, hand-made changes to a small place.",
   "entries": [
+    {
+      "version": "0.7.0",
+      "date": "2026-10-15",
+      "title": "Featured slots, shareable cards and a quiz",
+      "changes": [
+        "Featured launch slots: mark a listing \"featured\": true in config/sites.json and it takes a slot on the home page and the launch feed.",
+        "Every listing can be shared as a launch card — copy the link, share it, or download a PNG drawn in the browser.",
+        "A new game: the Website Personality Quiz. Six questions, five archetypes, four site recommendations.",
+        "Listings are checked before they ship — duplicate, broken, spammy and incomplete entries fail a GitHub Action."
+      ]
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-15",
+      "title": "A launch feed, and collections you keep",
+      "changes": [
+        "/new-websites is a real launch feed now: sort by newest, recently updated or most discussed, filter by category, tag and free versus paid, and a launch of the day.",
+        "Visitors can build collections such as “Useful AI tools” or “Sites to revisit”, keep them private or share them by link, and follow other curators.",
+        "The Games tab in the header got a tidier button, with a chevron that lines up with the word.",
+        "The admin review queue can approve a submission and publish it straight into config/sites.json through the GitHub API."
+      ]
+    },
     {
       "version": "0.5.0",
       "date": "2026-10-10",

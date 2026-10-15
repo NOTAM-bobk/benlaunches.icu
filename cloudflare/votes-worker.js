@@ -8,13 +8,22 @@
  *   POST /submit              -> { id, status }            (public, creates a pending submission)
  *   POST /admin/submissions   -> { submissions: [...] }     (requires ADMIN_PASSWORD)
  *   POST /admin/review        -> { id, status }             (requires ADMIN_PASSWORD)
+ *   POST /admin/publish       -> { slug, commit, commitUrl } (requires ADMIN_PASSWORD)
+ *        Formats a pending submission into a config/sites.json entry and commits
+ *        it to the repository on the admin's behalf. Needs GITHUB_TOKEN.
  *   GET  /health              -> { ok: true, adminConfigured: bool, submissions: n }
  *
  * Secrets/vars (wrangler):
  *   ADMIN_PASSWORD   required for /admin/*  (wrangler secret put ADMIN_PASSWORD)
+ *   GITHUB_TOKEN     repo write access for /admin/publish (wrangler secret put GITHUB_TOKEN)
  *   ALLOWED_ORIGIN   comma-separated list of allowed browser origins (defaults to "*")
+ *   GITHUB_REPO      "owner/name" to commit into (set in wrangler.toml [vars])
+ *   GITHUB_BRANCH    branch to commit to (defaults to "main")
+ *   GITHUB_SITES_PATH  directory file to edit (defaults to "config/sites.json")
  *   VOTES            KV namespace binding
  */
+
+const GITHUB_API = "https://api.github.com";
 
 const VOTE_PREFIX = "vote:";
 const MONTHLY_VOTE_PREFIX = "monthly-vote:";
@@ -206,6 +215,153 @@ function constantTimeEqual(a, b) {
 
 function adminConfigured(env) {
   return typeof env.ADMIN_PASSWORD === "string" && env.ADMIN_PASSWORD.length > 0;
+}
+
+/* ---------------- publishing an approved submission ---------------- */
+
+/** UTF-8 text as base64, the shape the GitHub contents API expects. */
+function toBase64(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+/** Base64 back to UTF-8 text (GitHub wraps long values with newlines). */
+function fromBase64(value) {
+  const binary = atob(String(value).replace(/\s+/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)));
+}
+
+/** "Two Cranes!" -> "two-cranes" — the same shape config/sites.json uses. */
+function slugFrom(value, fallback = "site") {
+  const slug = String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 40)
+    .replace(/^-+|-+$/g, "");
+  return slug || fallback;
+}
+
+/** A slug nobody has taken yet: "name", then "name-2", "name-3", … */
+function freshSlug(base, taken) {
+  if (!taken.has(base)) return base;
+  for (let n = 2; n < 100; n += 1) {
+    const candidate = `${base.slice(0, 36)}-${n}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+  return `${base.slice(0, 30)}-${Date.now().toString(36)}`;
+}
+
+function isIsoDate(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+/**
+ * A submission dressed as a config/sites.json entry. The card blurb is the
+ * tagline; the long answers ride along as `extras`, which the site page prints
+ * under "Details" without a code change.
+ */
+function entryFromSubmission(submission, slug) {
+  const category = submission.categories[0] || "uncategorized";
+  const description = (submission.tagline || submission.description || submission.name).trim().slice(0, 200);
+  const entry = {
+    id: slug,
+    name: submission.name,
+    slug,
+    url: submission.url,
+    description,
+    category,
+    tags: submission.categories,
+    verified: true,
+    launched: isIsoDate(submission.launchDate) ? submission.launchDate : new Date().toISOString().slice(0, 10),
+  };
+  const extras = {
+    about: submission.description,
+    targetAudience: submission.targetAudience,
+    problem: submission.problem,
+    features: submission.features,
+    useCases: submission.useCases,
+    alternatives: submission.alternatives,
+    pricing: submission.pricing,
+    socialLinks: submission.socialLinks,
+    faq: submission.faq,
+  };
+  for (const [key, value] of Object.entries(extras)) {
+    const text = String(value || "").trim();
+    if (text) entry[key] = text;
+  }
+  if (submission.openSource === true) entry.openSource = "Yes";
+  return entry;
+}
+
+/**
+ * Appends the submission to the directory file and commits it through the
+ * GitHub contents API. The token never reaches the browser — this runs here.
+ */
+async function publishToDirectory(env, submission) {
+  const token = env.GITHUB_TOKEN;
+  const repo = env.GITHUB_REPO;
+  if (typeof token !== "string" || !token || typeof repo !== "string" || !repo) {
+    return { error: "GitHub publishing is not configured on this worker.", status: 503 };
+  }
+  const branch = env.GITHUB_BRANCH || "main";
+  const path = env.GITHUB_SITES_PATH || "config/sites.json";
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "User-Agent": "ben-launches-admin",
+  };
+
+  let file;
+  try {
+    const current = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`, { headers });
+    if (current.status === 404) return { error: `Could not find ${path} on ${branch}.`, status: 404 };
+    if (!current.ok) return { error: `GitHub could not read ${path} (HTTP ${current.status}).`, status: 502 };
+    file = await current.json();
+  } catch {
+    return { error: "Could not reach GitHub.", status: 502 };
+  }
+
+  let data;
+  try {
+    data = JSON.parse(fromBase64(file.content || ""));
+  } catch {
+    return { error: `${path} is not valid JSON, so it was left alone.`, status: 502 };
+  }
+  if (!Array.isArray(data?.sites)) {
+    return { error: `${path} does not hold a "sites" list, so it was left alone.`, status: 502 };
+  }
+
+  const taken = new Set(data.sites.map((site) => site?.slug).filter(Boolean));
+  let host = "";
+  try {
+    host = new URL(submission.url).hostname.replace(/^www\./, "");
+  } catch {
+    /* the submission validator already rejected bad URLs */
+  }
+  const slug = freshSlug(slugFrom(submission.name, slugFrom(host)), taken);
+  data.sites.push(entryFromSubmission(submission, slug));
+
+  let result;
+  try {
+    const put = await fetch(`${GITHUB_API}/repos/${repo}/contents/${path}`, {
+      method: "PUT",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: `Add ${submission.name} to the directory`,
+        content: toBase64(`${JSON.stringify(data, null, 2)}\n`),
+        sha: file.sha,
+        branch,
+      }),
+    });
+    if (!put.ok) return { error: `GitHub rejected the commit (HTTP ${put.status}).`, status: 502 };
+    result = await put.json();
+  } catch {
+    return { error: "The commit could not be sent to GitHub.", status: 502 };
+  }
+
+  return { slug, commit: result?.commit?.sha || "", commitUrl: result?.commit?.html_url || "", path };
 }
 
 async function isAdmin(body, env) {
@@ -413,6 +569,7 @@ export default {
         {
           ok: true,
           adminConfigured: adminConfigured(env),
+          publishing: Boolean(env.GITHUB_TOKEN && env.GITHUB_REPO),
           submissions: (await env.VOTES.list({ prefix: SUBMISSION_PREFIX, limit: 1000 })).keys.length,
           purchases: (await env.VOTES.list({ prefix: PURCHASE_PREFIX, limit: 1000 })).keys.length,
         },
@@ -675,6 +832,46 @@ export default {
       if (!existing) return json({ error: "not found" }, headers, 404);
       await env.VOTES.put(PURCHASE_PREFIX + orderId, JSON.stringify({ ...existing, status, reviewedAt: new Date().toISOString() }));
       return json({ orderId, status }, headers);
+    }
+
+    if (pathname === "/admin/publish" && request.method === "POST") {
+      const body = await readBody(request);
+      if (!body) return json({ error: "invalid body" }, headers, 400);
+      if (!adminConfigured(env)) {
+        return json({ error: "admin is not configured on this worker" }, headers, 503);
+      }
+      if (!(await isAdmin(body, env))) {
+        return json({ error: "wrong password" }, headers, 401);
+      }
+      const id = str(body.id, 80);
+      if (!SLUG_RE.test(id)) return json({ error: "invalid submission" }, headers, 400);
+      const raw = await env.VOTES.get(SUBMISSION_PREFIX + id);
+      if (!raw) return json({ error: "not found" }, headers, 404);
+      const submission = JSON.parse(raw);
+      if (submission.publishedSlug) {
+        return json({ error: "That submission is already in the directory." }, headers, 409);
+      }
+
+      const published = await publishToDirectory(env, submission);
+      if (published.error) {
+        return json({ error: published.error }, headers, published.status || 502);
+      }
+
+      const now = new Date().toISOString();
+      const updated = {
+        ...submission,
+        status: "approved",
+        reviewedAt: now,
+        publishedAt: now,
+        publishedSlug: published.slug,
+        publishedCommit: published.commit,
+      };
+      await env.VOTES.put(SUBMISSION_PREFIX + id, JSON.stringify(updated));
+      return json(
+        { ok: true, id, status: updated.status, slug: published.slug, commit: published.commit, commitUrl: published.commitUrl, path: published.path },
+        headers,
+        201,
+      );
     }
 
     if ((pathname === "/admin/submissions" || pathname === "/admin/review") && request.method === "POST") {

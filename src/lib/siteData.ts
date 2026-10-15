@@ -22,8 +22,16 @@ export interface Site {
   tags: string[];
   trending?: number;
   launched?: string;
+  /** When the listing was last touched, when that differs from its launch. */
+  updated?: string;
   /** A listing a person has checked and marked as verified. */
   verified?: boolean;
+  /**
+   * A featured launch. Set `"featured": true` in config/sites.json to give a
+   * listing one of the sponsored slots on the home page and the launch feed.
+   * Anything else — omitted, or `false` — leaves it in the ordinary rows.
+   */
+  featured?: boolean;
   /**
    * Any field beyond the ones above, kept as readable text. Listings carry the
    * details that came in with a submission (tagline, pricing, FAQ, …), and the
@@ -119,7 +127,9 @@ const SITE_FIELDS = new Set([
   "tags",
   "trending",
   "launched",
+  "updated",
   "verified",
+  "featured",
 ]);
 
 /** Any JSON value as one line of readable text, or "" when there is nothing to show. */
@@ -166,7 +176,9 @@ function normalizeSites(value: unknown): Site[] {
     tags: Array.isArray(site.tags) ? site.tags : [],
     trending: typeof site.trending === "number" ? site.trending : undefined,
     launched: site.launched,
+    updated: typeof site.updated === "string" ? site.updated : undefined,
     verified: site.verified === true,
+    featured: site.featured === true,
     extras: extraDetails(site),
   }));
 }
@@ -359,6 +371,18 @@ export function sitesBySlugs(slugs: string[]): Site[] {
     .filter((site): site is Site => Boolean(site));
 }
 
+/**
+ * The listings marked `"featured": true` in config/sites.json, newest launch
+ * first. These fill the featured launch slots; rename or clear the flag and a
+ * listing drops back into the ordinary rows on the next deploy.
+ */
+export function featuredLaunchSites(count = 6): Site[] {
+  return sites
+    .filter((site) => site.featured === true)
+    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
+    .slice(0, count);
+}
+
 export function collectionSites(collection: SiteCollection): Site[] {
   return sitesBySlugs(collection.siteSlugs);
 }
@@ -393,6 +417,15 @@ export function newAdditions(count = 10, offset = 0): Site[] {
   return [...sites]
     .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
     .slice(offset, offset + count);
+}
+
+/**
+ * The date the listing last changed: its `updated` field when the config
+ * records one, otherwise the launch date. The launch feed sorts on this so
+ * "recently updated" works the moment a listing gains an `updated` date.
+ */
+export function updatedAt(site: Site): string {
+  return site.updated ?? site.launched ?? "";
 }
 
 /** The home hero picks, falling back to the top ranked sites. */
