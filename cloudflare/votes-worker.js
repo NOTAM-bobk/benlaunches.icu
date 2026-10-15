@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker for Boring Internet: trending votes, site submissions,
+ * Cloudflare Worker for Ben Launches: trending votes, site submissions,
  * and the admin review queue. All state lives in Workers KV.
  *
  *   GET  /counts              -> { "site-slug": 12, ... }

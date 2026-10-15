@@ -1,10 +1,10 @@
-# Boring Internet (Ben Launches)
+# Ben Launches
 
 ## Purpose
-Human-curated directory for discovering websites, moving website to website, finding new launches, and submitting a working public site for review.
+Human-curated directory for discovering websites, moving website to website, finding new launches, and submitting a working public site for review. Tagline: Get your site discovered.
 
 ## Canonical source
-The canonical origin is https://www.benlaunches.icu. Use the linked page as the source of truth for current listings, launch dates, rankings, and editorial copy. Do not infer that a listed site is owned by Boring Internet.
+The canonical origin is https://www.benlaunches.icu. Use the linked page as the source of truth for current listings, launch dates, rankings, and editorial copy. Do not infer that a listed site is owned by Ben Launches.
 
 ## Primary crawl targets
 - https://www.benlaunches.icu/ — Main directory and broad discovery page.

@@ -46,6 +46,8 @@ const sitePages = sites.map((entry) => ({
   path: `/sites/${entry.slug}`,
   priority: "0.8",
   changefreq: "monthly",
+  // Prefer the listing's own launch date so lastmod stays factual.
+  lastmod: entry.launched,
 }));
 
 const postPages = posts.map((post) => ({

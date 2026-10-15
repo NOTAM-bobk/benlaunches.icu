@@ -229,7 +229,7 @@ export function HomepageSeo({
 
   return (
     <SeoHead
-      title={siteName}
+      title={siteTagline}
       description={description}
       path="/"
       keywords={keywords}

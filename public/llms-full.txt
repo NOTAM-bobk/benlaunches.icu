@@ -1,7 +1,7 @@
-# Boring Internet: AI crawler guide
+# Ben Launches: AI crawler guide
 
 ## What this site is
-Boring Internet is a directory for people who want to discover websites without algorithmic feeds. Pages are curated by hand and organized so visitors can move website to website quickly.
+Ben Launches is a directory for people who want to discover websites without algorithmic feeds. Pages are curated by hand and organized so visitors can move website to website quickly. Tagline: Get your site discovered.
 
 ## Core pages to index
 

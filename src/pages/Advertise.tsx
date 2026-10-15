@@ -135,15 +135,15 @@ export default function Advertise() {
   return (
     <>
       <SiteSeo
-        title="Pricing — advertise with Boring Internet"
-        description="Simple, one-off pricing to launch and boost a website listing on Boring Internet. Prices in USD, paid through PayPal."
+        title="Pricing — advertise with Ben Launches"
+        description="Simple, one-off pricing to launch and boost a website listing on Ben Launches. Prices in USD, paid through PayPal."
         path="/advertise"
-        keywords={["pricing", "advertise with Boring Internet", "promote a website", "verified website listing"]}
+        keywords={["pricing", "advertise with Ben Launches", "promote a website", "verified website listing"]}
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "WebPage",
-            name: "Pricing — advertise with Boring Internet",
+            name: "Pricing — advertise with Ben Launches",
             url: `${siteUrl}/advertise`,
             description: "One-off services and 30-day placements to launch and promote a website listing, priced in USD.",
             inLanguage: "en",
