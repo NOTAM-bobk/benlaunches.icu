@@ -1361,33 +1361,14 @@ hr {
  * rail is gone, so there is no sticky aside to position any more.
  */
 
-/* Where you are, what the panel is for, and how much is behind it. */
+/* The one tap to something random, sitting under the close button. The drawer
+   head already draws the rule above it, so this row needs none of its own. */
 .sidenav-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.6rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.sidenav-head-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.sidenav-head-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.sidenav-head-note {
-  font-size: 0.72rem;
-  color: var(--muted);
+  padding: 0.6rem 0;
 }
 
 .sidenav-dice {
@@ -2167,6 +2148,52 @@ mark.hl {
 .site-row-visit:hover {
   background: var(--accent);
   color: var(--on-accent);
+}
+
+/* The two things a row offers, side by side on the right: a vote, and the way
+   out to the site itself. */
+.site-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.site-row-vote {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.7rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: 0 2px 0 0 var(--ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.site-row-vote:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* Once your vote is in, the button says so and stops taking clicks. */
+.site-row-vote.voted {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.site-row-vote:disabled {
+  cursor: default;
+}
+
+.site-row-vote-arrow {
+  font-size: 0.62rem;
+  line-height: 1;
 }
 
 /* ---------- "this or that" ---------- */

@@ -167,6 +167,58 @@ export async function castVote(slug: string, direction: "up" | "down" = "up"): P
 
 
 /**
+ * Every listing's score in one place, for a page that shows many sites at once.
+ * The shared counter is read a single time for the whole page however many rows
+ * ask for a number, and a vote lifts just the one slug it was cast for.
+ */
+export function useDirectoryVotes() {
+  const [counts, setCounts] = useState<Record<string, number>>(readLocalCounts);
+  const [voted, setVoted] = useState<string[]>(readVotedSlugs);
+  const [pending, setPending] = useState<string[]>([]);
+  const [shared, setShared] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetchSharedCounts().then((remote) => {
+      if (!active || !remote) return;
+      setShared(true);
+      setCounts((current) => ({ ...current, ...remote }));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  /**
+   * Votes for one listing. `configured` is the count the listing ships with in
+   * config/sites.json, which is what a row shows until this browser has a
+   * number of its own — the same fallback the rankings use.
+   */
+  async function vote(slug: string, configured = 0) {
+    if (readVotedSlugs().includes(slug) || pending.includes(slug)) return;
+
+    const nextCount = (counts[slug] ?? configured) + 1;
+    setCounts((current) => ({ ...current, [slug]: nextCount }));
+    setVoted((current) => (current.includes(slug) ? current : [...current, slug]));
+    setPending((current) => [...current, slug]);
+    markVoted(slug);
+    writeLocalCount(slug, nextCount);
+
+    const sharedCount = await castVote(slug, "up");
+    if (sharedCount !== null) {
+      setShared(true);
+      setCounts((current) => ({ ...current, [slug]: sharedCount }));
+      writeLocalCount(slug, sharedCount);
+    }
+    setPending((current) => current.filter((entry) => entry !== slug));
+  }
+
+  return { counts, voted, pending, shared, vote };
+}
+
+export type DirectoryVotes = ReturnType<typeof useDirectoryVotes>;
+
+/**
  * One site's vote state: the live count, whether this browser has voted, and a
  * `vote()` that updates locally first and then syncs with the shared Worker.
  * Used by the site page and its bottom bar.

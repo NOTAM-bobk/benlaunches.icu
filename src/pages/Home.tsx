@@ -35,6 +35,7 @@ import { siteDomain } from "../lib/siteTile";
 import { useAuth } from "../lib/auth";
 import { useSavedCollections } from "../lib/savedCollections";
 import { useSignInPrompt } from "../lib/signInPrompt";
+import { useDirectoryVotes, type DirectoryVotes } from "../lib/votes";
 
 /**
  * How many collections the home page's desktop grid shows. The rest stay in the
@@ -67,7 +68,16 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   );
 }
 
-function SiteRow({ site }: { site: Site }) {
+/**
+ * One row of a home page list: the icon, the name and line, then the two
+actions on the right — a vote, and the link that opens the site itself.
+ */
+function SiteRow({ site, votes }: { site: Site; votes: DirectoryVotes }) {
+  const configured = site.trending ?? 0;
+  const count = votes.counts[site.slug] ?? configured;
+  const voted = votes.voted.includes(site.slug);
+  const pending = votes.pending.includes(site.slug);
+
   return (
     <li className="site-row">
       <SiteIcon site={site} size={36} />
@@ -83,16 +93,35 @@ function SiteRow({ site }: { site: Site }) {
           {site.description}
         </p>
       </div>
-      <a
-        href={site.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="site-row-visit"
-        title={`Open ${site.name} in a new tab`}
-        aria-label={`Open ${site.name} in a new tab`}
-      >
-        ↗
-      </a>
+      <div className="site-row-actions">
+        <button
+          type="button"
+          className={`site-row-vote${voted ? " voted" : ""}`}
+          onClick={() => void votes.vote(site.slug, configured)}
+          disabled={voted || pending}
+          aria-label={
+            voted
+              ? `${site.name}, you voted, ${count} ${count === 1 ? "vote" : "votes"}`
+              : `Vote for ${site.name}, ${count} ${count === 1 ? "vote" : "votes"}`
+          }
+          title={voted ? "You already voted for this site" : "Vote for this site"}
+        >
+          <span className="site-row-vote-arrow" aria-hidden="true">
+            {voted ? "✓" : "▲"}
+          </span>
+          <span className="site-row-vote-count">{pending ? "…" : count}</span>
+        </button>
+        <a
+          href={site.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="site-row-visit"
+          title={`Open ${site.name} in a new tab`}
+          aria-label={`Open ${site.name} in a new tab`}
+        >
+          ↗
+        </a>
+      </div>
     </li>
   );
 }
@@ -166,7 +195,18 @@ function chunk<T>(list: T[], size: number): T[][] {
   return groups;
 }
 
-function PagedRows({ items, title, note }: { items: Site[]; title: string; note?: string }) {
+function PagedRows({
+  items,
+  title,
+  note,
+  votes,
+}: {
+  items: Site[];
+  title: string;
+  note?: string;
+  /** The directory's vote state, read once for the page and handed to every row. */
+  votes: DirectoryVotes;
+}) {
   const [page, setPage] = useState(0);
   const [mobilePage, setMobilePage] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
@@ -222,7 +262,7 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
       />
       <ul className="home-desktop-grid grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
         {current.map((site) => (
-          <SiteRow key={site.id} site={site} />
+          <SiteRow key={site.id} site={site} votes={votes} />
         ))}
       </ul>
 
@@ -237,7 +277,7 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
             <ul className="home-mobile-page" key={`${title}-page-${index + 1}`}>
               {/* SiteRow is already an <li>, so it goes straight into the page. */}
               {group.map((site) => (
-                <SiteRow key={site.id} site={site} />
+                <SiteRow key={site.id} site={site} votes={votes} />
               ))}
             </ul>
           ))}
@@ -399,6 +439,8 @@ export default function Home() {
   const [urlDraft, setUrlDraft] = useState("");
   const navigate = useNavigate();
   const lastRandom = useRef<string | null>(null);
+  /* One read of the shared scores for every row on the page. */
+  const votes = useDirectoryVotes();
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
   const interesting = useMemo(() => interestingSites(), []);
@@ -683,15 +725,30 @@ export default function Home() {
 
         <FeaturedLaunchSlots />
 
-        <PagedRows items={additions} title="New and Upcoming Websites" note="latest launches" />
-        <PagedRows items={picks} title="Featured Sites" note="top ranked" />
+        <PagedRows
+          items={additions}
+          title="New and Upcoming Websites"
+          note="latest launches"
+          votes={votes}
+        />
+        <PagedRows items={picks} title="Featured Sites" note="top ranked" votes={votes} />
 
         {interesting.length > 0 && (
-          <PagedRows items={interesting} title="Very Interesting" note="worth a detour" />
+          <PagedRows
+            items={interesting}
+            title="Very Interesting"
+            note="worth a detour"
+            votes={votes}
+          />
         )}
 
         {editorPickSites.length > 0 && (
-          <PagedRows items={editorPickSites} title="Editors’ Picks" note="chosen by the editors" />
+          <PagedRows
+            items={editorPickSites}
+            title="Editors’ Picks"
+            note="chosen by the editors"
+            votes={votes}
+          />
         )}
 
         {/* Collections */}

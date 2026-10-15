@@ -222,16 +222,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="sidenav-body">
       {/*
-        What this rail is for: where you are standing, how much is behind it,
-        and one tap back to something random.
+        The head is one thing only now: a single tap to something random. Which
+        section you are in, and how many sites there are, both read off the page
+        behind the menu already.
       */}
       <div className="sidenav-head">
-        <div className="sidenav-head-copy">
-          <span className="sidenav-head-label">
-            {SECTIONS.find((section) => section.id === activeSection)?.label ?? "Directory"}
-          </span>
-          <span className="sidenav-head-note">{sites.length} sites in the directory</span>
-        </div>
         <button
           type="button"
           className="sidenav-dice"
@@ -329,8 +324,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="sidenav-divider" />
 
       {/* Page-specific shortcuts stay useful by omitting actions already shown
-          as the primary or secondary buttons at the bottom of this panel. */}
-      {contextActions.length > 0 && (
+          as the primary or secondary buttons at the bottom of this panel. The
+          home page's group is the exception: its "On this page" shortcuts all
+          point at parts of the page the visitor just came from, so the menu
+          leaves them out. */}
+      {context.id !== "home" && contextActions.length > 0 && (
         <div className="sidenav-group sidenav-context">
           <span className="sidenav-context-title">{context.title}</span>
           {context.note && <span className="sidenav-context-note">{context.note}</span>}
