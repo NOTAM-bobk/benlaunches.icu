@@ -335,6 +335,20 @@ export const AVATAR_STYLES = [
   "identicon",
   "bottts-neutral",
   "fun-emoji",
+  "adventurer",
+  "avataaars",
+  "big-smile",
+  "croodles",
+  "dylan",
+  "glass",
+  "initials",
+  "lorelei",
+  "micah",
+  "miniavs",
+  "notionists",
+  "open-peeps",
+  "personas",
+  "pixel-art",
 ] as const;
 
 export type AvatarStyle = (typeof AVATAR_STYLES)[number];
@@ -362,7 +376,7 @@ export function avatarLabel(value: string) {
   return `${seed.replace(/-/g, " ")} · ${style.replace(/-/g, " ")}`;
 }
 
-/** The shelf of ready-made pictures: ten shapes, ten styles. */
+/** The shelf of ready-made pictures: a row of seeds, then one tile per style. */
 export const avatarPresets: string[] = [
   "quiet-web", "plain-html", "text-first", "slow-reading", "no-tracking",
   "one-person", "small-sites", "calm-cursor", "paper-trail", "night-owl",
@@ -372,6 +386,11 @@ export const avatarPresets: string[] = [
   "bottts-neutral:calm-kettle", "bottts-neutral:round-compass",
   "fun-emoji:sunny-path", "fun-emoji:warm-lantern", "fun-emoji:text-first",
   "thumbs:gentle-reader",
+  "adventurer:slow-reader", "avataaars:small-sites", "big-smile:sunny-path",
+  "croodles:paper-trail", "dylan:quiet-web", "glass:amber-window",
+  "initials:text-first", "lorelei:night-owl", "micah:open-shelf",
+  "miniavs:calm-kettle", "notionists:plain-html", "open-peeps:no-tracking",
+  "personas:steady-signal", "pixel-art:slow-reading",
 ];
 
 const AVATAR_WORDS_FIRST = ["quiet", "plain", "slow", "calm", "warm", "paper", "night", "small", "open", "soft", "steady", "gentle", "sunny", "round", "amber", "still"];

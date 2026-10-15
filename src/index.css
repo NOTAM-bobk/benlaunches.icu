@@ -3,8 +3,10 @@
 
 /* ---------- Brand tokens ---------- */
 :root {
-  /* Warm cream-orange skin palette */
+  /* Warm cream-orange skin palette. The background presets in lib/theme only
+     ever retint these, never the ink or the accent. */
   --bg: #f7e0c6;
+  --bg-glow: #fdeee0;
   --surface: #fff7ee;
   --ink: #1a120b;
   --muted: #6f4f36;
@@ -38,8 +40,8 @@ body {
   background-color: var(--bg);
   background-image: radial-gradient(
     1100px 520px at 50% -10%,
-    #fdeee0 0%,
-    rgba(253, 238, 224, 0) 70%
+    var(--bg-glow, #fdeee0) 0%,
+    transparent 70%
   );
   background-repeat: no-repeat;
   color: var(--ink);
@@ -1774,21 +1776,6 @@ hr {
 
 .account-page { width: 100%; }
 
-.account-layout {
-  display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr);
-  gap: 2rem;
-  align-items: start;
-}
-
-.account-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  position: sticky;
-  top: 7rem;
-}
-
 .account-eyebrow {
   color: var(--accent);
   font: 700 0.68rem var(--mono);
@@ -1796,9 +1783,6 @@ hr {
   text-transform: uppercase;
 }
 
-.account-nav { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.7rem; }
-.account-nav a { padding: 0.65rem 0.75rem; border: 1px solid transparent; font-weight: 700; }
-.account-nav a:hover, .account-nav a.active { border-color: var(--ink); background: var(--surface); box-shadow: 0 2px 0 var(--ink); }
 .account-content { min-width: 0; }
 
 .account-field { display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
@@ -1808,13 +1792,6 @@ hr {
 .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 1px solid var(--rule); border-radius: var(--radius-sm); }
 .setting-row span { display: flex; flex-direction: column; gap: 0.2rem; }
 .setting-row small { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
-
-@media (max-width: 700px) {
-  .account-layout { grid-template-columns: 1fr; gap: 1.25rem; }
-  .account-sidebar { position: static; }
-  .account-nav { flex-direction: row; overflow-x: auto; }
-  .account-nav a { white-space: nowrap; }
-}
 
 /* ---------- search match highlight ---------- */
 
@@ -3490,54 +3467,50 @@ mark.hl {
   line-height: 1.6;
 }
 
-.account-layout {
-  grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
-  gap: clamp(1rem, 3vw, 2rem);
-}
-
-.account-sidebar {
-  top: 6.5rem;
-  padding: 0.75rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.55);
-}
-
-.account-nav {
+/*
+ * The account tabs are the header's own buttons, one size down: same ink edge,
+ * same hard shadow, so the account pages look like the rest of the site.
+ */
+.account-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.account-nav-link {
-  display: flex;
+.account-tab {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid transparent;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--ink);
   border-radius: var(--radius-sm);
+  background: #fff;
   color: var(--ink);
-  font-size: 0.88rem;
+  font-size: 11px;
   font-weight: 700;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 2px 0 0 var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-.account-nav-link > span {
-  color: var(--muted);
-  transition: transform 0.15s ease;
-}
-
-.account-nav-link:hover,
-.account-nav-link.active {
-  border-color: var(--ink);
+.account-tab:hover {
   background: var(--surface);
-  box-shadow: 0 2px 0 var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--ink);
 }
 
-.account-nav-link:hover > span {
-  transform: translateX(2px);
+.account-tab.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.account-tab:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .account-content {
@@ -4359,36 +4332,6 @@ mark.hl {
   font: 0.63rem var(--mono);
 }
 
-@media (max-width: 700px) {
-  .account-layout {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .account-sidebar {
-    position: static;
-    overflow: hidden;
-    padding: 0.5rem;
-  }
-
-  .account-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 0.35rem;
-    scrollbar-width: none;
-  }
-
-  .account-nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .account-nav-link {
-    flex: 0 0 auto;
-    gap: 0.45rem;
-    white-space: nowrap;
-  }
-}
-
 @media (max-width: 639px) {
   .launch-meta {
     max-width: 5.25rem;
@@ -4435,8 +4378,6 @@ mark.hl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .account-nav-link,
-  .account-nav-link > span,
   .account-site-card,
   .vote-row,
   .vote-circle {
@@ -4629,6 +4570,83 @@ mark.hl {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+/*
+ * Reading and editing sit side by side on a wide screen — the form on the
+ * left, the summary cards on the right — and stack in that order on a phone.
+ */
+.account-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.account-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .account-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- background presets (Settings → Background) ---------- */
+
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.7rem;
+}
+
+.theme-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  padding: 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: #fffdf8;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-choice:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+}
+
+.theme-choice.active {
+  border-color: var(--ink);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.theme-swatch {
+  display: block;
+  height: 2.6rem;
+  border: 1px solid var(--ink);
+  border-radius: calc(var(--radius-sm) - 3px);
+}
+
+.theme-choice-label {
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.theme-choice:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .avatar-picker {
@@ -5530,99 +5548,6 @@ mark.hl {
   .user-profile-header {
     align-items: flex-start;
     flex-direction: column;
-  }
-}
-
-/* ---------- Account pages: phone nav row, desktop rail on the right ---------- */
-.account-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: start;
-}
-
-.account-sidebar {
-  position: static;
-  top: auto;
-}
-
-.account-nav {
-  flex-direction: row;
-  gap: 0.4rem;
-  margin-top: 0;
-}
-
-/* The three pages sit side by side on a phone, so each link becomes a tile. */
-.account-nav-link {
-  flex: 1 1 0;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0.7rem 0.4rem;
-  text-align: center;
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
-.account-nav-link > span {
-  transform: rotate(90deg);
-}
-
-.account-nav-link:hover > span,
-.account-nav-link.active > span {
-  transform: rotate(90deg) translateX(2px);
-}
-
-@media (max-width: 400px) {
-  .account-nav-link {
-    padding: 0.6rem 0.3rem;
-    font-size: 0.72rem;
-  }
-}
-
-@media (min-width: 900px) {
-  .account-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(11rem, 14rem);
-    gap: clamp(1.25rem, 3vw, 2.25rem);
-  }
-
-  /* The rail moves to the right of the page and follows the scroll. */
-  .account-sidebar {
-    grid-column: 2;
-    grid-row: 1;
-    position: sticky;
-    top: 6.5rem;
-  }
-
-  .account-content {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .account-nav {
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .account-nav-link {
-    flex: 0 1 auto;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0.7rem 0.8rem;
-    text-align: left;
-    font-size: 0.86rem;
-    white-space: normal;
-  }
-
-  .account-nav-link > span {
-    transform: none;
-  }
-
-  .account-nav-link:hover > span,
-  .account-nav-link.active > span {
-    transform: translateX(2px);
   }
 }
 

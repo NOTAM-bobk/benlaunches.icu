@@ -31,9 +31,12 @@ import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
 import Stats from "./pages/Stats.tsx";
 import { recordVisitToday } from "./lib/visitStreak";
+import { applyTheme, readTheme } from "./lib/theme";
 
 /* Opening the site is all the daily streak needs — no account involved. */
 recordVisitToday();
+/* Repaint before the first render, so a chosen background never flashes. */
+applyTheme(readTheme());
 
 const router = createBrowserRouter([
   {

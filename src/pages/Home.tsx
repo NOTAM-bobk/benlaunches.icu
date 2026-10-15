@@ -486,7 +486,14 @@ export default function Home() {
         </h2>
       </div>
 
-      {/* Above the search box: one click, one random site, in a new tab. */}
+      {/* The crowd, then who else is here: one line, so the avatars and the
+          visitor count sit on the same baseline, above the ways to play. */}
+      <div className="hero-social">
+        <AvatarRow />
+        <VisitorsBadge />
+      </div>
+
+      {/* Under that: one click, one random site, in a new tab. */}
       <div className="bored-row">
         <button
           type="button"
@@ -499,13 +506,6 @@ export default function Home() {
         <Link to="/this-or-that" className="bored-btn">
           <span aria-hidden="true">🆚</span> This or that
         </Link>
-      </div>
-
-      {/* The crowd, then who else is here: one line, so the avatars and the
-          visitor count sit on the same baseline. */}
-      <div className="hero-social">
-        <AvatarRow />
-        <VisitorsBadge />
       </div>
 
       <form className="search-box launch-form" onSubmit={handleLaunch}>

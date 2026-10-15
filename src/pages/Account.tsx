@@ -11,8 +11,9 @@ import {
   type AuthSettings,
   type AuthUser,
 } from "../lib/auth";
-import { siteBySlug } from "../lib/siteData";
+import { siteBySlug, siteName } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
+import { readTheme, setTheme, THEME_PRESETS } from "../lib/theme";
 
 const ACCOUNT_NAV: Array<{ to: string; label: string }> = [
   { to: "/profile", label: "Your account" },
@@ -20,49 +21,41 @@ const ACCOUNT_NAV: Array<{ to: string; label: string }> = [
   { to: "/settings", label: "Settings" },
 ];
 
+/**
+ * Every account screen wears the same clothes: a heading, one row of tabs in
+ * the site's own button style, then the panels. There used to be a second
+ * sidebar here — it is gone, like the one on the directory pages.
+ */
 function AccountFrame({
   title,
   path,
-  eyebrow,
   children,
 }: {
   title: string;
   path: string;
-  eyebrow: string;
   children: ReactNode;
 }) {
   return (
     <>
-      <SiteSeo
-        title={title}
-        description={`${title} for your Boring Internet account.`}
-        path={path}
-        noindex
-      />
-      <main className="account-page mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+      <SiteSeo title={title} description={`${title} on ${siteName}.`} path={path} noindex />
+      <main className="account-page mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
         <header className="account-page-heading">
           <span className="account-eyebrow">Your account</span>
           <h1>{title}</h1>
-          <p>{eyebrow}</p>
         </header>
-        <div className="account-layout">
-          <aside className="account-sidebar" aria-label="Account navigation">
-            <nav className="account-nav">
-              {ACCOUNT_NAV.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end
-                  className={({ isActive }) => `account-nav-link${isActive ? " active" : ""}`}
-                >
-                  {item.label}
-                  <span aria-hidden="true">→</span>
-                </NavLink>
-              ))}
-            </nav>
-          </aside>
-          <section className="account-content">{children}</section>
-        </div>
+        <nav className="account-tabs" aria-label="Your account">
+          {ACCOUNT_NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end
+              className={({ isActive }) => `account-tab${isActive ? " active" : ""}`}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+        <section className="account-content">{children}</section>
       </main>
     </>
   );
@@ -70,12 +63,11 @@ function AccountFrame({
 
 function AccountLoading({ title, path }: { title: string; path: string }) {
   return (
-    <AccountFrame title={title} path={path} eyebrow="Getting your personal space ready…">
+    <AccountFrame title={title} path={path}>
       <div className="account-panel account-message" role="status">
         <span className="account-message-mark" aria-hidden="true">…</span>
         <div>
           <h2>Loading your account</h2>
-          <p>Your saved sites and settings will be here in a moment.</p>
         </div>
       </div>
     </AccountFrame>
@@ -173,11 +165,8 @@ function ProfileForm({ user }: { user: AuthUser }) {
           height="72"
         />
         <div>
-          <h2>Make it yours</h2>
-          <p>
-            Your avatar and name appear in the account menu and on your saves. Pick a colour,
-            a face, a ring or a robot — or shuffle for something else entirely.
-          </p>
+          <h2>Your profile</h2>
+          <p>Shown in the account menu and on the sites you save or vote for.</p>
         </div>
       </div>
 
@@ -227,7 +216,6 @@ function ProfileForm({ user }: { user: AuthUser }) {
           >
             <span aria-hidden="true">🎲</span> Shuffle
           </button>
-          <span>Pick one above or shuffle for a new illustration — no code to type.</span>
         </div>
       </div>
 
@@ -254,7 +242,7 @@ function ProfileForm({ user }: { user: AuthUser }) {
           autoComplete="url"
           onChange={(event) => setForm((current) => ({ ...current, websiteUrl: event.target.value }))}
         />
-        <span>This link appears on your public profile.</span>
+        <span>Shown on your public profile.</span>
       </label>
 
       <div className="account-form-actions">
@@ -282,7 +270,6 @@ function AccountOverview({ user }: { user: AuthUser }) {
         <span className="account-settings-icon" aria-hidden="true">◇</span>
         <div>
           <h2>At a glance</h2>
-          <p>What this account has picked up so far.</p>
         </div>
       </div>
 
@@ -314,10 +301,6 @@ function AccountOverview({ user }: { user: AuthUser }) {
           <dt>Website</dt>
           <dd>{user.websiteUrl ? <a href={user.websiteUrl} target="_blank" rel="noreferrer" className="accent-text underline break-all">{user.websiteUrl}</a> : "No website yet — add one above."}</dd>
         </div>
-        <div>
-          <dt>Account reference</dt>
-          <dd className="account-detail-mono">{user.id.slice(0, 8)}</dd>
-        </div>
       </dl>
     </section>
   );
@@ -338,7 +321,6 @@ function AccountShortcuts() {
         <span className="account-settings-icon" aria-hidden="true">◎</span>
         <div>
           <h2>Shortcuts</h2>
-          <p>The parts of the directory that are yours.</p>
         </div>
       </div>
       <ul className="account-shortcuts">
@@ -368,7 +350,7 @@ function SubmittedSites({ user }: { user: AuthUser }) {
 function StreakPanel({ user }: { user: AuthUser }) {
   return <section className="account-panel streak-panel" id="streak">
     <div className="streak-flame" aria-hidden="true">🔥</div>
-    <div className="streak-copy"><span className="account-eyebrow">Daily sign-in</span><h2>{user.streak.current} day streak</h2><p>Sign in every day to keep it going. Your best streak is {user.streak.longest} day{user.streak.longest === 1 ? "" : "s"}.</p></div>
+    <div className="streak-copy"><span className="account-eyebrow">Daily sign-in</span><h2>{user.streak.current} day streak</h2><p>Best run: {user.streak.longest} day{user.streak.longest === 1 ? "" : "s"}.</p></div>
     <div className="streak-count"><strong>{user.streak.current}</strong><span>days</span></div>
   </section>;
 }
@@ -378,16 +360,17 @@ export function Profile() {
   if (loading) return <AccountLoading title="Your account" path="/profile" />;
 
   return (
-    <AccountFrame
-      title="Your account"
-      path="/profile"
-      eyebrow="Your name, avatar and bio, plus a summary of what you have saved and voted for."
-    >
+    <AccountFrame title="Your account" path="/profile">
       {user ? (
         <div className="account-stack">
-          <ProfileForm user={user} />
-          <AccountOverview user={user} />
-          <StreakPanel user={user} />
+          {/* Edit on the left, read on the right: the form is the tall one. */}
+          <div className="account-split">
+            <ProfileForm user={user} />
+            <div className="account-column">
+              <AccountOverview user={user} />
+              <StreakPanel user={user} />
+            </div>
+          </div>
           <SubmittedSites user={user} />
           <AccountShortcuts />
         </div>
@@ -403,11 +386,7 @@ export function Saved() {
   if (loading) return <AccountLoading title="Saved" path="/saved" />;
 
   return (
-    <AccountFrame
-      title="Saved"
-      path="/saved"
-      eyebrow="A shelf for sites you want to find again, plus everything you have voted for."
-    >
+    <AccountFrame title="Saved" path="/saved">
       {user ? (
         <div className="account-stack">
           <div className="account-panel account-saved-summary">
@@ -419,10 +398,7 @@ export function Saved() {
               <strong>{user.voted.length}</strong>
               <span>voted for</span>
             </div>
-            <p>
-              Everything here is tied to {user.email}. Remove a site by opening it and tapping Save
-              again.
-            </p>
+            <p>Tied to {user.email}. Tap Save on a site again to remove it.</p>
           </div>
           <div className="account-panel account-saved-panel">
           <SiteList
@@ -492,6 +468,49 @@ const SETTING_GROUPS: Array<{
   },
 ];
 
+/*
+  The background swatches. A colour choice is a browser preference, so picking
+  one repaints the page immediately and there is nothing to save.
+*/
+function ThemePicker() {
+  const [theme, setThemeState] = useState(() => readTheme());
+  const active = THEME_PRESETS.find((preset) => preset.id === theme) ?? THEME_PRESETS[0];
+
+  return (
+    <section className="account-panel account-settings-panel">
+      <div className="account-panel-heading account-settings-heading">
+        <span className="account-settings-icon" aria-hidden="true">◐</span>
+        <div>
+          <h2>Background</h2>
+          <p>Kept in this browser, on every page.</p>
+        </div>
+      </div>
+
+      <div className="theme-picker" role="radiogroup" aria-label="Background colour">
+        {THEME_PRESETS.map((preset) => {
+          const on = preset.id === active.id;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              className={`theme-choice${on ? " active" : ""}`}
+              onClick={() => {
+                setTheme(preset.id);
+                setThemeState(preset.id);
+              }}
+            >
+              <span className="theme-swatch" style={{ background: preset.swatch }} aria-hidden="true" />
+              <span className="theme-choice-label">{preset.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function SettingsForm({ user }: { user: AuthUser }) {
   const { updateSettings, signOut } = useAuth();
   const [message, setMessage] = useState("");
@@ -552,6 +571,8 @@ function SettingsForm({ user }: { user: AuthUser }) {
         </section>
       ))}
 
+      <ThemePicker />
+
       <div className="account-panel account-settings-actions">
         <div>
           <h2>Save your switches</h2>
@@ -578,13 +599,13 @@ function SettingsForm({ user }: { user: AuthUser }) {
           <span className="account-settings-icon" aria-hidden="true">☻</span>
           <div>
             <h2>This account</h2>
-            <p>Signed in as {user.email}. Saved sites and votes follow this account between devices.</p>
+            <p>Signed in as {user.email}.</p>
           </div>
         </div>
         <div className="account-settings-actions">
           <div>
             <strong>Sign out</strong>
-            <p>Ends the session in this browser. Your saved sites stay on the account.</p>
+            <p>Ends this browser's session.</p>
           </div>
           <button className="btn ghost" type="button" onClick={() => void signOut()}>
             Sign out
@@ -600,11 +621,7 @@ export function Settings() {
   if (loading) return <AccountLoading title="Settings" path="/settings" />;
 
   return (
-    <AccountFrame
-      title="Settings"
-      path="/settings"
-      eyebrow="Email, motion and privacy switches for how this directory behaves for you."
-    >
+    <AccountFrame title="Settings" path="/settings">
       {user ? <SettingsForm user={user} /> : <SignInRequired />}
     </AccountFrame>
   );
