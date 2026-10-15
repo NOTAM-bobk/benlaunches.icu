@@ -8,7 +8,11 @@
       "url": "https://news.ycombinator.com",
       "description": "Links and discussion for people who build things, on a page that has barely changed since 2007.",
       "category": "news",
-      "tags": ["news", "tech", "classic"],
+      "tags": [
+        "news",
+        "tech",
+        "classic"
+      ],
       "verified": true,
       "launched": "2026-10-03"
     },
@@ -19,7 +23,11 @@
       "url": "https://text.npr.org",
       "description": "NPR's headlines as bare text, with no images, scripts, or ads.",
       "category": "news",
-      "tags": ["news", "text", "lowdata"],
+      "tags": [
+        "news",
+        "text",
+        "lowdata"
+      ],
       "verified": true,
       "launched": "2026-06-11"
     },
@@ -30,7 +38,11 @@
       "url": "https://lite.cnn.com",
       "description": "CNN stripped down to a text-only page that opens instantly on any connection.",
       "category": "news",
-      "tags": ["news", "text", "fast"],
+      "tags": [
+        "news",
+        "text",
+        "fast"
+      ],
       "verified": false,
       "launched": "2026-05-24"
     },
@@ -41,7 +53,11 @@
       "url": "https://legiblenews.com",
       "description": "One screen of world news, rewritten to be readable instead of clickable.",
       "category": "news",
-      "tags": ["news", "summaries", "calm"],
+      "tags": [
+        "news",
+        "summaries",
+        "calm"
+      ],
       "verified": false,
       "launched": "2026-09-12"
     },
@@ -52,7 +68,11 @@
       "url": "https://plaintextsports.com",
       "description": "Live sports scores rendered as plain text you could read over a terminal.",
       "category": "news",
-      "tags": ["sports", "scores", "text"],
+      "tags": [
+        "sports",
+        "scores",
+        "text"
+      ],
       "verified": false,
       "launched": "2026-08-30"
     },
@@ -63,7 +83,11 @@
       "url": "https://standardebooks.org",
       "description": "Volunteers re-typeset public-domain books so the free version looks better than the paid one.",
       "category": "books",
-      "tags": ["books", "ebooks", "free"],
+      "tags": [
+        "books",
+        "ebooks",
+        "free"
+      ],
       "verified": false,
       "launched": "2026-07-19"
     },
@@ -74,7 +98,11 @@
       "url": "https://www.gutenberg.org",
       "description": "The original library of free public-domain ebooks, still running on plain HTML.",
       "category": "books",
-      "tags": ["books", "archive", "classic"],
+      "tags": [
+        "books",
+        "archive",
+        "classic"
+      ],
       "verified": true,
       "launched": "2026-04-02"
     },
@@ -85,7 +113,11 @@
       "url": "https://openlibrary.org",
       "description": "A lending library cataloguing nearly every book ever published.",
       "category": "books",
-      "tags": ["books", "lending", "catalog"],
+      "tags": [
+        "books",
+        "lending",
+        "catalog"
+      ],
       "verified": true,
       "launched": "2026-03-15"
     },
@@ -96,7 +128,11 @@
       "url": "https://www.themarginalian.org",
       "description": "Essays on books, science, and living, published by one person since 2006.",
       "category": "reading",
-      "tags": ["essays", "books", "longform"],
+      "tags": [
+        "essays",
+        "books",
+        "longform"
+      ],
       "verified": false,
       "launched": "2026-02-27"
     },
@@ -107,7 +143,11 @@
       "url": "https://paulgraham.com",
       "description": "Essays on programming and startups, hand-written in plain HTML for two decades.",
       "category": "reading",
-      "tags": ["essays", "startups", "writing"],
+      "tags": [
+        "essays",
+        "startups",
+        "writing"
+      ],
       "verified": false,
       "launched": "2026-01-30"
     },
@@ -118,7 +158,11 @@
       "url": "https://sive.rs",
       "description": "Very short notes and books from a programmer who writes to think.",
       "category": "reading",
-      "tags": ["notes", "books", "short"],
+      "tags": [
+        "notes",
+        "books",
+        "short"
+      ],
       "verified": false,
       "launched": "2026-09-21"
     },
@@ -129,7 +173,11 @@
       "url": "https://jvns.ca",
       "description": "Programming explanations and hand-drawn comics that assume nothing.",
       "category": "reading",
-      "tags": ["comics", "programming", "beginner"],
+      "tags": [
+        "comics",
+        "programming",
+        "beginner"
+      ],
       "verified": false,
       "launched": "2026-08-08"
     },
@@ -140,7 +188,11 @@
       "url": "https://danluu.com",
       "description": "Long, data-heavy posts about hardware, companies, and how systems really behave.",
       "category": "reading",
-      "tags": ["performance", "longform", "systems"],
+      "tags": [
+        "performance",
+        "longform",
+        "systems"
+      ],
       "verified": false,
       "launched": "2026-07-25"
     },
@@ -151,7 +203,11 @@
       "url": "https://gwern.net",
       "description": "A single site of endlessly revised research notes with footnotes for everything.",
       "category": "reading",
-      "tags": ["research", "notes", "longform"],
+      "tags": [
+        "research",
+        "notes",
+        "longform"
+      ],
       "verified": false,
       "launched": "2026-05-09"
     },
@@ -162,7 +218,11 @@
       "url": "https://craigmod.com",
       "description": "Walking, books, and photography written up as quiet, photo-heavy essays.",
       "category": "reading",
-      "tags": ["essays", "walking", "photography"],
+      "tags": [
+        "essays",
+        "walking",
+        "photography"
+      ],
       "verified": false,
       "launched": "2026-06-28"
     },
@@ -173,7 +233,11 @@
       "url": "https://developer.mozilla.org",
       "description": "The web platform reference, written for humans and kept current by Mozilla.",
       "category": "dev",
-      "tags": ["docs", "reference", "web"],
+      "tags": [
+        "docs",
+        "reference",
+        "web"
+      ],
       "verified": true,
       "launched": "2026-02-14"
     },
@@ -185,7 +249,11 @@
       "url": "https://marginalia-search.com",
       "description": "A search engine that deliberately favours small, text-heavy pages over big ones.",
       "category": "tools",
-      "tags": ["search", "indie", "text"],
+      "tags": [
+        "search",
+        "indie",
+        "text"
+      ],
       "verified": true,
       "launched": "2026-09-29"
     },
@@ -196,7 +264,11 @@
       "url": "https://wiby.me",
       "description": "A search engine for hand-made pages, plus a button that drops you somewhere random.",
       "category": "tools",
-      "tags": ["search", "oldweb", "random"],
+      "tags": [
+        "search",
+        "oldweb",
+        "random"
+      ],
       "verified": true,
       "launched": "2026-08-17"
     },
@@ -207,7 +279,11 @@
       "url": "https://write.as",
       "description": "Publish a post without an account, a dashboard, or anything to configure.",
       "category": "tools",
-      "tags": ["writing", "blog", "minimal"],
+      "tags": [
+        "writing",
+        "blog",
+        "minimal"
+      ],
       "verified": false,
       "launched": "2026-07-07"
     },
@@ -218,7 +294,11 @@
       "url": "https://bearblog.dev",
       "description": "A tiny blogging platform with no trackers, no scripts, and a dashboard that fits on one screen.",
       "category": "tools",
-      "tags": ["blog", "smallweb", "minimal"],
+      "tags": [
+        "blog",
+        "smallweb",
+        "minimal"
+      ],
       "verified": false,
       "launched": "2026-10-09"
     },
@@ -230,7 +310,11 @@
       "url": "https://excalidraw.com",
       "description": "Hand-drawn style diagrams that stay in your browser until you export them.",
       "category": "tools",
-      "tags": ["diagrams", "drawing", "local"],
+      "tags": [
+        "diagrams",
+        "drawing",
+        "local"
+      ],
       "verified": true,
       "launched": "2026-06-19"
     },
@@ -241,7 +325,11 @@
       "url": "https://tldraw.com",
       "description": "An infinite canvas for sketching that opens instantly and shares with one link.",
       "category": "tools",
-      "tags": ["canvas", "drawing", "fast"],
+      "tags": [
+        "canvas",
+        "drawing",
+        "fast"
+      ],
       "verified": false,
       "launched": "2026-05-30"
     },
@@ -252,7 +340,11 @@
       "url": "https://photopea.com",
       "description": "A full image editor that runs in the browser and opens Photoshop files.",
       "category": "tools",
-      "tags": ["images", "editor", "browser"],
+      "tags": [
+        "images",
+        "editor",
+        "browser"
+      ],
       "verified": false,
       "launched": "2026-04-18"
     },
@@ -263,7 +355,11 @@
       "url": "https://squoosh.app",
       "description": "Compress and resize images in the tab, with nothing uploaded anywhere.",
       "category": "tools",
-      "tags": ["images", "compression", "local"],
+      "tags": [
+        "images",
+        "compression",
+        "local"
+      ],
       "verified": true,
       "launched": "2026-03-27"
     },
@@ -274,7 +370,11 @@
       "url": "https://godbolt.org",
       "description": "See the assembly your compiler actually generates, side by side with your source.",
       "category": "dev",
-      "tags": ["code", "compilers", "dev"],
+      "tags": [
+        "code",
+        "compilers",
+        "dev"
+      ],
       "verified": false,
       "launched": "2026-08-26"
     },
@@ -285,7 +385,11 @@
       "url": "https://regex101.com",
       "description": "Build a regular expression and have every character explained back to you.",
       "category": "dev",
-      "tags": ["regex", "dev", "explain"],
+      "tags": [
+        "regex",
+        "dev",
+        "explain"
+      ],
       "verified": false,
       "launched": "2026-07-31"
     },
@@ -296,7 +400,11 @@
       "url": "https://lucide.dev",
       "description": "A consistent open-source icon set you can copy out as a single SVG.",
       "category": "design",
-      "tags": ["icons", "svg", "design"],
+      "tags": [
+        "icons",
+        "svg",
+        "design"
+      ],
       "verified": false,
       "launched": "2026-06-05"
     },
@@ -307,7 +415,11 @@
       "url": "https://svgl.app",
       "description": "Brand logos as tidy SVGs, searchable and ready to paste into a project.",
       "category": "design",
-      "tags": ["logos", "svg", "design"],
+      "tags": [
+        "logos",
+        "svg",
+        "design"
+      ],
       "verified": false,
       "launched": "2026-05-16"
     },
@@ -318,7 +430,11 @@
       "url": "https://coolors.co",
       "description": "Generate colour palettes fast, then lock the ones worth keeping.",
       "category": "design",
-      "tags": ["colour", "palettes", "design"],
+      "tags": [
+        "colour",
+        "palettes",
+        "design"
+      ],
       "verified": false,
       "launched": "2026-04-28"
     },
@@ -329,7 +445,11 @@
       "url": "https://every-layout.dev",
       "description": "Small CSS layout primitives that teach the idea instead of hiding it.",
       "category": "design",
-      "tags": ["css", "layout", "learning"],
+      "tags": [
+        "css",
+        "layout",
+        "learning"
+      ],
       "verified": false,
       "launched": "2026-03-08"
     },
@@ -340,7 +460,11 @@
       "url": "https://miniflux.app",
       "description": "A tiny self-hosted RSS reader with a keyboard-first interface.",
       "category": "tools",
-      "tags": ["rss", "selfhosted", "reader"],
+      "tags": [
+        "rss",
+        "selfhosted",
+        "reader"
+      ],
       "verified": false,
       "launched": "2026-09-08"
     },
@@ -351,7 +475,11 @@
       "url": "https://ooh.directory",
       "description": "A hand-checked directory of blogs, sorted by the subject they actually write about.",
       "category": "culture",
-      "tags": ["blogs", "directory", "curated"],
+      "tags": [
+        "blogs",
+        "directory",
+        "curated"
+      ],
       "verified": false,
       "launched": "2026-08-21"
     },
@@ -362,7 +490,11 @@
       "url": "https://micro.blog",
       "description": "Short posts and a timeline you own, with no algorithm deciding the order.",
       "category": "culture",
-      "tags": ["blogging", "social", "indieweb"],
+      "tags": [
+        "blogging",
+        "social",
+        "indieweb"
+      ],
       "verified": false,
       "launched": "2026-07-12"
     },
@@ -373,7 +505,11 @@
       "url": "https://neocities.org",
       "description": "Free home pages for people who miss the handmade, link-happy web.",
       "category": "culture",
-      "tags": ["hosting", "oldweb", "personal"],
+      "tags": [
+        "hosting",
+        "oldweb",
+        "personal"
+      ],
       "verified": false,
       "launched": "2026-06-24"
     },
@@ -384,7 +520,11 @@
       "url": "https://www.are.na",
       "description": "Collect links and images into quiet channels, then browse what others are collecting.",
       "category": "culture",
-      "tags": ["collections", "research", "visual"],
+      "tags": [
+        "collections",
+        "research",
+        "visual"
+      ],
       "verified": false,
       "launched": "2026-05-03"
     },
@@ -395,7 +535,11 @@
       "url": "https://archive.org",
       "description": "The web's attic: old sites, books, audio, and software kept available for good.",
       "category": "culture",
-      "tags": ["archive", "history", "library"],
+      "tags": [
+        "archive",
+        "history",
+        "library"
+      ],
       "verified": true,
       "launched": "2026-04-11"
     },
@@ -406,7 +550,11 @@
       "url": "https://densediscovery.com",
       "description": "A weekly letter of tools, articles, and thoughtful design, with no sponsored filler.",
       "category": "culture",
-      "tags": ["newsletter", "design", "weekly"],
+      "tags": [
+        "newsletter",
+        "design",
+        "weekly"
+      ],
       "verified": false,
       "launched": "2026-03-22"
     },
@@ -417,7 +565,11 @@
       "url": "https://practicaltypography.com",
       "description": "A whole book on typography you can read in the browser for free.",
       "category": "design",
-      "tags": ["typography", "book", "design"],
+      "tags": [
+        "typography",
+        "book",
+        "design"
+      ],
       "verified": false,
       "launched": "2026-02-09"
     },
@@ -428,7 +580,11 @@
       "url": "https://fontsinuse.com",
       "description": "A public archive of typography spotted on signage, packaging, and album covers.",
       "category": "design",
-      "tags": ["typography", "archive", "design"],
+      "tags": [
+        "typography",
+        "archive",
+        "design"
+      ],
       "verified": false,
       "launched": "2026-01-26"
     },
@@ -439,7 +595,11 @@
       "url": "https://musicforprogramming.net",
       "description": "Long, wordless mixes made for working, listed with the notes behind each one.",
       "category": "sound",
-      "tags": ["music", "focus", "mixes"],
+      "tags": [
+        "music",
+        "focus",
+        "mixes"
+      ],
       "verified": false,
       "launched": "2026-08-14"
     },
@@ -450,7 +610,11 @@
       "url": "https://512kb.club",
       "description": "A list of sites whose whole page weighs less than half a megabyte.",
       "category": "culture",
-      "tags": ["performance", "list", "web"],
+      "tags": [
+        "performance",
+        "list",
+        "web"
+      ],
       "verified": false,
       "launched": "2026-07-04"
     },
@@ -461,7 +625,11 @@
       "url": "https://suckless.org",
       "description": "Software philosophy and small programs that do one thing without configuration.",
       "category": "culture",
-      "tags": ["software", "minimal", "philosophy"],
+      "tags": [
+        "software",
+        "minimal",
+        "philosophy"
+      ],
       "verified": false,
       "launched": "2026-06-16"
     },
@@ -472,7 +640,11 @@
       "url": "https://brutalistwebsites.com",
       "description": "A gallery of sites that ignore the template and show their structure instead.",
       "category": "culture",
-      "tags": ["gallery", "design", "web"],
+      "tags": [
+        "gallery",
+        "design",
+        "web"
+      ],
       "verified": false,
       "launched": "2026-05-21"
     },
@@ -483,7 +655,11 @@
       "url": "https://pudding.cool",
       "description": "Visual essays that explain a cultural question with data instead of paragraphs.",
       "category": "experiment",
-      "tags": ["data", "essays", "visual"],
+      "tags": [
+        "data",
+        "essays",
+        "visual"
+      ],
       "verified": false,
       "launched": "2026-09-02"
     },
@@ -494,7 +670,11 @@
       "url": "https://ciechanow.ski",
       "description": "Interactive articles that let you drag the physics until it clicks.",
       "category": "experiment",
-      "tags": ["interactive", "physics", "explainers"],
+      "tags": [
+        "interactive",
+        "physics",
+        "explainers"
+      ],
       "verified": false,
       "launched": "2026-07-28"
     },
@@ -505,7 +685,11 @@
       "url": "https://www.desmos.com",
       "description": "A graphing calculator in the browser that renders equations as you type them.",
       "category": "experiment",
-      "tags": ["math", "graphs", "calculator"],
+      "tags": [
+        "math",
+        "graphs",
+        "calculator"
+      ],
       "verified": false,
       "launched": "2026-06-30"
     },
@@ -516,7 +700,11 @@
       "url": "https://time.is",
       "description": "The exact time anywhere, on a page that is almost entirely numbers.",
       "category": "experiment",
-      "tags": ["time", "clock", "simple"],
+      "tags": [
+        "time",
+        "clock",
+        "simple"
+      ],
       "verified": false,
       "launched": "2026-05-12"
     },
@@ -528,7 +716,11 @@
       "url": "https://www.weather.gov",
       "description": "A government forecast page with no ads, no app prompts, and real radar data.",
       "category": "experiment",
-      "tags": ["weather", "data", "forecast"],
+      "tags": [
+        "weather",
+        "data",
+        "forecast"
+      ],
       "verified": false,
       "launched": "2026-04-06"
     },
@@ -540,7 +732,11 @@
       "url": "https://www.openstreetmap.org",
       "description": "A world map anyone can edit and everyone can use without a key.",
       "category": "experiment",
-      "tags": ["maps", "open", "geo"],
+      "tags": [
+        "maps",
+        "open",
+        "geo"
+      ],
       "verified": false,
       "launched": "2026-03-02"
     },
@@ -551,7 +747,11 @@
       "url": "https://freshrss.org",
       "description": "A self-hosted feed reader that keeps your subscriptions on your own server.",
       "category": "experiment",
-      "tags": ["rss", "selfhosted", "feeds"],
+      "tags": [
+        "rss",
+        "selfhosted",
+        "feeds"
+      ],
       "verified": false,
       "launched": "2026-02-20"
     },
@@ -562,7 +762,11 @@
       "url": "https://asoftmurmur.com",
       "description": "Mix rain, thunder, and wind into a background hum and leave it running.",
       "category": "sound",
-      "tags": ["ambient", "sound", "focus"],
+      "tags": [
+        "ambient",
+        "sound",
+        "focus"
+      ],
       "verified": false,
       "launched": "2026-01-18"
     },
@@ -573,9 +777,35 @@
       "url": "https://rainymood.com",
       "description": "One page that plays rain and does absolutely nothing else.",
       "category": "sound",
-      "tags": ["ambient", "rain", "single"],
+      "tags": [
+        "ambient",
+        "rain",
+        "single"
+      ],
       "verified": false,
       "launched": "2026-01-05"
+    },
+    {
+      "id": "base31-org-a-directory-of-cool-sites-and",
+      "name": "base31.org — A Directory of Cool Sites and Fun Websites",
+      "slug": "base31-org-a-directory-of-cool-sites-and",
+      "url": "https://www.base31.org/",
+      "description": "Explore base31.org, an independent directory of cool sites, fun websites, creative web projects, and useful online tools built for the open web.",
+      "category": "news",
+      "tags": [
+        "news",
+        "experiment",
+        "dev",
+        "tools"
+      ],
+      "verified": true,
+      "launched": "2026-10-15",
+      "about": "Explore base31.org, an independent directory of cool sites, fun websites, creative web projects, and useful online tools built for the open web.",
+      "targetAudience": "everyone",
+      "problem": "find cool sites",
+      "alternatives": "nick launches",
+      "pricing": "free",
+      "openSource": "Yes"
     }
   ]
 }
