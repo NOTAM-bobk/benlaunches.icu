@@ -69,4 +69,17 @@ export const featureBadges: FeatureBadge[] = [
     height: 52,
     alt: "Featured on Launch Llama Tools",
   },
+  {
+    id: "launchit",
+    name: "LaunchIt",
+    href: "https://launchit.fast",
+    image: "https://launchit.fast/img/launching.svg",
+    // The SVG's own width/height are 200x54. The footer CSS owns the rendered
+    // height (3.15rem) and lets width follow, so these two only feed the
+    // aspect-ratio box reserved before the image loads — keep them true to the
+    // file or the row shifts a couple of pixels as it loads.
+    width: 200,
+    height: 54,
+    alt: "Featured on LaunchIt",
+  },
 ];
