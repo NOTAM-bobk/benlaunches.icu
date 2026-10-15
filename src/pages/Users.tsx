@@ -75,7 +75,7 @@ export function Users() {
 
   return (
     <>
-      <SiteSeo title="Find users" description="Find people exploring the Boring Internet directory." path="/users" noindex />
+      <SiteSeo title="Find users" description="Find people exploring the Ben Launches directory." path="/users" noindex />
       <main className="users-page mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
         <header className="users-heading">
           <span className="account-eyebrow">Community</span>
@@ -116,12 +116,12 @@ export function UserProfile() {
 
   return (
     <>
-      <SiteSeo title={`${profile.name} · Boring Internet`} description={`See ${profile.name}'s liked and saved websites.`} path={`/users/${profile.id}`} noindex />
+      <SiteSeo title={`${profile.name} · Ben Launches`} description={`See ${profile.name}'s liked and saved websites.`} path={`/users/${profile.id}`} noindex />
       <main className="users-page mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
         <Link to="/users" className="users-back">← Find users</Link>
         <header className="user-profile-header">
           <ProfileAvatar seed={profile.avatarSeed} size={96} />
-          <div><span className="account-eyebrow">Boring Internet profile</span><h1>{profile.name}</h1>{profile.bio && <p>{profile.bio}</p>}{profile.websiteUrl && <a href={profile.websiteUrl} target="_blank" rel="noreferrer" className="accent-text underline underline-offset-4 break-all">{profile.websiteUrl}</a>}</div>
+          <div><span className="account-eyebrow">Ben Launches profile</span><h1>{profile.name}</h1>{profile.bio && <p>{profile.bio}</p>}{profile.websiteUrl && <a href={profile.websiteUrl} target="_blank" rel="noreferrer" className="accent-text underline underline-offset-4 break-all">{profile.websiteUrl}</a>}</div>
         </header>
         <div className="user-profile-stats"><span><strong>{profile.voted.length}</strong> liked</span><span><strong>{profile.saved.length}</strong> saved</span></div>
         <div className="user-profile-lists">

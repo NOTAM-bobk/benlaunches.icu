@@ -83,7 +83,7 @@ type PublicProfileRow = Pick<ProfileRow, "id" | "name" | "avatar_seed" | "bio" |
 function publicProfile(profile: PublicProfileRow, saved: Array<{ slug: string }> | null, voted: Array<{ slug: string }> | null): PublicProfile {
   return {
     id: profile.id,
-    name: profile.name || "Boring Internet user",
+    name: profile.name || "Ben Launches user",
     avatarSeed: profile.avatar_seed || profile.id.slice(0, 8),
     bio: profile.bio || "",
     websiteUrl: profile.website_url || "",
@@ -126,7 +126,7 @@ export async function getSiteSupporters(slug: string): Promise<SiteSupporter[]> 
   const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
   return ids.map((id) => {
     const profile = byId.get(id);
-    return { id, name: profile?.name || "Boring Internet supporter", avatarSeed: profile?.avatar_seed || id.slice(0, 8) };
+    return { id, name: profile?.name || "Ben Launches supporter", avatarSeed: profile?.avatar_seed || id.slice(0, 8) };
   });
 }
 

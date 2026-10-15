@@ -14,12 +14,12 @@ export default function Stats() {
   const maxViews = useMemo(() => Math.max(1, ...(stats?.days ?? []).map((day) => day.views)), [stats]);
 
   return <>
-    <SiteSeo title="Directory stats" description="A transparent look at visits to Boring Internet." path="/stats" noindex />
+    <SiteSeo title="Directory stats" description="A transparent look at visits to Ben Launches." path="/stats" noindex />
     <main className="stats-page mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
       <header className="stats-heading">
         <span className="account-eyebrow">Open numbers</span>
         <h1>Directory stats</h1>
-        <p>Visits to Boring Internet, counted at the edge. We do not use cookies or store IP addresses.</p>
+        <p>Visits to Ben Launches, counted at the edge. We do not use cookies or store IP addresses.</p>
       </header>
       {!votesConnected ? <div className="account-panel stats-message"><strong>Analytics is not connected.</strong><span>Set VITE_VOTES_API_URL to the deployed Cloudflare Worker to turn this page on.</span></div> : loading ? <p className="users-status">Loading the latest numbers…</p> : result?.status === "missing" ? <div className="account-panel stats-message"><strong>Waiting on a Worker redeploy.</strong><span>The vote counter answers, but this version of it has no /analytics routes yet, so there is nothing to chart. Deploying the current cloudflare/votes-worker.js turns this page on; counts start from zero and fill as pages are viewed.</span></div> : result?.status === "unavailable" ? <div className="account-panel stats-message"><strong>Stats are temporarily unavailable.</strong><span>Try refreshing in a moment. If the whole directory is quiet, the vote counter may be down.</span></div> : stats ? <>
         <div className="stats-cards">

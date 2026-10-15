@@ -1,7 +1,7 @@
 {
-  "name": "Boring Internet",
-  "short_name": "Boring Internet",
-  "description": "A quiet list of launched sites, kept small on purpose.",
+  "name": "Ben Launches",
+  "short_name": "Ben Launches",
+  "description": "Get your site discovered.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7e0c6",

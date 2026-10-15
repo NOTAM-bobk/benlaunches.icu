@@ -13,7 +13,7 @@ export default function Auth() {
 
   if (loading) return <div className="mx-auto max-w-md p-8">Loading account…</div>;
   if (user) {
-    return <><SiteSeo title="Account" description="Your Boring Internet account." path="/auth" noindex /><div className="mx-auto max-w-md px-4 py-12"><div className="card p-6 space-y-4"><h1 className="text-3xl font-bold">You’re signed in</h1><p style={{ color: "var(--muted)" }}>Welcome back, {user.name}.</p><div className="flex flex-wrap gap-3"><Link className="btn accent" to="/profile">Open profile</Link><Link className="btn ghost" to="/saved">View saved</Link></div></div></div></>;
+    return <><SiteSeo title="Account" description="Your Ben Launches account." path="/auth" noindex /><div className="mx-auto max-w-md px-4 py-12"><div className="card p-6 space-y-4"><h1 className="text-3xl font-bold">You’re signed in</h1><p style={{ color: "var(--muted)" }}>Welcome back, {user.name}.</p><div className="flex flex-wrap gap-3"><Link className="btn accent" to="/profile">Open profile</Link><Link className="btn ghost" to="/saved">View saved</Link></div></div></div></>;
   }
 
   async function submit(event: React.FormEvent) {

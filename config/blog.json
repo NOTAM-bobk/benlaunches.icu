@@ -5,7 +5,7 @@
       "title": "What counts as launched?",
       "description": "A live URL, a working sign-in, and nothing else half-finished — the bar a site has to clear before it appears in this directory.",
       "date": "2026-10-04",
-      "author": "Boring Internet",
+      "author": "Ben Launches",
       "tags": ["curation", "launch"],
       "excerpt": "A live URL, a working sign-in, and nothing else half-finished. That is the bar this directory uses before a site goes up.",
       "blocks": [
@@ -43,7 +43,7 @@
       "title": "Why the list stays small",
       "description": "Directories get worse as they grow. Here is why this one caps its index on purpose instead of accepting every submission.",
       "date": "2026-09-28",
-      "author": "Boring Internet",
+      "author": "Ben Launches",
       "tags": ["curation", "editorial"],
       "excerpt": "Directories get worse as they get bigger. The index is capped on purpose, and older entries drop off rather than pile up.",
       "blocks": [
@@ -80,7 +80,7 @@
       "title": "Editing the directory by hand",
       "description": "How the config folder works: sites, categories, trending, explore, and blog are five plain JSON files you edit and commit.",
       "date": "2026-09-20",
-      "author": "Boring Internet",
+      "author": "Ben Launches",
       "tags": ["config", "howto"],
       "excerpt": "Every entry lives in one of a handful of plain JSON files, reviewed before it ships. No submissions queue, no scraping, no autopilot.",
       "blocks": [
@@ -120,7 +120,7 @@
       "title": "How the trending list is decided",
       "description": "Trending order comes from stored vote counts, a per-site starting score, and a small editorial boost — all served by one Cloudflare Worker.",
       "date": "2026-10-07",
-      "author": "Boring Internet",
+      "author": "Ben Launches",
       "tags": ["trending", "howto"],
       "excerpt": "Votes are stored in one Worker, counts start from the score in config/sites.json, and a per-site boost in config/trending.json nudges the order.",
       "blocks": [

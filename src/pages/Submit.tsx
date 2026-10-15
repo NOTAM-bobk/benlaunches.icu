@@ -185,7 +185,7 @@ export default function Submit() {
     embedUrl.searchParams.set("url", submittedSite?.url ?? "");
     embedUrl.searchParams.set("status", "listed");
     const embedSrc = embedUrl.toString().replaceAll("&", "&amp;");
-    const embedCode = `<iframe src="${embedSrc}" title="As seen on Boring Internet" width="280" height="76" loading="lazy" style="border:0;max-width:100%" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+    const embedCode = `<iframe src="${embedSrc}" title="As seen on Ben Launches" width="280" height="76" loading="lazy" style="border:0;max-width:100%" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
 
     return (
       <>
@@ -211,16 +211,16 @@ export default function Submit() {
                 Share your listing
               </span>
               <h2 id="submit-embed-title" className="text-xl font-bold">
-                Add an “As seen on Boring Internet” badge
+                Add an “As seen on Ben Launches” badge
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
                 Copy this iframe snippet and paste it into your site’s HTML. The badge links back
-                to Boring Internet and shows your site name and domain.
+                to Ben Launches and shows your site name and domain.
               </p>
             </div>
             <textarea
               className="embed-code"
-              aria-label="Boring Internet badge iframe code"
+              aria-label="Ben Launches badge iframe code"
               readOnly
               rows={3}
               value={embedCode}

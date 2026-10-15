@@ -38,7 +38,7 @@ export default function EmbedBadge() {
 
   return (
     <>
-      <SiteSeo title="Embedded badge" description="Boring Internet featured-site badge." path="/embed" noindex />
+      <SiteSeo title="Embedded badge" description="Ben Launches featured-site badge." path="/embed" noindex />
       <main className={standalone ? "embed-root embed-root-standalone" : "embed-root"}>
       <a
         href="https://www.benlaunches.icu/"

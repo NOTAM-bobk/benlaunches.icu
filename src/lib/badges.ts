@@ -45,7 +45,7 @@ export const featureBadges: FeatureBadge[] = [
     image: "https://startuptrusted.com/api/badge?type=featured&style=dark",
     width: 240,
     height: 54,
-    alt: "Boring Internet on StartupTrusted",
+    alt: "Ben Launches on StartupTrusted",
   },
   {
     id: "launch-llama-tools",

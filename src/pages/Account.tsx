@@ -35,7 +35,7 @@ function AccountFrame({
     <>
       <SiteSeo
         title={title}
-        description={`${title} for your Boring Internet account.`}
+        description={`${title} for your Ben Launches account.`}
         path={path}
         noindex
       />
