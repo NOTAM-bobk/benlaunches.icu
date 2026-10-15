@@ -23,7 +23,7 @@ const LEGAL_LINKS: { to: string; label: string }[] = [
 
 const CONNECT_LINKS: { href: string; label: string }[] = [
   { href: siteLinks.contact ?? "mailto:hello@base31.org", label: "Contact" },
-  { href: "https://github.com/NOTAM-bobk/boringinternet.org", label: "GitHub" },
+  { href: "https://github.com/NOTAM-bobk/benlaunches.icu", label: "GitHub" },
 ];
 
 export function Footer() {

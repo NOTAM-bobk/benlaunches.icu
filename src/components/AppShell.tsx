@@ -3,8 +3,9 @@ import { Link, NavLink, Outlet, useLocation, useNavigationType } from "react-rou
 import { AccountMenu } from "./AccountMenu";
 import { CartLink } from "./CartLink";
 import { Footer } from "./Footer";
+import { GamesMenu } from "./GamesMenu";
 import { MobileNav, HamburgerButton } from "./MobileNav";
-import { SideNav } from "./SideNav";
+import { SearchOverlay } from "./SearchOverlay";
 import { trackPageView } from "../lib/analytics";
 
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
@@ -204,10 +205,12 @@ export function AppShell() {
                 Trending <span aria-hidden="true">🔥</span>
               </span>
             </NavItem>
+            <GamesMenu />
             <NavItem to="/blog">Blog</NavItem>
           </nav>
 
           <div className="justify-self-end flex items-center gap-2">
+            <SearchOverlay />
             <CartLink />
             <AccountMenu />
             <HamburgerButton open={navOpen} onClick={() => setNavOpen((open) => !open)} />
@@ -218,11 +221,10 @@ export function AppShell() {
       <MobileNav open={navOpen} onClose={() => setNavOpen(false)} />
 
       {/*
-        One grid row holds the side nav and the page, so the nav sticks while you
-        scroll the page but ends with a generous lower gutter before the footer.
+        The page now owns the full width: the side rail is gone on desktop, so
+        the directory reads edge to edge with one centered column per page.
       */}
-      <div className="flex-1 w-full lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:pb-12">
-        <SideNav />
+      <div className="flex-1 w-full lg:pb-12">
         <main className="min-w-0">
           <div key={location.pathname} className={`route-pane slide-${direction}`}>
             <Outlet />

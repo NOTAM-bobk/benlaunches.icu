@@ -190,11 +190,12 @@ Setup notes:
 4. Set the site's `VITE_VOTES_API_URL` to the Worker URL
 
 `cloudflare/wrangler.toml` also sets `ALLOWED_ORIGIN`, the comma-separated list
-of browser origins the Worker answers for (`boringinternet.org`,
-`new.base31.org`, `boringinternet.vercel.app`, `www.benlaunches.icu`,
-`benlaunches.icu`). Entries are exact origins — scheme and host only. A trailing
-slash, a path, or a missing `www.` will not match a real request and the Worker
-falls back to the first entry, so vote writes from that site silently fail CORS.
+of browser origins the Worker answers for (`benlaunches.icu`,
+`www.benlaunches.icu`, plus the older `new.base31.org` and
+`boringinternet.vercel.app` preview hosts). The site's own domain is the only
+public one. Entries are exact origins — scheme and host only. A trailing slash, a
+path, or a missing `www.` will not match a real request and the Worker falls back
+to the first entry, so vote writes from that site silently fail CORS.
 
 Until `VITE_VOTES_API_URL` is set the pages say so: votes fall back to
 localStorage and the submit form is disabled.

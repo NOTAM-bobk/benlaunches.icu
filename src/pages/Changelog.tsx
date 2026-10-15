@@ -79,7 +79,7 @@ export default function Changelog() {
 
         <p className="changelog-foot">
           Something missing or wrong? Tell us on the{" "}
-          <a href="https://github.com/NOTAM-bobk/boringinternet.org" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/NOTAM-bobk/benlaunches.icu" target="_blank" rel="noopener noreferrer">
             GitHub repository
           </a>
           .

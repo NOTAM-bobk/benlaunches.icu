@@ -14,4 +14,4 @@ id = "36580dc8d626443cbe3783979036b9b9"
 # browser's Origin header never carries one. The first entry is the fallback
 # used when the caller's origin is not on the list.
 [vars]
-ALLOWED_ORIGIN = "https://boringinternet.org,https://new.base31.org,https://boringinternet.vercel.app,https://www.benlaunches.icu,https://benlaunches.icu"
+ALLOWED_ORIGIN = "https://benlaunches.icu,https://www.benlaunches.icu,https://new.base31.org,https://boringinternet.vercel.app"
