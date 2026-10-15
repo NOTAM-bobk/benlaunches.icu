@@ -11,8 +11,9 @@ import {
   type AuthSettings,
   type AuthUser,
 } from "../lib/auth";
-import { siteBySlug, siteName } from "../lib/siteData";
+import { collectionById, collectionSites, siteBySlug, siteName } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
+import { useSavedCollections } from "../lib/savedCollections";
 import { readTheme, setTheme, THEME_PRESETS } from "../lib/theme";
 
 const ACCOUNT_NAV: Array<{ to: string; label: string }> = [
@@ -130,6 +131,65 @@ function SiteList({
           <p>{empty}</p>
         </div>
       )}
+    </section>
+  );
+}
+
+/**
+ * The collections this browser kept. Saved sites live on the account; a kept
+ * collection is local, which is why it says so at the foot of the list.
+ */
+function SavedCollections() {
+  const [saved, toggle] = useSavedCollections();
+  const entries = saved
+    .map((id) => collectionById(id))
+    .filter((collection): collection is NonNullable<typeof collection> => Boolean(collection));
+
+  return (
+    <section className="account-list-section">
+      <div className="account-list-heading">
+        <h2>Saved collections</h2>
+        <span>{entries.length}</span>
+      </div>
+      {entries.length > 0 ? (
+        <ul className="account-site-list">
+          {entries.map((collection) => (
+            <li key={collection.id}>
+              <div className="account-site-card">
+                <span className="account-collection-tiles" aria-hidden="true">
+                  {collectionSites(collection)
+                    .slice(0, 3)
+                    .map((site) => (
+                      <SiteIcon key={site.id} site={site} size={22} label={false} />
+                    ))}
+                </span>
+                <span className="account-site-copy">
+                  <Link to={`/collections/${collection.id}`} className="account-collection-name">
+                    {collection.title}
+                  </Link>
+                  <span className="account-site-domain">
+                    {collectionSites(collection).length} sites
+                  </span>
+                  <span className="account-site-description">{collection.description}</span>
+                </span>
+                <button
+                  type="button"
+                  className="account-collection-remove"
+                  onClick={() => toggle(collection.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="account-empty-state">
+          <span aria-hidden="true">◇</span>
+          <p>No collections kept yet. Open one and tap Save.</p>
+        </div>
+      )}
+      <p className="account-saved-note">A kept collection lives in this browser; saved websites follow your account.</p>
     </section>
   );
 }
@@ -401,16 +461,17 @@ export function Saved() {
             <p>Tied to {user.email}. Tap Save on a site again to remove it.</p>
           </div>
           <div className="account-panel account-saved-panel">
-          <SiteList
-            title="Saved websites"
-            slugs={user.saved}
-            empty="You have not saved any websites yet. Open a site and tap Save to keep it here."
-          />
-          <SiteList
-            title="Websites you voted for"
-            slugs={user.voted}
-            empty="Your voted websites will appear here after you cast a vote while signed in."
-          />
+            <SiteList
+              title="Saved websites"
+              slugs={user.saved}
+              empty="You have not saved any websites yet. Open a site and tap Save to keep it here."
+            />
+            <SiteList
+              title="Websites you voted for"
+              slugs={user.voted}
+              empty="Your voted websites will appear here after you cast a vote while signed in."
+            />
+            <SavedCollections />
           </div>
         </div>
       ) : (

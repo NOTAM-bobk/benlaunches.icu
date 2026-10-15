@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
 import { ShareSite } from "../components/ShareSite";
+import { useSignInPrompt } from "../lib/signInPrompt";
 import { SiteIcon } from "../components/SiteIcon";
 import { VerifiedStamp } from "../components/VerifiedStamp";
 import { SiteSeo } from "../components/SeoHead";
@@ -41,6 +42,7 @@ const DETAIL_ORDER = [
 export default function SiteDetail() {
   const { slug = "" } = useParams();
   const { user, toggleSaved } = useAuth();
+  const askSignIn = useSignInPrompt();
   const site = siteBySlug(slug);
   const vote = useSiteVote(slug, site?.trending ?? 0);
   const [supporters, setSupporters] = useState<SiteSupporter[]>([]);
@@ -176,13 +178,15 @@ export default function SiteDetail() {
               >
                 Visit {domain} <span aria-hidden="true">→</span>
               </a>
-              {user ? (
-                <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
-                  {saved ? "Saved ✓" : "Save site"}
-                </button>
-              ) : (
-                <Link to="/auth" className="btn ghost">Sign in to save</Link>
-              )}
+              <button
+                type="button"
+                className="btn ghost"
+                aria-pressed={saved}
+                title={saved ? "Remove from your saved list" : "Save this site"}
+                onClick={() => (user ? void toggleSaved(site.slug) : askSignIn("save this site"))}
+              >
+                {saved ? "Saved ✓" : "Save site"}
+              </button>
               <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
             </div>
           </div>

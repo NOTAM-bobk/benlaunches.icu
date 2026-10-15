@@ -29,7 +29,7 @@ const CONNECT_LINKS: { href: string; label: string }[] = [
 export function Footer() {
   return (
     <footer
-      className="footer w-full border-t mt-auto"
+      className="footer w-full border-t-2 mt-auto"
       style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
     >
       <div className="footer-inner w-full px-5 sm:px-8 lg:px-12 py-10 sm:py-12 flex flex-col gap-10 text-sm">
@@ -112,8 +112,8 @@ export function Footer() {
         <FeatureBadges />
 
         <div
-          className="footer-meta flex flex-col gap-2 text-[11px] border-t pt-6"
-          style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
+          className="footer-meta flex flex-col gap-2 text-[11px] border-t-2 pt-6"
+          style={{ color: "var(--muted)", borderColor: "var(--ink)" }}
         >
           <div className="footer-meta-row flex flex-wrap items-center justify-between gap-3">
             <p>

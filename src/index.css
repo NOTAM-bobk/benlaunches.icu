@@ -1978,8 +1978,9 @@ mark.hl {
   margin-inline: -1.25rem;
   padding: 2rem 0 2.15rem;
   overflow: hidden;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
+  /* The footer's rules are the heavy ones, like the site's section heads. */
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
 }
 
 .footer-badges-label {
@@ -3909,7 +3910,8 @@ mark.hl {
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 0.9rem;
-  border-bottom: 1px solid var(--rule);
+  /* Matches the section rules on the home page: 2px of ink. */
+  border-bottom: 2px solid var(--ink);
 }
 
 .needs-votes-heading > div {
@@ -7520,5 +7522,167 @@ button.sidenav-foot-link:hover {
   }
   .games-caret {
     transition: none;
+  }
+}
+
+/* ---------- a URL that does not exist ---------- */
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.15rem;
+}
+
+.not-found-code {
+  color: var(--accent);
+  font: 700 clamp(4.5rem, 17vw, 7.5rem) / 0.8 var(--mono);
+  letter-spacing: -0.06em;
+  text-shadow: 4px 4px 0 var(--ink);
+}
+
+.not-found-title {
+  font-size: clamp(1.55rem, 4.6vw, 2.3rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.not-found-copy {
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.not-found-copy code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  font: 0.78rem var(--mono);
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.not-found-doors {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 1.15rem;
+  border-top: 2px solid var(--ink);
+}
+
+.not-found-door {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: 0 2px 0 var(--ink);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.not-found-door:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.not-found-door span {
+  color: var(--accent);
+}
+
+/* ---------- "you need an account for that" ---------- */
+
+.signin-prompt {
+  width: min(100%, 27rem);
+}
+
+.signin-prompt-copy {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.signin-prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding-top: 0.85rem;
+  border-top: 2px solid var(--ink);
+}
+
+/* ---------- saved collections in the account list ---------- */
+
+.account-collection-tiles {
+  display: flex;
+}
+
+/* The site marks overlap, the way a shelf of covers sits edge to edge. */
+.account-collection-tiles > * + * {
+  margin-left: -0.5rem;
+}
+
+.account-collection-name {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-collection-remove {
+  flex: none;
+  padding: 0.32rem 0.62rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--muted);
+  font: 700 0.62rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.account-collection-remove:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.account-saved-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* The count and the save button under a collection's blurb. */
+.collection-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+/*
+ * The home page's collection grid stops at six on anything wider than the
+ * phone's swipe rail (560px), which keeps every card to swipe through.
+ */
+@media (min-width: 561px) {
+  .home-collections-swipe > .collection-card-beyond {
+    display: none;
   }
 }

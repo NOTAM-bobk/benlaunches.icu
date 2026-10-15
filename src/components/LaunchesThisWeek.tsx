@@ -26,8 +26,8 @@ export function LaunchesThisWeek() {
   return (
     <section className="space-y-4" aria-labelledby="launches-heading">
       <div
-        className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-        style={{ borderColor: "var(--rule)" }}
+        className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+        style={{ borderColor: "var(--ink)" }}
       >
         <h2 id="launches-heading" className="text-xl font-bold tracking-[-0.01em]">
           {launchesTitle}

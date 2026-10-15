@@ -30,6 +30,7 @@ import Checkout from "./pages/Checkout.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import { UserProfile, Users } from "./pages/Users.tsx";
 import Stats from "./pages/Stats.tsx";
+import NotFound from "./pages/NotFound.tsx";
 import { recordVisitToday } from "./lib/visitStreak";
 import { applyTheme, readTheme } from "./lib/theme";
 
@@ -150,6 +151,11 @@ const router = createBrowserRouter([
       {
         path: "stats",
         element: <Stats />,
+      },
+      /* Anything else keeps the header and the footer and reads as a dead end. */
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

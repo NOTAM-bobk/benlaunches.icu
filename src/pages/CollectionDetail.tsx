@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
+import { useSignInPrompt } from "../lib/signInPrompt";
 import {
   collectionById,
   collectionSites,
@@ -9,12 +10,19 @@ import {
   siteName,
 } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
+import { useSavedCollections } from "../lib/savedCollections";
+import { useAuth } from "../lib/auth";
 
 /** One collection: its name, its blurb, and every site in it as a link out. */
 export default function CollectionDetail() {
   const { id = "" } = useParams();
   const collection = collectionById(id);
   const members = collection ? collectionSites(collection) : [];
+  /* Saved collections are kept in this browser; the id is the collection's own. */
+  const { user } = useAuth();
+  const askSignIn = useSignInPrompt();
+  const [savedCollections, toggleSavedCollection] = useSavedCollections();
+  const saved = savedCollections.includes(id);
 
   if (!collection) {
     return (
@@ -95,9 +103,22 @@ export default function CollectionDetail() {
           <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
             {collection.description}
           </p>
-          <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-            {members.length} site{members.length === 1 ? "" : "s"} in this collection
-          </span>
+          <div className="collection-detail-actions">
+            <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+              {members.length} site{members.length === 1 ? "" : "s"} in this collection
+            </span>
+            <button
+              type="button"
+              className="btn ghost"
+              aria-pressed={saved}
+              title={saved ? "Remove from your saved list" : "Save this collection"}
+              onClick={() =>
+                user ? toggleSavedCollection(id) : askSignIn("save this collection")
+              }
+            >
+              {saved ? "Saved ✓" : "Save collection"}
+            </button>
+          </div>
         </header>
 
         <ul className="flex flex-col gap-3">

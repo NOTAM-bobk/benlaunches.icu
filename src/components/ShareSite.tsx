@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router";
 import { SiteIcon } from "./SiteIcon";
+import { useSignInPrompt } from "../lib/signInPrompt";
 import { BrandIcon } from "./BrandIcons";
 import { SHARE_ICON_COLORS } from "../lib/shareBrands";
 import { useAuth } from "../lib/auth";
@@ -113,6 +113,7 @@ function TickGlyph() {
  */
 export function ShareSite({ site, pageUrl }: { site: Site; pageUrl: string }) {
   const { user, toggleSaved } = useAuth();
+  const askSignIn = useSignInPrompt();
   const [open, setOpen] = useState(false);
   const [copy, setCopy] = useState<CopyState>("idle");
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -265,15 +266,18 @@ export function ShareSite({ site, pageUrl }: { site: Site; pageUrl: string }) {
                   {copy === "copied" ? <TickGlyph /> : <CopyGlyph />}
                   {copy === "copied" ? "Link copied" : "Copy link"}
                 </button>
-                {user ? (
-                  <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
-                    {saved ? "Saved ✓" : "Save to my list"}
-                  </button>
-                ) : (
-                  <Link to="/auth" className="btn ghost" onClick={close}>
-                    Sign in to save it
-                  </Link>
-                )}
+                <button
+                  type="button"
+                  className="btn ghost"
+                  aria-pressed={saved}
+                  onClick={() => {
+                    if (user) return void toggleSaved(site.slug);
+                    close();
+                    askSignIn("save this site");
+                  }}
+                >
+                  {saved ? "Saved ✓" : "Save to my list"}
+                </button>
                 {/*
                   The copy result sits next to the button that caused it: on a
                   short screen the fine print at the foot of the sheet can be

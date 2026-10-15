@@ -6,6 +6,7 @@ import { Footer } from "./Footer";
 import { GamesMenu } from "./GamesMenu";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
+import { SignInPromptProvider } from "./SignInPrompt";
 import { trackPageView } from "../lib/analytics";
 
 /**
@@ -182,6 +183,7 @@ export function AppShell() {
   }, [showPromo]);
 
   return (
+    <SignInPromptProvider>
     <div className="min-h-screen flex flex-col">
       <header className="site-header" ref={headerRef}>
         {/* Slim promo bar: what we do for a launch, and the way to start one.
@@ -264,5 +266,6 @@ export function AppShell() {
 
       <BackToTop />
     </div>
+    </SignInPromptProvider>
   );
 }

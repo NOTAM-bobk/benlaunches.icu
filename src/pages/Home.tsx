@@ -31,6 +31,15 @@ import {
 } from "../lib/siteData";
 import { formatDate, posts } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
+import { useAuth } from "../lib/auth";
+import { useSavedCollections } from "../lib/savedCollections";
+import { useSignInPrompt } from "../lib/signInPrompt";
+
+/**
+ * How many collections the home page's desktop grid shows. The rest stay in the
+ * phone's swipe rail and behind the "all collections" link.
+ */
+const HOME_COLLECTIONS = 6;
 
 /** Only the newest handful of posts get a card in the home page's article row. */
 const FEATURED_POSTS = posts.slice(0, 3);
@@ -104,8 +113,8 @@ function SectionHead({
 }) {
   return (
     <div
-      className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-      style={{ borderColor: "var(--rule)" }}
+      className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+      style={{ borderColor: "var(--ink)" }}
     >
       <div className="flex items-baseline gap-3">
         <h2 className="text-xl font-bold tracking-[-0.01em]">{title}</h2>
@@ -256,15 +265,18 @@ function CollectionCard({
   collection,
   saved,
   onToggle,
+  beyond = false,
 }: {
   collection: SiteCollection;
   saved: boolean;
   onToggle: () => void;
+  /** Past the desktop cut-off: kept for the phone rail, hidden on a wide screen. */
+  beyond?: boolean;
 }) {
   const members = collectionSites(collection);
 
   return (
-    <article className="collection-card">
+    <article className={beyond ? "collection-card collection-card-beyond" : "collection-card"}>
       <div className="flex items-start justify-between gap-3">
         <div className="tile-cluster">
           {members.slice(0, 5).map((site) => (
@@ -372,35 +384,6 @@ function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
   );
 }
 
-function useSavedCollections(): [string[], (id: string) => void] {
-  const [saved, setSaved] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = window.localStorage.getItem("bi:collections");
-      const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-      return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : [];
-    } catch {
-      return [];
-    }
-  });
-
-  function toggle(id: string) {
-    setSaved((current) => {
-      const next = current.includes(id) ? current.filter((v) => v !== id) : [...current, id];
-      if (typeof window !== "undefined") {
-        try {
-          window.localStorage.setItem("bi:collections", JSON.stringify(next));
-        } catch {
-          /* private mode */
-        }
-      }
-      return next;
-    });
-  }
-
-  return [saved, toggle];
-}
-
 /* ---------------- page ---------------- */
 
 export default function Home() {
@@ -408,6 +391,8 @@ export default function Home() {
   const [params, setParams] = useSearchParams();
   const query = params.get("q") ?? "";
   const selectedCategory = params.get("category") ?? "all";
+  const { user } = useAuth();
+  const askSignIn = useSignInPrompt();
   const [savedCollections, toggleSaved] = useSavedCollections();
   const [showAllSites, setShowAllSites] = useState(false);
   const [urlDraft, setUrlDraft] = useState("");
@@ -582,8 +567,8 @@ export default function Home() {
 
           <section className="space-y-5">
             <div
-              className="flex flex-col gap-2 border-b pb-4"
-              style={{ borderColor: "var(--rule)" }}
+              className="flex flex-col gap-2 border-b-2 pb-4"
+              style={{ borderColor: "var(--ink)" }}
             >
               <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
                 Category
@@ -641,8 +626,8 @@ export default function Home() {
           {switcher}
           <section id="all-sites" className="space-y-4 scroll-mt-28" aria-live="polite">
             <div
-              className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-              style={{ borderColor: "var(--rule)" }}
+              className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+              style={{ borderColor: "var(--ink)" }}
             >
               <div>
                 <span className="section-eyebrow">Matching your search</span>
@@ -710,8 +695,8 @@ export default function Home() {
         {collections.length > 0 && (
           <section id="collections" className="space-y-4 scroll-mt-28">
           <div
-            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-            style={{ borderColor: "var(--rule)" }}
+            className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+            style={{ borderColor: "var(--ink)" }}
           >
             <h2 className="text-xl font-bold tracking-[-0.01em]">Latest Collections</h2>
               <Link
@@ -722,12 +707,15 @@ export default function Home() {
               </Link>
             </div>
             <div className="home-collections-swipe grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {collections.map((collection) => (
+              {collections.map((collection, index) => (
                 <CollectionCard
                   key={collection.id}
                   collection={collection}
+                  beyond={index >= HOME_COLLECTIONS}
                   saved={savedCollections.includes(collection.id)}
-                  onToggle={() => toggleSaved(collection.id)}
+                  onToggle={() =>
+                    user ? toggleSaved(collection.id) : askSignIn("save this collection")
+                  }
                 />
               ))}
             </div>
@@ -737,8 +725,8 @@ export default function Home() {
         {/* Blog */}
         <section className="space-y-4">
           <div
-            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-            style={{ borderColor: "var(--rule)" }}
+            className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+            style={{ borderColor: "var(--ink)" }}
           >
             <h2 className="text-xl font-bold tracking-[-0.01em]">Featured Articles</h2>
             <Link to="/blog" className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text">
@@ -768,8 +756,8 @@ export default function Home() {
         {trending.length > 0 && (
           <section className="space-y-4">
             <div
-              className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-              style={{ borderColor: "var(--rule)" }}
+              className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+              style={{ borderColor: "var(--ink)" }}
             >
               <h2 className="text-xl font-bold tracking-[-0.01em]">
                 Trending <span aria-hidden="true">🔥</span>
@@ -808,8 +796,8 @@ export default function Home() {
         {/* Full directory */}
         <section id="all-sites" className="space-y-4 scroll-mt-28">
           <div
-            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
-            style={{ borderColor: "var(--rule)" }}
+            className="sec-head flex items-end justify-between gap-4 border-b-2 pb-3"
+            style={{ borderColor: "var(--ink)" }}
           >
             <h2 className="text-xl font-bold tracking-[-0.01em]">
               {query ? "Search results" : selectedCategory === "all" ? "All sites" : categoryLabel(selectedCategory)}
