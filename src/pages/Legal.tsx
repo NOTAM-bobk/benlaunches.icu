@@ -307,8 +307,15 @@ const PRIVACY: LegalSection[] = [
           <li>
             <strong>Cloudflare</strong> — serves the site and the account/vote service.
           </li>
+          <li>
+            <strong>Google Analytics</strong> — counts page views and shows us roughly where visitors
+            came from, using cookies set for this site and a coarse location derived from your IP
+            address. Google describes its handling in the{" "}
+            <a href="https://policies.google.com/privacy">Google privacy policy</a>, and offers a{" "}
+            <a href="https://tools.google.com/dlpage/gaoptout">browser add-on that opts you out</a>.
+          </li>
         </ul>
-        <p>We do not run an analytics script or an ad network on these pages.</p>
+        <p>We run no advertising network on these pages.</p>
       </>
     ),
   },

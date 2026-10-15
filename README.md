@@ -300,6 +300,13 @@ on `/profile`; approved URLs are returned on `/users/:id`. Analytics uses a
 random browser identifier stored in localStorage only to deduplicate visitors
 within a day. It does not store IP addresses or cookies.
 
+Google Analytics (`G-MRPR60LML5`) is also loaded on every page straight from
+`index.html`'s `gtag.js` snippet. Unlike the Worker's own counter it does set
+cookies on the visitor's browser, which `/privacy` discloses — keep that
+disclosure in `src/pages/Legal.tsx` in step with the tag if the measurement ID
+ever changes. Because the app is a single-page router, that tag records the
+initial page view only; route changes are counted by the Worker's counter.
+
 Two KV behaviours are worth knowing: writes take up to ~60 seconds to appear
 in reads from other locations (the admin page therefore polls every 30s while
 unlocked), and neither `/submit` nor `/vote` is rate limited yet, so treat the

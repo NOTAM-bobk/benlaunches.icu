@@ -54,6 +54,20 @@
         }
       }
     </script>
+
+    <!-- Google Analytics (gtag.js). Loads on every page; Google is disclosed as
+         a third-party caller in src/pages/Legal.tsx. To turn it off in a
+         browser before this tag runs, set `window['ga-disable-G-MRPR60LML5'] =
+         true` (Google also ships an opt-out browser add-on). -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MRPR60LML5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-MRPR60LML5");
+    </script>
   </head>
   <body>
     <div id="root"></div>

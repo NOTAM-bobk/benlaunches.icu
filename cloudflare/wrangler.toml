@@ -3,13 +3,20 @@ main = "votes-worker.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
 
-# Reads and votes are public; /admin/* requires the ADMIN_PASSWORD secret.
-# `wrangler secret put ADMIN_PASSWORD` sets it (never commit the value).
+# Secrets (never listed below, never committed — `wrangler deploy` leaves
+# secrets alone, so a redeploy cannot clear them):
+#   ADMIN_PASSWORD   unlocks /admin/*
+#   GITHUB_TOKEN     "Approve & publish" commits config/sites.json through the
+#                    GitHub contents API; needs Contents: Read and write on
+#                    GITHUB_REPO (a fine-grained PAT, or a classic PAT with the
+#                    `public_repo` scope). Set it with
+#                      wrangler secret put GITHUB_TOKEN --config cloudflare/wrangler.toml
+#                    or the dashboard's Variables and Secrets → type "Secret".
 #
-# "Approve & publish" on the Admin page commits a formatted entry into
-# config/sites.json through the GitHub contents API, which needs a repo token:
-#   wrangler secret put GITHUB_TOKEN      (a fine-grained PAT with Contents: Read and write)
-# The repo, branch and file are not secret, so they live in [vars] below.
+# Everything in [vars] below is public: it ships in the Worker bundle and is
+# readable in the Cloudflare dashboard, so it must never hold a credential.
+# Values added as plain-text variables in the dashboard are overwritten by the
+# next `wrangler deploy` — that is why the non-secret settings are mirrored here.
 [[kv_namespaces]]
 binding = "VOTES"
 id = "36580dc8d626443cbe3783979036b9b9"
@@ -22,7 +29,8 @@ id = "36580dc8d626443cbe3783979036b9b9"
 ALLOWED_ORIGIN = "https://benlaunches.icu,https://www.benlaunches.icu,https://new.base31.org,https://boringinternet.vercel.app"
 
 # Where /admin/publish writes an approved submission. Change GITHUB_REPO if the
-# directory repository lives somewhere else.
-GITHUB_REPO = "NOTAM-bobk/benlaunches.icu"
+# directory repository lives somewhere else. GITHUB_TOKEN is deliberately
+# absent: it is a secret, not a var — see the note at the top of this file.
 GITHUB_BRANCH = "main"
+GITHUB_REPO = "NOTAM-bobk/benlaunches.icu"
 GITHUB_SITES_PATH = "config/sites.json"
