@@ -48,6 +48,19 @@ export const featureBadges: FeatureBadge[] = [
     alt: "Boring Internet on StartupTrusted",
   },
   {
+    id: "daniel-launches",
+    name: "DanielLaunches",
+    href: "https://daniellaunches.com",
+    image: "https://daniellaunches.com/badge-light.svg",
+    // The SVG's own width/height are 200x44. The footer CSS owns the rendered
+    // height (3.15rem) and lets width follow, so these two only feed the
+    // aspect-ratio box reserved before the image loads — keep them true to the
+    // file or the row shifts a couple of pixels as it loads.
+    width: 200,
+    height: 44,
+    alt: "Featured on DanielLaunches",
+  },
+  {
     id: "launch-llama-tools",
     name: "Launch Llama Tools",
     href: "https://tools.launchllama.co/products/base31-org?utm_source=badge&utm_medium=referral",
