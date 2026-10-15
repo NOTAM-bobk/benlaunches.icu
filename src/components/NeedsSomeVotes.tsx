@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import { SiteVoteRow } from "./SiteVoteRow";
 import { rankedSites, type Site } from "../lib/siteData";
@@ -15,6 +15,13 @@ import {
 const SITE_POOL = rankedSites();
 /** How many listings the strip shows at once. */
 const ROW_COUNT = 3;
+/**
+ * How long after a vote the thank-you drops in, and how long it stays. The
+ * pause keeps it from racing the confetti on the vote button: the vote lands,
+ * the strip settles, then it says thank you.
+ */
+const THANKS_DELAY_MS = 420;
+const THANKS_VISIBLE_MS = 1800;
 const STARTING_COUNTS = Object.fromEntries(
   SITE_POOL.map((site) => [site.slug, site.trending ?? 0]),
 );
@@ -48,6 +55,23 @@ export function NeedsSomeVotes() {
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [pending, setPending] = useState<string[]>([]);
   const [shared, setShared] = useState(false);
+  /* The slug whose vote the badge is celebrating — also its animation key. */
+  const [thanks, setThanks] = useState<string | null>(null);
+  const thanksTimers = useRef<number[]>([]);
+
+  /* Voting here is a drive-by: never leave a timer running after a page change. */
+  useEffect(() => () => {
+    thanksTimers.current.forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
+  /** Wait a beat, then let the badge fall, then take it away again. */
+  function celebrate(slug: string) {
+    thanksTimers.current.forEach((timer) => window.clearTimeout(timer));
+    thanksTimers.current = [
+      window.setTimeout(() => setThanks(slug), THANKS_DELAY_MS),
+      window.setTimeout(() => setThanks(null), THANKS_DELAY_MS + THANKS_VISIBLE_MS),
+    ];
+  }
 
   useEffect(() => {
     let active = true;
@@ -82,6 +106,9 @@ export function NeedsSomeVotes() {
     setPending((current) => [...current, site.slug]);
     markVoted(site.slug);
     writeLocalCount(site.slug, nextCount);
+    // The thank-you is on a timer rather than a fetch, so a slow counter cannot
+    // swallow it.
+    celebrate(site.slug);
 
     // Hand the freed slot to the next listing that needs votes.
     const nextUp = weakestFirst(counts).find((candidate) => !shown.includes(candidate.slug));
@@ -114,6 +141,12 @@ export function NeedsSomeVotes() {
       </header>
 
       <div className="needs-votes-panel">
+        {/* Announced politely: the vote itself already moved the count. */}
+        {thanks !== null && (
+          <span key={thanks} className="thanks-drop" role="status">
+            Thank u!
+          </span>
+        )}
         <ol className="vote-rows">
           {rows.map(({ site, rank }) => (
             <SiteVoteRow

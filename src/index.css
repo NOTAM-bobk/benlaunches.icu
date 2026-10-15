@@ -3878,6 +3878,7 @@ mark.hl {
 
 /* The heading and its rule stay on the page; the listings sit in the panel. */
 .needs-votes-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -3886,6 +3887,70 @@ mark.hl {
   border-radius: var(--radius);
   background: #fff8ef;
   box-shadow: var(--shadow-thick);
+}
+
+/*
+ * The strip's thanks: a badge that drops in over the panel a moment after a
+ * vote, then fades out on its own. Purely a flourish, so it takes no clicks.
+ */
+.thanks-drop {
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  z-index: 5;
+  padding: 0.3rem 0.85rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 3px 0 0 var(--ink);
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: thanks-fall 1.8s cubic-bezier(0.3, 0.7, 0.3, 1) both;
+}
+
+@keyframes thanks-fall {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -1.6rem) rotate(-3deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(2deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, 0.15rem) rotate(-1deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0.6rem) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* It still says thank you; it just does not travel to say it. */
+  .thanks-drop {
+    transform: translateX(-50%);
+    animation: thanks-fade 1.8s ease both;
+  }
+}
+
+@keyframes thanks-fade {
+  from {
+    opacity: 0;
+  }
+  20%,
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 /* A fresh listing sliding into the slot a vote just freed. */
@@ -7096,13 +7161,36 @@ button.sidenav-foot-link:hover {
   display: block;
 }
 
-/* The second line is the loud one: accent words over a thick underline. */
+/*
+ * The second line is the loud one: accent words over a thick underline. The
+ * rule is a pseudo element rather than a border, so it can scale from nothing
+ * and draw itself in from the left as the page arrives.
+ */
 .find-title-highlight {
+  position: relative;
   width: fit-content;
   margin-top: 0.1em;
   padding-bottom: 0.06em;
-  border-bottom: 6px solid var(--accent);
   color: var(--accent);
+}
+
+.find-title-highlight::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 6px;
+  background: var(--accent);
+  transform-origin: left center;
+  animation: rule-draw 0.8s cubic-bezier(0.25, 0.8, 0.3, 1) 0.08s both;
+}
+
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @media (max-width: 420px) {
@@ -7113,96 +7201,155 @@ button.sidenav-foot-link:hover {
   .find-title {
     font-size: clamp(2.05rem, 9.4vw, 2.85rem);
   }
-  .find-title-highlight {
-    border-bottom-width: 4px;
+  .find-title-highlight::after {
+    height: 4px;
   }
 }
-/* ---------- monthly trending archive ---------- */
-.trending-month-archive {
+
+@media (prefers-reduced-motion: reduce) {
+  .find-title-highlight::after {
+    animation: none;
+  }
+}
+/* ---------- monthly trending archive: the month chooser pill ---------- */
+
+.trending-months {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin: 1.25rem 0 1.1rem;
-  padding: 1rem;
-  border: 2px solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow-thick);
 }
-.trending-month-heading {
+
+.month-picker {
+  position: relative;
+  width: min(100%, 24rem);
+}
+
+/* The pill from the reference: cream fill, heavy outline, hard shadow underneath. */
+.month-picker-toggle {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  width: 100%;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.9rem 1.05rem;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #fffdf8;
   color: var(--ink);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.trending-month-current {
-  color: var(--muted);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-.trending-month-cards {
-  display: flex;
-  gap: 0.6rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding: 0.1rem 0.1rem 0.45rem;
-  scrollbar-width: thin;
-}
-.trending-month-card {
-  display: grid;
-  flex: 0 0 6.4rem;
-  min-height: 5rem;
-  align-content: start;
-  gap: 0.06rem;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  color: var(--ink);
-  box-shadow: 0 2px 0 0 var(--ink);
+  box-shadow: 0 4px 0 0 var(--ink);
   text-align: left;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.trending-month-card:hover {
+
+.month-picker-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 0 0 var(--ink);
+  box-shadow: 0 6px 0 0 var(--ink);
 }
-.trending-month-card:focus-visible {
+
+.month-picker-toggle:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.month-picker-month {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.month-picker-sep {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.month-picker-count {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.month-picker-caret {
+  margin-left: auto;
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: transform 0.16s ease;
+}
+
+.month-picker-caret.is-open {
+  transform: rotate(180deg);
+}
+
+.month-picker-menu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  width: 100%;
+  min-width: 15rem;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 5px 0 0 var(--ink);
+  animation: menu-pop 0.16s ease both;
+}
+
+.month-picker-option {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.06rem;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.month-picker-option:hover {
+  background: #fff3e4;
+}
+
+.month-picker-option:focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
-.trending-month-card.is-active {
+
+.month-picker-option[aria-checked="true"] {
   background: var(--accent);
   color: var(--on-accent);
 }
-.trending-month-name {
+
+.month-picker-option-month {
   font-family: var(--display);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-}
-.trending-month-year {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  opacity: 0.82;
-}
-.trending-month-kind {
-  margin-top: 0.35rem;
-  font-family: var(--mono);
-  font-size: 0.56rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  opacity: 0.85;
-  text-transform: uppercase;
 }
+
+.month-picker-option-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.month-picker-option[aria-checked="true"] .month-picker-option-note {
+  color: var(--on-accent);
+  opacity: 0.85;
+}
+
 .trending-month-note {
-  margin: 0.45rem 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 0.73rem;
   line-height: 1.5;
@@ -7510,10 +7657,7 @@ button.sidenav-foot-link:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .trending-month-card {
-    transition: none;
-  }
-  .trending-month-card:hover {
+  .month-picker-toggle:hover {
     transform: none;
   }
   .games-menu,
@@ -7685,4 +7829,63 @@ button.sidenav-foot-link:hover {
   .home-collections-swipe > .collection-card-beyond {
     display: none;
   }
+}
+
+/* ---------- naming a new category on the submit form ---------- */
+
+.submit-new-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius-sm);
+  background: #fffdf8;
+}
+
+.submit-new-category-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.submit-new-category-row .field {
+  flex: 1 1 13rem;
+  min-width: 0;
+}
+
+.submit-new-category-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+
+/*
+ * A category the submitter named, outlined in dashes so it never reads as one
+ * of the existing chips. Unlayered, so it outranks the `border` utility.
+ */
+.submit-category-own {
+  border-style: dashed;
+}
+
+.submit-category-own-mark {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+/* ---------- category filters on the discover page ---------- */
+
+.discover-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.discover-filters-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
 }

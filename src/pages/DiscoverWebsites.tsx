@@ -1,11 +1,15 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { featuredSiteRows, siteName, siteUrl, trendingSites } from "../lib/siteData";
+import { discoverList as pickDiscoverList } from "../lib/discover";
+import { categoryCount, categoryFilters, categoryLabel, siteName, siteUrl, trendingSites } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 
 export default function DiscoverWebsites() {
-  const discoverList = featuredSiteRows(18);
+  /* ?category=… keeps a filtered view a link somebody can send on. */
+  const [params, setParams] = useSearchParams();
+  const category = params.get("category") ?? "all";
+  const discoverList = pickDiscoverList(category);
   const trending = trendingSites(6);
 
   return (
@@ -70,31 +74,82 @@ export default function DiscoverWebsites() {
         </header>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-bold">Websites to discover now</h2>
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {discoverList.map((site) => (
-              <li key={site.id} className="card p-4 flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                  <SiteIcon site={site} size={30} />
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold hover:underline underline-offset-4"
-                    style={{ color: "var(--ink)" }}
+          {/* Filter the list by what the site is, not just how it ranks. */}
+          <div className="discover-filters">
+            <h2 className="text-xl font-bold">
+              {category === "all" ? "Websites to discover now" : categoryLabel(category)}
+            </h2>
+            <div className="chip-row" role="group" aria-label="Filter discoveries by category">
+              {categoryFilters
+                .filter((entry) => entry.id === "all" || categoryCount(entry.id) > 0)
+                .map((entry) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="chip"
+                    aria-pressed={category === entry.id}
+                    onClick={() => {
+                      const next = new URLSearchParams(params);
+                      if (entry.id === "all") next.delete("category");
+                      else next.set("category", entry.id);
+                      setParams(next, { replace: true, preventScrollReset: true });
+                    }}
+                    style={{
+                      backgroundColor: category === entry.id ? "var(--accent)" : "#ffffff",
+                      color: category === entry.id ? "var(--on-accent)" : "var(--ink)",
+                    }}
                   >
-                    {site.name}
-                  </a>
-                </div>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-                  {site.description}
-                </p>
-                <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                  {siteDomain(site.url)}
-                </span>
-              </li>
-            ))}
-          </ul>
+                    {entry.label}
+                    <span className="chip-count">
+                      {entry.id === "all" ? discoverList.length : categoryCount(entry.id)}
+                    </span>
+                  </button>
+                ))}
+            </div>
+            <p className="discover-filters-note">
+              {category === "all"
+                ? `${discoverList.length} listed websites, ready to open.`
+                : `Showing ${discoverList.length} of ${categoryCount(category)} in ${categoryLabel(category)}.`}
+            </p>
+          </div>
+
+          {discoverList.length === 0 ? (
+            <p
+              className="border p-6 text-center text-sm"
+              style={{ color: "var(--muted)", borderColor: "var(--ink)" }}
+            >
+              Nothing is filed under {categoryLabel(category)} yet. Try another category, or browse{" "}
+              <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+                everything
+              </Link>
+              .
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {discoverList.map((site) => (
+                <li key={site.id} className="card p-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <SiteIcon site={site} size={30} />
+                    <a
+                      href={site.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold hover:underline underline-offset-4"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      {site.name}
+                    </a>
+                  </div>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                    {site.description}
+                  </p>
+                  <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+                    {siteDomain(site.url)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="space-y-3">

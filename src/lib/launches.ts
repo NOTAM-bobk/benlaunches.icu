@@ -10,6 +10,15 @@ const config = launchesJson as LaunchesConfig;
 export const launchesTitle = config.title ?? "Launches this week";
 
 /**
+ * How many listings launched during a month ("2026-10"), counted from their own
+ * launch dates. Sits next to the weekly ticker because it answers the same
+ * question with a wider window.
+ */
+export function launchesIn(month: string): number {
+  return sites.filter((site) => (site.launched ?? "").startsWith(`${month}-`)).length;
+}
+
+/**
  * The ticker is derived from site `launched` dates, newest first. The rolling
  * seven-day window includes today and never shows more than five listings.
  */

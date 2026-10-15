@@ -3,9 +3,15 @@ import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { BoostTraffic } from "../components/BoostTraffic";
 import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
-import { categoryChoices, siteName, siteUrl } from "../lib/siteData";
+import { categoryChoices, categorySlug, humanizeKey, siteName, siteUrl } from "../lib/siteData";
 import { readVotedSlugs } from "../lib/votes";
-import { autofillSite, submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
+import {
+  autofillSite,
+  submissionsConnected,
+  submitSite,
+  SUBMISSION_CATEGORY_LIMIT,
+  type SubmissionDraft,
+} from "../lib/submissions";
 import { useAuth } from "../lib/auth";
 
 type TextFieldKey =
@@ -120,6 +126,45 @@ export default function Submit() {
 
   /* Every configured category, including the niche ones no listing uses yet. */
   const openCategories = categoryChoices;
+  /* A category the submitter names themselves, added to the same list. */
+  const [newCategory, setNewCategory] = useState("");
+  const [categoryNote, setCategoryNote] = useState<string | null>(null);
+  const ownCategories = draft.categories.filter(
+    (id) => !openCategories.some((category) => category.id === id),
+  );
+  const categoriesFull = draft.categories.length >= SUBMISSION_CATEGORY_LIMIT;
+
+  /**
+   * Add the typed name as a new category. The id is slugged the way the config
+   * writes its own, so the reviewers can drop it straight into
+   * config/categories.json once the listing is in.
+   */
+  function addCategory() {
+    const id = categorySlug(newCategory);
+    if (!id) {
+      setCategoryNote("Give the new category a name first.");
+      return;
+    }
+    if (openCategories.some((category) => category.id === id)) {
+      setCategoryNote(`“${humanizeKey(id)}” already exists — tick it in the row above.`);
+      return;
+    }
+    if (draft.categories.includes(id)) {
+      setCategoryNote(`“${humanizeKey(id)}” is already one of your categories.`);
+      return;
+    }
+    if (categoriesFull) {
+      setCategoryNote(
+        `That is already ${SUBMISSION_CATEGORY_LIMIT} categories. Untick one to make room.`,
+      );
+      return;
+    }
+    setDraft((current) => ({ ...current, categories: [...current.categories, id] }));
+    setNewCategory("");
+    setCategoryNote(
+      `“${humanizeKey(id)}” will be read as a new category. It appears once a reviewer adds it to the directory.`,
+    );
+  }
 
   function update<K extends keyof SubmissionDraft>(key: K, value: SubmissionDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -432,6 +477,69 @@ export default function Submit() {
                   </button>
                 );
               })}
+              {/* Categories this submitter named, shown beside the configured ones. */}
+              {ownCategories.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  title="Remove this category"
+                  aria-label={`Remove the new category ${humanizeKey(id)}`}
+                  onClick={() => {
+                    toggleCategory(id);
+                    setCategoryNote(null);
+                  }}
+                  className="submit-category-own border px-3 py-1.5 text-[13px] font-bold transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+                  style={{
+                    borderColor: "var(--ink)",
+                    backgroundColor: "var(--accent)",
+                    color: "var(--on-accent)",
+                  }}
+                >
+                  {humanizeKey(id)}
+                  <span className="submit-category-own-mark" aria-hidden="true">
+                    {" "}
+                    new ×
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Somebody always knows a category the directory has not thought of. */}
+            <div className="submit-new-category">
+              <label htmlFor="new-category" className="text-[12px] font-bold tracking-[0.12em] uppercase">
+                Or name a new category
+              </label>
+              <div className="submit-new-category-row">
+                <input
+                  id="new-category"
+                  type="text"
+                  maxLength={40}
+                  placeholder="Birdwatching, local news, board games…"
+                  value={newCategory}
+                  onChange={(event) => {
+                    setNewCategory(event.target.value);
+                    setCategoryNote(null);
+                  }}
+                  onKeyDown={(event) => {
+                    /* Enter here adds a category instead of sending the form. */
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addCategory();
+                    }
+                  }}
+                  className="field"
+                  style={{ borderColor: "var(--ink)" }}
+                />
+                <button type="button" className="btn ghost" onClick={addCategory}>
+                  Add category
+                </button>
+              </div>
+              <p className="submit-new-category-note">
+                {categoryNote ??
+                  (categoriesFull
+                    ? `That is ${SUBMISSION_CATEGORY_LIMIT} categories, which is as many as a listing can carry.`
+                    : "A name nobody has used yet is welcome. Reviewers read it, and your site can be the first listing filed under it.")}
+              </p>
             </div>
           </fieldset>
 

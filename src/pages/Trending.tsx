@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteVoteRow } from "../components/SiteVoteRow";
+import { launchesIn } from "../lib/launches";
 import { rankedSites, siteName, siteUrl, trendingConfig, type Site } from "../lib/siteData";
 import {
   castVote,
@@ -75,6 +76,28 @@ export default function Trending() {
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [mode, setMode] = useState<VoteMode>(votesConnected ? "checking" : "local");
   const [pending, setPending] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  /* The month menu closes the way the Games menu does: a click away, or Esc. */
+  useEffect(() => {
+    if (!pickerOpen) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!pickerRef.current?.contains(event.target as Node)) setPickerOpen(false);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setPickerOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [pickerOpen]);
 
   /*
     The ranking is the votes: a site that collects more of them moves straight to
@@ -227,25 +250,53 @@ export default function Trending() {
         </header>
 
         {monthlyView ? (
-          <section className="trending-month-archive" aria-label="Monthly trending archive">
-            <div className="trending-month-heading">
-              <span>Monthly rankings</span>
-              <span className="trending-month-current">Showing {monthLabel(selectedMonth)}</span>
-            </div>
-            <div className="trending-month-cards" role="group" aria-label="Choose a month">
-              {archiveMonths.map((month) => (
-                <button
-                  key={month}
-                  type="button"
-                  className={`trending-month-card${selectedMonth === month ? " is-active" : ""}`}
-                  aria-pressed={selectedMonth === month}
-                  onClick={() => chooseMonth(month)}
+          <section className="trending-months" aria-label="Monthly trending archive">
+            <div className="month-picker" ref={pickerRef}>
+              <button
+                type="button"
+                className="month-picker-toggle"
+                aria-haspopup="menu"
+                aria-expanded={pickerOpen}
+                onClick={() => setPickerOpen((value) => !value)}
+              >
+                <span className="month-picker-month">{monthLabel(selectedMonth)}</span>
+                <span className="month-picker-sep" aria-hidden="true">
+                  ·
+                </span>
+                <span className="month-picker-count">
+                  {launchesIn(selectedMonth)} {launchesIn(selectedMonth) === 1 ? "launch" : "launches"}
+                </span>
+                <span
+                  className={`month-picker-caret${pickerOpen ? " is-open" : ""}`}
+                  aria-hidden="true"
                 >
-                  <span className="trending-month-name">{monthLabel(month, "short").split(" ")[0]}</span>
-                  <span className="trending-month-year">{month.slice(0, 4)}</span>
-                  <span className="trending-month-kind">{month === currentMonth ? "Current" : "Archive"}</span>
-                </button>
-              ))}
+                  ▾
+                </span>
+              </button>
+
+              {pickerOpen && (
+                <div className="month-picker-menu" role="menu" aria-label="Choose a month">
+                  {archiveMonths.map((month) => (
+                    <button
+                      key={month}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={month === selectedMonth}
+                      className="month-picker-option"
+                      onClick={() => {
+                        chooseMonth(month);
+                        setPickerOpen(false);
+                      }}
+                    >
+                      <span className="month-picker-option-month">{monthLabel(month)}</span>
+                      <span className="month-picker-option-note">
+                        {launchesIn(month)} {launchesIn(month) === 1 ? "launch" : "launches"}
+                        {month === currentMonth ? " · current month" : ""}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             {archiveMonths.length === 1 && (
               <p className="trending-month-note">

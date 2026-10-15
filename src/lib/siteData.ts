@@ -323,6 +323,23 @@ export function categoryLabel(id: string): string {
   return categoryById(id)?.label ?? id;
 }
 
+/** The longest id the submission Worker will store for a category. */
+export const CATEGORY_ID_MAX = 40;
+
+/**
+ * The id for a category somebody named on the submit form: lower case, one dash
+ * between words, no leading or trailing dash, never longer than the Worker's
+ * limit — the same shape config/categories.json uses.
+ */
+export function categorySlug(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, CATEGORY_ID_MAX)
+    .replace(/^-+|-+$/g, "");
+}
+
 export function sitesByCategory(categoryId: string): Site[] {
   if (categoryId === "all") return sites;
   return sites.filter((site) => site.category === categoryId);

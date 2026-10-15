@@ -10,6 +10,12 @@ export const submissionsConnected = votesConnected;
 
 export type SubmissionStatus = "pending" | "approved" | "rejected";
 
+/**
+ * How many categories the Worker keeps on a submission (CATEGORY_LIMIT there),
+ * counted over the configured ones the submitter ticked plus any they named.
+ */
+export const SUBMISSION_CATEGORY_LIMIT = 8;
+
 export interface SubmissionDraft {
   name: string;
   url: string;
