@@ -724,7 +724,9 @@ hr {
     gap: 0.75rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    padding: 0.25rem 0.25rem 0.4rem;
+    /* No side padding: the flat rows line up with the section heading above
+       them instead of sitting inset inside a box. */
+    padding: 0.15rem 0 0.5rem;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
@@ -748,13 +750,29 @@ hr {
     scroll-snap-stop: always;
   }
 
+  /*
+   * Unboxed like the desktop list: each row sits straight on the page with a
+   * hairline between neighbours, so a phone screenful reads as a list of sites
+   * rather than a stack of bordered cards.
+   */
   .home-mobile-page .site-row {
-    min-height: 5rem;
-    padding: 0.9rem;
-    border: 1px solid var(--ink);
-    border-radius: var(--radius);
-    background: var(--surface);
-    box-shadow: var(--shadow-thick);
+    min-height: 4.25rem;
+    padding: 0.6rem 0;
+    border: 0;
+    border-top: 1px dashed var(--rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .home-mobile-page .site-row:first-child {
+    border-top: 0;
+  }
+
+  .home-mobile-page .site-row:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
   }
 
   .home-mobile-dots {
@@ -7514,6 +7532,17 @@ button.sidenav-foot-link:hover {
 }
 
 /*
+ * On a phone the icon-only search button goes: the brand row only has room for
+ * the cart, account and menu controls, and the menu drawer already carries the
+ * same search field a tap away.
+ */
+@media (max-width: 767px) {
+  .header-icon-btn {
+    display: none;
+  }
+}
+
+/*
  * Fixed to the viewport, not the page: the popup opens over whichever screen
  * you happen to be on and closes back onto it.
  */
@@ -8265,6 +8294,59 @@ button.sidenav-foot-link:hover {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: auto;
+}
+
+/*
+ * A phone gets the same three slots in a shorter, quieter card: one column, a
+ * slimmer frame, and a blurb that stops after two lines so the whole set is
+ * scannable without a long scroll. The config note is a note for whoever edits
+ * `config/sites.json`, so it steps aside on the smallest screens.
+ */
+@media (max-width: 640px) {
+  .feature-slot-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .feature-slot {
+    gap: 0.4rem;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .feature-slots-note {
+    display: none;
+  }
+
+  .feature-slot-head {
+    gap: 0.55rem;
+  }
+
+  .feature-slot-name {
+    font-size: 1rem;
+  }
+
+  .feature-slot-domain,
+  .feature-slot-meta {
+    font-size: 0.64rem;
+  }
+
+  .feature-slot-blurb {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .feature-slot-actions {
+    gap: 0.4rem;
+  }
+
+  .feature-slot-actions .btn {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.72rem;
+  }
 }
 
 .launch-badge-featured {
