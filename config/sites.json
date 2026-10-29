@@ -838,6 +838,25 @@
       "launched": "2026-10-29",
       "about": "Capvant is a free marketplace where small and medium businesses compare business loans, revenue-based finance, invoice finance and other funding options from multiple providers in one place. Capvant is not a lender; funding is not guaranteed.",
       "pricing": "Free for businesses"
+    },
+    {
+      "id": "kling-4-0-ai-video-generator",
+      "name": "Kling 4.0 AI Video Generator",
+      "slug": "kling-4-0-ai-video-generator",
+      "url": "https://www.kling3ai.net/kling/kling-4",
+      "description": "Kling 4.0 AI Video Generator — 30s, Keyframes & References",
+      "category": "tools",
+      "tags": [
+        "tools",
+        "video"
+      ],
+      "verified": true,
+      "launched": "2026-10-21",
+      "about": "Kling 4.0 is a next-generation AI video model designed to create videos from text prompts, images, and reference materials. It focuses on longer video generation, improved motion control, and more flexible audio-visual creation.\nMain features presented on the website include:\nText to Video — create video scenes from written prompts.\nImage to Video — turn still images into moving scenes.\nMulti-Keyframe Control — use up to 10 images to define important moments.\nOmni Reference — guide video creation with images, videos, subjects, and voice references.\nLonger Video Generation — support clips from 3 to 30 seconds.\nCamera and Motion Control — describe camera movements, subject actions, and scene transitions.\nStereo Audio — support two-channel audio and improved dialogue synchronization.\nHigh-Resolution Output — listed specifications include 1080p and 4K HDR.\nVideo Editing and Extension — use reference materials to guide edits \nand longer sequences, subject to platform availability.\nKling 4.0 is designed for content creators, filmmakers, marketers, designers, e-commerce teams, and creative studios.",
+      "targetAudience": "Kling 4.0 is designed for content creators, filmmakers, marketers, designers, e-commerce teams, and creative studios.",
+      "problem": "Create with Kling 4.0 using text, images, keyframes, and multimodal references.",
+      "features": "Text to Video — create video scenes from written prompts.\nImage to Video — turn still images into moving scenes.\nMulti-Keyframe Control — use up to 10 images to define important moments.\nOmni Reference — guide video creation with images, videos, subjects, and voice references.\nLonger Video Generation — support clips from 3 to 30 seconds.\nCamera and Motion Control — describe camera movements, subject actions, and scene transitions.",
+      "pricing": "free"
     }
   ]
 }
