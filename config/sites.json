@@ -857,6 +857,21 @@
       "problem": "Create with Kling 4.0 using text, images, keyframes, and multimodal references.",
       "features": "Text to Video — create video scenes from written prompts.\nImage to Video — turn still images into moving scenes.\nMulti-Keyframe Control — use up to 10 images to define important moments.\nOmni Reference — guide video creation with images, videos, subjects, and voice references.\nLonger Video Generation — support clips from 3 to 30 seconds.\nCamera and Motion Control — describe camera movements, subject actions, and scene transitions.",
       "pricing": "free"
+    },
+    {
+      "id": "synfield",
+      "name": "SYNFIELD",
+      "slug": "synfield",
+      "url": "https://synfield.space",
+      "description": "Shape the invisible — an interactive browser artwork.",
+      "category": "experiment",
+      "tags": [
+        "experiment"
+      ],
+      "verified": true,
+      "launched": "2026-10-29",
+      "about": "A human-made web artwork by Sandra Bamboo where light, matter and sound react to your mouse, touch or optional camera. No goals, no signup, free.",
+      "pricing": "Free"
     }
   ]
 }
