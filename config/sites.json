@@ -806,6 +806,23 @@
       "alternatives": "nick launches",
       "pricing": "free",
       "openSource": "Yes"
+    },
+    {
+      "id": "rw-emulator",
+      "name": "RW Emulator",
+      "slug": "rw-emulator",
+      "url": "https://rwemulator.com",
+      "description": "Explore classic console games in your browser",
+      "category": "gaming",
+      "tags": [
+        "gaming",
+        "retro"
+      ],
+      "verified": true,
+      "launched": "2026-10-29",
+      "about": "RW Emulator is a browser-based retro gaming site for players who want to explore classic console games. Its catalog organizes titles and editions by platform, with game metadata, browser controls, and local save support. Visitors can browse the catalog and play compatible games directly in their browser.",
+      "targetAudience": "Retro gaming enthusiasts and players exploring classic console titles and their platform editions.",
+      "features": "Browser-based retro gaming; platform-organized catalog; game metadata; browser controls; local save support."
     }
   ]
 }
