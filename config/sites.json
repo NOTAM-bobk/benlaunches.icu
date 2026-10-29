@@ -823,6 +823,21 @@
       "about": "RW Emulator is a browser-based retro gaming site for players who want to explore classic console games. Its catalog organizes titles and editions by platform, with game metadata, browser controls, and local save support. Visitors can browse the catalog and play compatible games directly in their browser.",
       "targetAudience": "Retro gaming enthusiasts and players exploring classic console titles and their platform editions.",
       "features": "Browser-based retro gaming; platform-organized catalog; game metadata; browser controls; local save support."
+    },
+    {
+      "id": "capvant",
+      "name": "Capvant",
+      "slug": "capvant",
+      "url": "https://capvant.com",
+      "description": "Compare SME business funding options in one place",
+      "category": "finance",
+      "tags": [
+        "finance"
+      ],
+      "verified": true,
+      "launched": "2026-10-29",
+      "about": "Capvant is a free marketplace where small and medium businesses compare business loans, revenue-based finance, invoice finance and other funding options from multiple providers in one place. Capvant is not a lender; funding is not guaranteed.",
+      "pricing": "Free for businesses"
     }
   ]
 }
