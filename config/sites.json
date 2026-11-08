@@ -872,6 +872,25 @@
       "launched": "2026-10-29",
       "about": "A human-made web artwork by Sandra Bamboo where light, matter and sound react to your mouse, touch or optional camera. No goals, no signup, free.",
       "pricing": "Free"
+    },
+    {
+      "id": "emugamers",
+      "name": "EmuGamers",
+      "slug": "emugamers",
+      "url": "https://emugamers.com/",
+      "description": "Browse classic console and arcade games in your browser",
+      "category": "gaming",
+      "tags": [
+        "gaming",
+        "retro"
+      ],
+      "verified": true,
+      "launched": "2026-11-08",
+      "about": "EmuGamers is a browser-based catalog of retro games across console, handheld, arcade, and DOS platforms. Visitors can search titles, compare editions through series guides, and open supported games in a built-in player. Save support and mobile controls vary by title.",
+      "targetAudience": "People looking for a specific classic game, platform, or edition.",
+      "problem": "It helps visitors find the right edition and check whether a game supports browser play before launching it.",
+      "features": "Search and filters, platform pages, series guides, and per-game compatibility notes.",
+      "useCases": "Discover a title by console or series, check its support details, and open a browser-play session when available."
     }
   ]
 }
